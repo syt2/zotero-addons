@@ -46,7 +46,8 @@ async function updatePrefsUI() {
   // with addon.data.prefs.window.document
   // Or bind some events to the elements
   const renderLock = ztoolkit.getGlobal("Zotero").Promise.defer();
-  const tableHelper = new ztoolkit.VirtualizedTable(addon.data.prefs?.window!)
+  if (addon.data.prefs?.window == undefined) return;
+  const tableHelper = new ztoolkit.VirtualizedTable(addon.data.prefs?.window)
     .setContainerId(`${config.addonRef}-table-container`)
     .setProp({
       id: `${config.addonRef}-prefs-table`,
@@ -122,7 +123,7 @@ function bindPrefEvents() {
     });
 
   addon.data
-    .prefs!!.window.document.querySelector(
+    .prefs!.window.document.querySelector(
       `#zotero-prefpane-${config.addonRef}-input`
     )
     ?.addEventListener("change", (e) => {

@@ -8,10 +8,7 @@ export function initLocale() {
   };
 }
 
-export function getString(
-  localString: string,
-  noReload: boolean = false
-): string {
+export function getString(localString: string, noReload = false): string {
   try {
     return addon.data.locale?.stringBundle.GetStringFromName(localString);
   } catch (e) {
