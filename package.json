@@ -25,7 +25,8 @@
     "restart": "npm run restart-dev",
     "release": "release-it",
     "lint": "prettier --write . && eslint . --ext .ts --fix",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "update-deps": "npm update --save"
   },
   "repository": {
     "type": "git",
