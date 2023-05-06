@@ -1,46 +1,50 @@
-const esbuild = require("esbuild");
-const compressing = require("compressing");
-const path = require("path");
-const fs = require("fs");
-const process = require("process");
-const replace = require("replace-in-file");
-const {
-  name,
-  author,
-  description,
-  homepage,
-  version,
-  config,
-} = require("../package.json");
+import { build } from "esbuild";
+import { zip } from "compressing";
+import { join, basename } from "path";
+import {
+  existsSync,
+  lstatSync,
+  writeFileSync,
+  readFileSync,
+  mkdirSync,
+  readdirSync,
+  rmSync,
+} from "fs";
+import { env, exit } from "process";
+import replaceInFile from "replace-in-file";
+const { sync } = replaceInFile;
+import details from "../package.json" assert { type: "json" };
+
+const { name, author, description, homepage, version, config } = details;
 
 function copyFileSync(source, target) {
   var targetFile = target;
 
   // If target is a directory, a new file with the same name will be created
-  if (fs.existsSync(target)) {
-    if (fs.lstatSync(target).isDirectory()) {
-      targetFile = path.join(target, path.basename(source));
+  if (existsSync(target)) {
+    if (lstatSync(target).isDirectory()) {
+      targetFile = join(target, basename(source));
     }
   }
 
-  fs.writeFileSync(targetFile, fs.readFileSync(source));
+  writeFileSync(targetFile, readFileSync(source));
 }
 
 function copyFolderRecursiveSync(source, target) {
   var files = [];
 
   // Check if folder needs to be created or integrated
-  var targetFolder = path.join(target, path.basename(source));
-  if (!fs.existsSync(targetFolder)) {
-    fs.mkdirSync(targetFolder);
+  var targetFolder = join(target, basename(source));
+  if (!existsSync(targetFolder)) {
+    mkdirSync(targetFolder);
   }
 
   // Copy
-  if (fs.lstatSync(source).isDirectory()) {
-    files = fs.readdirSync(source);
+  if (lstatSync(source).isDirectory()) {
+    files = readdirSync(source);
     files.forEach(function (file) {
-      var curSource = path.join(source, file);
-      if (fs.lstatSync(curSource).isDirectory()) {
+      var curSource = join(source, file);
+      if (lstatSync(curSource).isDirectory()) {
         copyFolderRecursiveSync(curSource, targetFolder);
       } else {
         copyFileSync(curSource, targetFolder);
@@ -50,11 +54,11 @@ function copyFolderRecursiveSync(source, target) {
 }
 
 function clearFolder(target) {
-  if (fs.existsSync(target)) {
-    fs.rmSync(target, { recursive: true, force: true });
+  if (existsSync(target)) {
+    rmSync(target, { recursive: true, force: true });
   }
 
-  fs.mkdirSync(target, { recursive: true });
+  mkdirSync(target, { recursive: true });
 }
 
 function dateFormat(fmt, date) {
@@ -86,7 +90,7 @@ async function main() {
 
   console.log(
     `[Build] BUILD_DIR=${buildDir}, VERSION=${version}, BUILD_TIME=${buildTime}, ENV=${[
-      process.env.NODE_ENV,
+      env.NODE_ENV,
     ]}`
   );
 
@@ -97,18 +101,16 @@ async function main() {
   copyFileSync("update-template.json", "update.json");
   copyFileSync("update-template.rdf", "update.rdf");
 
-  await esbuild
-    .build({
-      entryPoints: ["src/index.ts"],
-      define: {
-        __env__: `"${process.env.NODE_ENV}"`,
-      },
-      bundle: true,
-      outfile: path.join(buildDir, "addon/chrome/content/scripts/index.js"),
-      // Don't turn minify on
-      // minify: true,
-    })
-    .catch(() => process.exit(1));
+  await build({
+    entryPoints: ["src/index.ts"],
+    define: {
+      __env__: `"${env.NODE_ENV}"`,
+    },
+    bundle: true,
+    outfile: join(buildDir, "addon/chrome/content/scripts/index.js"),
+    // Don't turn minify on
+    // minify: true,
+  }).catch(() => exit(1));
 
   console.log("[Build] Run esbuild OK");
 
@@ -129,15 +131,15 @@ async function main() {
 
   const optionsAddon = {
     files: [
-      path.join(buildDir, "**/*.rdf"),
-      path.join(buildDir, "**/*.dtd"),
-      path.join(buildDir, "**/*.xul"),
-      path.join(buildDir, "**/*.xhtml"),
-      path.join(buildDir, "**/*.json"),
-      path.join(buildDir, "addon/prefs.js"),
-      path.join(buildDir, "addon/chrome.manifest"),
-      path.join(buildDir, "addon/manifest.json"),
-      path.join(buildDir, "addon/bootstrap.js"),
+      join(buildDir, "**/*.rdf"),
+      join(buildDir, "**/*.dtd"),
+      join(buildDir, "**/*.xul"),
+      join(buildDir, "**/*.xhtml"),
+      join(buildDir, "**/*.json"),
+      join(buildDir, "addon/prefs.js"),
+      join(buildDir, "addon/chrome.manifest"),
+      join(buildDir, "addon/manifest.json"),
+      join(buildDir, "addon/bootstrap.js"),
       "update.json",
       "update.rdf",
     ],
@@ -146,21 +148,21 @@ async function main() {
     countMatches: true,
   };
 
-  _ = replace.sync(optionsAddon);
+  const replaceResult = sync(optionsAddon);
   console.log(
     "[Build] Run replace in ",
-    _.filter((f) => f.hasChanged).map(
-      (f) => `${f.file} : ${f.numReplacements} / ${f.numMatches}`
-    )
+    replaceResult
+      .filter((f) => f.hasChanged)
+      .map((f) => `${f.file} : ${f.numReplacements} / ${f.numMatches}`)
   );
 
   console.log("[Build] Replace OK");
 
   console.log("[Build] Addon prepare OK");
 
-  compressing.zip.compressDir(
-    path.join(buildDir, "addon"),
-    path.join(buildDir, `${name}.xpi`),
+  await zip.compressDir(
+    join(buildDir, "addon"),
+    join(buildDir, `${name}.xpi`),
     {
       ignoreBase: true,
     }
@@ -174,5 +176,5 @@ async function main() {
 
 main().catch((err) => {
   console.log(err);
-  process.exit(1);
+  exit(1);
 });
