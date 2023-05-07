@@ -1,2 +1,3 @@
-pref("extensions.zotero.__addonRef__.enable", true);
-pref("extensions.zotero.__addonRef__.input", "This is input");
+/* eslint-disable no-undef */
+pref("__prefsPrefix__.enable", true);
+pref("__prefsPrefix__.input", "This is input");

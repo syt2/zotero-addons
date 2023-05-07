@@ -1,5 +1,5 @@
 import { config } from "../../package.json";
-import { getString } from "./locale";
+import { getString } from "../utils/locale";
 
 export function registerPrefsScripts(_window: Window) {
   // This function is called when the prefs window is opened

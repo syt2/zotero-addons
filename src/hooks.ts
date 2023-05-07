@@ -6,7 +6,7 @@ import {
   UIExampleFactory,
 } from "./modules/examples";
 import { config } from "../package.json";
-import { getString, initLocale } from "./modules/locale";
+import { getString, initLocale } from "./utils/locale";
 import { registerPrefsScripts } from "./modules/preferenceScript";
 
 async function onStartup() {
