@@ -11,6 +11,11 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/volatile-static/Chartero?label=Chartero)
 ![GitHub Repo stars](https://img.shields.io/github/stars/l0o0/tara?label=tara)
 ![GitHub Repo stars](https://img.shields.io/github/stars/redleafnew/delitemwithatt?label=delitemwithatt)
+![GitHub Repo stars](https://img.shields.io/github/stars/redleafnew/zotero-updateifsE?label=zotero-updateifsE)
+![GitHub Repo stars](https://img.shields.io/github/stars/inciteful-xyz/inciteful-zotero-plugin?label=inciteful-zotero-plugin)
+![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/zotero-gpt?label=zotero-gpt)
+![GitHub Repo stars](https://img.shields.io/github/stars/lifan0127/ai-research-assistant?label=ai-research-assistant)
+
 
 This is a plugin template for [Zotero](https://www.zotero.org/). Plugins using this template are shown above.
 
