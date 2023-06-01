@@ -1,15 +1,15 @@
 {
-  "name": "zotero-addon-template",
-  "version": "0.1.6",
-  "description": "Zotero Addon Template",
+  "name": "zotero-addons",
+  "version": "0.6.0-3",
+  "description": "Zotero Addon Collection",
   "config": {
-    "addonName": "Zotero Addon Template",
-    "addonID": "addontemplate@euclpts.com",
-    "addonRef": "addontemplate",
-    "addonInstance": "AddonTemplate",
-    "prefsPrefix": "extensions.zotero.addontemplate",
-    "releasepage": "https://github.com/windingwind/zotero-addon-template/releases/latest/download/zotero-addon-template.xpi",
-    "updaterdf": "https://raw.githubusercontent.com/windingwind/zotero-addon-template/bootstrap/update.json"
+    "addonName": "Zotero Addons",
+    "addonID": "zoteroAddons@ytshen.com",
+    "addonRef": "zoteroaddons",
+    "addonInstance": "ZoteroAddons",
+    "prefsPrefix": "extensions.zotero.zoteroaddons",
+    "releasepage": "https://github.com/syt2/zotero-addons/releases/download/0.6.0-3/zotero-addons.xpi",
+    "updaterdf": "https://raw.githubusercontent.com/syt2/zotero-addons/z6/update.json"
   },
   "main": "src/index.ts",
   "scripts": {
@@ -31,14 +31,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/windingwind/zotero-addon-template.git"
+    "url": "git+https://github.com/syt2/zotero-addons.git"
   },
-  "author": "windingwind",
+  "author": "ytshen",
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/windingwind/zotero-addon-template/issues"
+    "url": "https://github.com/syt2/zotero-addons/issues"
   },
-  "homepage": "https://github.com/windingwind/zotero-addon-template#readme",
+  "homepage": "https://github.com/syt2/zotero-addons#readme",
   "dependencies": {
     "zotero-plugin-toolkit": "^2.1.3"
   },
@@ -55,7 +55,7 @@
     "minimist": "^1.2.8",
     "prettier": "2.8.8",
     "release-it": "^15.10.3",
-    "replace-in-file": "^6.3.5",
+    "replace-in-file": "^7.0.1",
     "typescript": "^5.0.4",
     "zotero-types": "^1.0.14"
   },
