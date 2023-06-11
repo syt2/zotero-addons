@@ -58,8 +58,5 @@
     "replace-in-file": "^6.3.5",
     "typescript": "^5.0.4",
     "zotero-types": "^1.0.14"
-  },
-  "prettier": {
-    "tabWidth": 2
   }
 }
