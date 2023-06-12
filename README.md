@@ -219,7 +219,7 @@ Tired of endless restarting? Forget about it!
 1. Run `npm run start-watch`. (If Zotero is already running, use `npm run watch`)
 2. Coding. (Yes, that's all)
 
-When file changes are detected in `src` or `addon`, the plugin will do automatically compiled and reloaded.
+When file changes are detected in `src` or `addon`, the plugin will be automatically compiled and reloaded.
 
 
 <details style="text-indent: 2em">
