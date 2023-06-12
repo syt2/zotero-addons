@@ -42,6 +42,7 @@ If you are using this repo, I recommended that you put this badge ([![Using Zote
 
 - Event-driven, functional programming, under extensive skeleton;
 - Simple and user-friendly, works out-of-the-box.
+- ⭐[New!]Auto hot reload! Whenever the source code is modified, automatically compile and reload. [See here→](#auto-hot-reload)
 - Abundant examples in `src/modules/examples.ts`, covering most of the commonly used APIs in plugins(using [zotero-plugin-toolkit](https://github.com/windingwind/zotero-plugin-toolkit));
 - TypeScript support:
   - Full type definition support for the whole Zotero project, which is written in JavaScript(using [zotero-types](https://github.com/windingwind/zotero-types));
@@ -50,7 +51,7 @@ If you are using this repo, I recommended that you put this badge ([![Using Zote
   - Automatically generate/update plugin id/version, update configrations, and set environment variables(`development/production`);
   - Automatically build and reload code in Zotero;
   - Automatically release to GitHub(using [release-it](https://github.com/release-it/release-it));
-- ⭐[New!]Compatibilities for Zotero 6 & Zotero 7.(using [zotero-plugin-toolkit](https://github.com/windingwind/zotero-plugin-toolkit))
+- Compatibilities for Zotero 6 & Zotero 7.(using [zotero-plugin-toolkit](https://github.com/windingwind/zotero-plugin-toolkit))
 
 ## Examples
 
@@ -210,6 +211,29 @@ vim ./scripts/zotero-cmd.json
 10. Click `connect` in the leftside-bar of Firefox remote-debugging page.
 
 11. Click "Inspect Main Process"
+
+### Auto Hot Reload
+
+Tired of endless restarting? Forget about it!
+
+1. Run `npm run start-watch`. (If Zotero is already running, use `npm run watch`)
+2. Coding. (Yes, that's all)
+
+When file changes are detected in `src` or `addon`, the plugin will do automatically compiled and reloaded.
+
+
+<details style="text-indent: 2em">
+<summary>💡 Steps to add this feature to an existing plugin</summary>
+
+1. Add `if (reason == ADDON_DISABLE) {Services.obs.notifyObservers(null, "startupcache-invalidate", null);}` to `shutdown()` in the `addon/bootstrap.js`
+2. Copy `scripts/reload.mjs`
+3. Copy `reload`, `watch`, and `start-watch` commands in `package.json`
+4. Run `npm install --save-dev chokidar-cli`
+5. Done.
+
+</details>
+
+
 
 ### Debug in Zotero
 

@@ -7,6 +7,13 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "StartDev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start-watch"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Restart",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "restart"]
