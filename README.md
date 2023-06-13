@@ -225,11 +225,10 @@ When file changes are detected in `src` or `addon`, the plugin will be automatic
 <details style="text-indent: 2em">
 <summary>💡 Steps to add this feature to an existing plugin</summary>
 
-1. Add `if (reason == ADDON_DISABLE) {Services.obs.notifyObservers(null, "startupcache-invalidate", null);}` to `shutdown()` in the `addon/bootstrap.js`
-2. Copy `scripts/reload.mjs`
-3. Copy `reload`, `watch`, and `start-watch` commands in `package.json`
-4. Run `npm install --save-dev chokidar-cli`
-5. Done.
+1. Copy `scripts/reload.mjs`
+2. Copy `reload`, `watch`, and `start-watch` commands in `package.json`
+3. Run `npm install --save-dev chokidar-cli`
+4. Done.
 
 </details>
 
