@@ -24,7 +24,7 @@
     "restart-prod": "npm run build-prod && npm run stop && npm run start",
     "restart": "npm run restart-dev",
     "reload": "npm run build-dev && node scripts/reload.mjs",
-    "watch": "chokidar \"src/*.*\" \"addon/*.*\" -c \"npm run reload\"",
+    "watch": "chokidar \"src/**\" \"addon/**\" -c \"npm run reload\"",
     "release": "release-it",
     "lint": "prettier --write . && eslint . --ext .ts --fix",
     "test": "echo \"Error: no test specified\" && exit 1",
