@@ -1,5 +1,5 @@
 import { config } from "../../package.json";
-import { getString } from "../utils/locale";
+import { getStringAsync } from "../utils/locale";
 
 function example(
   target: any,
@@ -71,13 +71,12 @@ export class BasicExampleFactory {
   }
 
   @example
-  static registerPrefs() {
+  static async registerPrefs() {
     const prefOptions = {
       pluginID: config.addonID,
       src: rootURI + "chrome/content/preferences.xhtml",
-      label: getString("prefs.title"),
+      label: await getStringAsync("prefs-title"),
       image: `chrome://${config.addonRef}/content/icons/favicon.png`,
-      extraDTD: [`chrome://${config.addonRef}/locale/overlay.dtd`],
       defaultXUL: true,
     };
     ztoolkit.PreferencePane.register(prefOptions);
@@ -198,29 +197,29 @@ export class UIExampleFactory {
   }
 
   @example
-  static registerRightClickMenuItem() {
+  static async registerRightClickMenuItem() {
     const menuIcon = `chrome://${config.addonRef}/content/icons/favicon@0.5x.png`;
     // item menuitem with icon
     ztoolkit.Menu.register("item", {
       tag: "menuitem",
       id: "zotero-itemmenu-addontemplate-test",
-      label: getString("menuitem.label"),
+      label: await getStringAsync("menuitem-label"),
       commandListener: (ev) => addon.hooks.onDialogEvents("dialogExample"),
       icon: menuIcon,
     });
   }
 
   @example
-  static registerRightClickMenuPopup() {
+  static async registerRightClickMenuPopup() {
     ztoolkit.Menu.register(
       "item",
       {
         tag: "menu",
-        label: getString("menupopup.label"),
+        label: await getStringAsync("menupopup-label"),
         children: [
           {
             tag: "menuitem",
-            label: getString("menuitem.submenulabel"),
+            label: await getStringAsync("menuitem-submenulabel"),
             oncommand: "alert('Hello World! Sub Menuitem.')",
           },
         ],
@@ -233,14 +232,14 @@ export class UIExampleFactory {
   }
 
   @example
-  static registerWindowMenuWithSeparator() {
+  static async registerWindowMenuWithSeparator() {
     ztoolkit.Menu.register("menuFile", {
       tag: "menuseparator",
     });
     // menu->File menuitem
     ztoolkit.Menu.register("menuFile", {
       tag: "menuitem",
-      label: getString("menuitem.filemenulabel"),
+      label: await getStringAsync("menuitem-filemenulabel"),
       oncommand: "alert('Hello World! File Menuitem.')",
     });
   }
@@ -346,9 +345,9 @@ export class UIExampleFactory {
   }
 
   @example
-  static registerLibraryTabPanel() {
+  static async registerLibraryTabPanel() {
     const tabId = ztoolkit.LibraryTabPanel.register(
-      getString("tabpanel.lib.tab.label"),
+      await getStringAsync("tabpanel-lib-tab-label"),
       (panel: XUL.Element, win: Window) => {
         const elem = ztoolkit.UI.createElement(win.document, "vbox", {
           children: [
@@ -392,7 +391,7 @@ export class UIExampleFactory {
   @example
   static async registerReaderTabPanel() {
     const tabId = await ztoolkit.ReaderTabPanel.register(
-      getString("tabpanel.reader.tab.label"),
+      await getStringAsync("tabpanel-reader-tab-label"),
       (
         panel: XUL.TabPanel | undefined,
         deck: XUL.Deck,

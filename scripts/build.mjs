@@ -9,6 +9,7 @@ import {
   mkdirSync,
   readdirSync,
   rmSync,
+  renameSync,
 } from "fs";
 import { env, exit } from "process";
 import replaceInFile from "replace-in-file";
@@ -157,6 +158,30 @@ async function main() {
   );
 
   console.log("[Build] Replace OK");
+
+  // Walk the builds/addon/locale folder's sub folders and rename *.ftl to addonRef-*.ftl
+  const localeDir = join(buildDir, "addon/locale");
+  const localeFolders = readdirSync(localeDir, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name);
+
+  for (const localeSubFolder of localeFolders) {
+    const localeSubDir = join(localeDir, localeSubFolder);
+    const localeSubFiles = readdirSync(localeSubDir, {
+      withFileTypes: true,
+    })
+      .filter((dirent) => dirent.isFile())
+      .map((dirent) => dirent.name);
+
+    for (const localeSubFile of localeSubFiles) {
+      if (localeSubFile.endsWith(".ftl")) {
+        renameSync(
+          join(localeSubDir, localeSubFile),
+          join(localeSubDir, `${config.addonRef}-${localeSubFile}`)
+        );
+      }
+    }
+  }
 
   console.log("[Build] Addon prepare OK");
 

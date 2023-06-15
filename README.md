@@ -28,7 +28,7 @@ This is a plugin template for [Zotero](https://www.zotero.org/). Plugins using t
 
 📌[Zotero Plugin Template](https://github.com/windingwind/zotero-plugin-template)(This repo)
 
-> 👍You are currently in `bootstrap` extension mode. To use `overlay` mode, plsase switch to `overlay` branch in git.
+> 👍You are currently in `bootstrap` extension mode. To use `overlay` mode, please switch to `overlay` branch in git.
 
 > 👁 Watch this repo so that you can be notified whenever there are fixes & updates.
 
@@ -39,6 +39,8 @@ If you are using this repo, I recommended that you put this badge ([![Using Zote
 ```
 
 ## Features
+
+> ❗The localization system is upgraded (dtd is deprecated and we do not use .properties anymore). Only supports Zotero 7.0.0-beta.12 or higher now. If you want to support Zotero 6, you may need to use `dtd`, `properties`, and `ftl` at the same time.
 
 - Event-driven, functional programming, under extensive skeleton;
 - Simple and user-friendly, works out-of-the-box.
@@ -221,7 +223,6 @@ Tired of endless restarting? Forget about it!
 
 When file changes are detected in `src` or `addon`, the plugin will be automatically compiled and reloaded.
 
-
 <details style="text-indent: 2em">
 <summary>💡 Steps to add this feature to an existing plugin</summary>
 
@@ -231,8 +232,6 @@ When file changes are detected in `src` or `addon`, the plugin will be automatic
 4. Done.
 
 </details>
-
-
 
 ### Debug in Zotero
 
