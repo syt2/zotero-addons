@@ -11,7 +11,6 @@ class Addon {
     ztoolkit: ZoteroToolkit;
     locale?: {
       current: any;
-      default: any;
     };
     prefs?: {
       window: Window;
