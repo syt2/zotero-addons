@@ -10,7 +10,9 @@ export function initLocale() {
     [`${config.addonRef}-addon.ftl`]
   );
   const currentBundle = bundleGenerator.next().value;
-  const defaultBundle = bundleGenerator.next().value;
+  // No default when in en-US
+  const defaultBundle =
+    Zotero.locale !== "en-US" ? bundleGenerator.next().value : null;
   addon.data.locale = {
     current: currentBundle,
     default: defaultBundle,
