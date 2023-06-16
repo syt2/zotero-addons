@@ -1,52 +1,56 @@
 import { config } from "../../package.json";
-import { waitUntil } from "./wait";
 
 /**
  * Initialize locale data
  */
 export function initLocale() {
-  ztoolkit.UI.appendElement(
-    {
-      tag: "link",
-      namespace: "html",
-      properties: {
-        rel: "localization",
-        href: `${config.addonRef}-addon.ftl`,
-      },
-    },
-    document.querySelector("linkset")!
+  const l10n = ztoolkit.getGlobal("L10nRegistry").getInstance();
+  const bundleGenerator = l10n.generateBundlesSync(
+    [Zotero.locale, "en-US"],
+    [`${config.addonRef}-addon.ftl`]
   );
+  const currentBundle = bundleGenerator.next().value;
+  const defaultBundle = bundleGenerator.next().value;
+  addon.data.locale = {
+    current: currentBundle,
+    default: defaultBundle,
+  };
 }
 
 /**
  * Get locale string
  * @param localString
- * @deprecated
+ * @param branch branch name
+ * @example
+ * ```ftl
+ * # addon.ftl
+ * addon-name = Addon Template
+ *     .label = Addon Template Label
+ * ```
+ * ```js
+ * getString("addon-name"); // Addon Template
+ * getString("addon-name", "label"); // Addon Template Label
+ * ```
  */
-export function getString(localString: string): string {
-  let result = "";
-  let flag = false;
-  getStringAsync(localString)
-    .then((value) => {
-      result = value;
-      flag = true;
-    })
-    .catch((e) => {
-      ztoolkit.log(e);
-      flag = true;
-    });
-  const t = new Date().getTime();
-  while (!flag && t < new Date().getTime() - 3000) {
-    // wait until the string is loaded
-  }
-  return result;
+export function getString(localString: string, branch = ""): string {
+  return (
+    getStringFromBundle(addon.data.locale?.current, localString, branch) ||
+    getStringFromBundle(addon.data.locale?.default, localString, branch) ||
+    localString
+  );
 }
 
-/**
- * Get locale string async
- * @param localString
- */
-export async function getStringAsync(localString: string): Promise<string> {
-  // @ts-ignore
-  return (await document.l10n.formatValue(localString)) || localString;
+function getStringFromBundle(bundle: any, localString: string, branch = "") {
+  if (!bundle) {
+    return "";
+  }
+  const patterns = bundle.getMessage(localString);
+  if (!patterns) {
+    return "";
+  }
+  if (branch) {
+    return bundle.formatPattern(patterns.attributes[branch]);
+  } else {
+    return bundle.formatPattern(patterns.value);
+  }
 }

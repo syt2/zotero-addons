@@ -1,5 +1,5 @@
 import { config } from "../../package.json";
-import { getStringAsync } from "../utils/locale";
+import { getString } from "../utils/locale";
 
 export async function registerPrefsScripts(_window: Window) {
   // This function is called when the prefs window is opened
@@ -10,13 +10,13 @@ export async function registerPrefsScripts(_window: Window) {
       columns: [
         {
           dataKey: "title",
-          label: await getStringAsync("prefs-table-title"),
+          label: getString("prefs-table-title"),
           fixedWidth: true,
           width: 100,
         },
         {
           dataKey: "detail",
-          label: await getStringAsync("prefs-table-detail"),
+          label: getString("prefs-table-detail"),
         },
       ],
       rows: [

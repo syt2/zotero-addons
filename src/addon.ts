@@ -10,7 +10,8 @@ class Addon {
     // ztoolkit: MyToolkit;
     ztoolkit: ZoteroToolkit;
     locale?: {
-      stringBundle: any;
+      current: any;
+      default: any;
     };
     prefs?: {
       window: Window;
