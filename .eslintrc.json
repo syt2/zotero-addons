@@ -23,17 +23,11 @@
     "@typescript-eslint/no-non-null-assertion": "off"
   },
   "ignorePatterns": [
+    "**/builds/**",
     "**/dist/**",
     "**/node_modules/**",
-    "**/abbrevIso*",
-    "**/example*",
-    "**/*.bak",
-    "coverage/**",
-    "docs-shared/lib/**",
-    "packages/*/assets/**",
-    "packages/*/lib/**",
-    "!.vuepress/**",
-    "**/.vuepress/.cache/**",
-    "**/.vuepress/.temp/**"
+    "**/scripts/**",
+    "**/*.js",
+    "**/*.bak"
   ]
 }
