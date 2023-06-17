@@ -1,9 +1,11 @@
 import { config } from "../../package.json";
 
+export { initLocale, getString };
+
 /**
  * Initialize locale data
  */
-export function initLocale() {
+function initLocale() {
   const l10n = new (ztoolkit.getGlobal("Localization"))(
     [`${config.addonRef}-addon.ftl`],
     true
@@ -36,7 +38,27 @@ export function initLocale() {
  * getString("addon-dynamic-example", { args: { count: 2 } }); // I have 2 apples
  * ```
  */
-export function getString(
+function getString(localString: string): string;
+function getString(localString: string, branch: string): string;
+function getString(
+  localString: string,
+  options: { branch?: string | undefined; args?: Record<string, unknown> }
+): string;
+function getString(...inputs: any[]) {
+  if (inputs.length === 1) {
+    return _getString(inputs[0]);
+  } else if (inputs.length === 2) {
+    if (typeof inputs[1] === "string") {
+      return _getString(inputs[0], { branch: inputs[1] });
+    } else {
+      return _getString(inputs[0], inputs[1]);
+    }
+  } else {
+    throw new Error("Invalid arguments");
+  }
+}
+
+function _getString(
   localString: string,
   options: { branch?: string | undefined; args?: Record<string, unknown> } = {}
 ): string {
