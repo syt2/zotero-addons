@@ -28,8 +28,6 @@ This is a plugin template for [Zotero](https://www.zotero.org/). Plugins using t
 
 📌[Zotero Plugin Template](https://github.com/windingwind/zotero-plugin-template)(This repo)
 
-> 👍You are currently in `bootstrap` extension mode. To use `overlay` mode, please switch to `overlay` branch in git.
-
 > 👁 Watch this repo so that you can be notified whenever there are fixes & updates.
 
 If you are using this repo, I recommended that you put this badge ([![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)) on your README:
@@ -40,7 +38,7 @@ If you are using this repo, I recommended that you put this badge ([![Using Zote
 
 ## Features
 
-> ❗The localization system is upgraded (dtd is deprecated and we do not use .properties anymore). Only supports Zotero 7.0.0-beta.12 or higher now. If you want to support Zotero 6, you may need to use `dtd`, `properties`, and `ftl` at the same time.
+> ❗The localization system is upgraded (dtd is deprecated and we do not use .properties anymore). Only supports Zotero 7.0.0-beta.12 or higher now. If you want to support Zotero 6, you may need to use `dtd`, `properties`, and `ftl` at the same time. See the staled branch `zotero6-bootstrap`.
 
 - Event-driven, functional programming, under extensive skeleton;
 - Simple and user-friendly, works out-of-the-box.
@@ -53,7 +51,6 @@ If you are using this repo, I recommended that you put this badge ([![Using Zote
   - Automatically generate/update plugin id/version, update configrations, and set environment variables(`development/production`);
   - Automatically build and reload code in Zotero;
   - Automatically release to GitHub(using [release-it](https://github.com/release-it/release-it));
-- Compatibilities for Zotero 6 & Zotero 7.(using [zotero-plugin-toolkit](https://github.com/windingwind/zotero-plugin-toolkit))
 
 ## Examples
 
@@ -180,7 +177,7 @@ npm run release
 
 1. Install a beta version of Zotero: https://www.zotero.org/support/beta_builds (Zotero 7 beta: https://www.zotero.org/support/dev/zotero_7_for_developers)
 
-2. Install Firefox 60(for Zotero 6)/Firefox 102(for Zotero 7)
+2. Install Firefox 102(for Zotero 7)
 
 3. Copy zotero command line config file. Modify the commands that starts your installation of the beta Zotero.
 
@@ -196,19 +193,15 @@ vim ./scripts/zotero-cmd.json
 
 5. Build plugin and restart Zotero with `npm run restart`.
 
-6. Launch Firefox 60(Zotero 6)/Firefox 102(Zotero 7)
+6. Launch Firefox 102(Zotero 7)
 
 7. In Firefox, go to devtools, go to settings, click "enable remote debugging" and the one next to it that's also about debugging
 
-> Press `shift+F8` in FF 60, or enter `about:debugging#/setup` in FF 102.
+> Enter `about:debugging#/setup` in FF 102.
 
 8. In Zotero, go to setting, advanced, config editor, look up "debugging" and click on "allow remote debugging".
 
-9. Connect to Zotero in Firefox.
-
-> In FF 60, click the hamburger menu in the top right -> web developer -> Connect..., then enter `localhost:6100`.
-
-> In FF 102, enter `localhost:6100` in the bottom input of remote-debugging page and click `add`.
+9. Connect to Zotero in Firefox. In FF 102, enter `localhost:6100` in the bottom input of remote-debugging page and click `add`.
 
 10. Click `connect` in the leftside-bar of Firefox remote-debugging page.
 
@@ -269,37 +262,6 @@ This template registers the following variables to the global scope:
 ```ts
 Zotero, ZoteroPane, Zotero_Tabs, window, document, rootURI, ztoolkit, addon;
 ```
-
-### About Preference
-
-Zotero 6 doesn't support preference pane injection in bootstrap mode, thus I write a register for Zotero 6 or lower.
-
-You only need to maintain one `preferences.xhtml` which runs natively on Zotero 7 and let the plugin template handle it when it is running on Zotero 6.
-
-<table style="margin-left: auto; margin-right: auto;">
-    <tr>
-        <td>
-          <img width="350px" src="https://user-images.githubusercontent.com/33902321/208080125-2a776a98-f427-4c81-8924-7877bf803e3d.png"/>
-          <div>Zotero 7</div>
-        </td>
-        <td>
-          <img width="300px" src="https://user-images.githubusercontent.com/33902321/208080491-b7006c08-2679-4f85-9a28-dba8e622d745.png"/>
-          <div>Zotero 6</div>
-        </td>
-    </tr>
-</table>
-
-https://github.com/windingwind/zotero-plugin-template/blob/08d72a4e2b3bacff574f537bbd06cb33e6b22480/src/modules/examples.ts#L73-L85
-
-> `<preferences>` element is deprecated. Please use the full pref-key in the elements' `preference` attribute. Like:
-
-```xml
-<checkbox label="&zotero.__addonRef__.pref.enable.label;" preference="extensions.zotero.__addonRef__.enable" />
-```
-
-The elements with `preference` attributes will bind to Zotero preferences.
-
-Remember to call `unregister()` on plugin unload.
 
 ### Create Elements API
 
@@ -363,9 +325,7 @@ This section shows the directory structure of a template.
 ├─.github           # github conf
 │
 ├─addon             # addon dir
-│  │  chrome.manifest  # for Zotero 6
-│  │  manifest.json # for Zotero 7
-│  │  install.rdf   # addon install conf, for Zotero 6
+│  │  manifest.json # addon config
 │  │  bootstrap.js  # addon load/unload script, like a main.c
 │  │
 │  └─chrome
@@ -406,7 +366,3 @@ This section shows the directory structure of a template.
 Use this code under AGPL. No warranties are provided. Keep the laws of your locality in mind!
 
 If you want to change the license, please contact me at wyzlshx@foxmail.com
-
-Part of the code of this repo refers to other open-source projects within the allowed scope.
-
-- zotero-better-bibtex(`d.ts`)

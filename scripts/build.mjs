@@ -100,7 +100,6 @@ async function main() {
   copyFolderRecursiveSync("addon", buildDir);
 
   copyFileSync("update-template.json", "update.json");
-  copyFileSync("update-template.rdf", "update.rdf");
 
   await build({
     entryPoints: ["src/index.ts"],
@@ -142,7 +141,6 @@ async function main() {
       join(buildDir, "addon/manifest.json"),
       join(buildDir, "addon/bootstrap.js"),
       "update.json",
-      "update.rdf",
     ],
     from: replaceFrom,
     to: replaceTo,
