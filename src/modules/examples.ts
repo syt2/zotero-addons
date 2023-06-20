@@ -294,6 +294,7 @@ export class UIExampleFactory {
   static async registerCustomCellRenderer() {
     await ztoolkit.ItemTree.addRenderCellHook(
       "title",
+      // eslint-disable-next-line @typescript-eslint/ban-types
       (index: number, data: string, column: any, original: Function) => {
         const span = original(index, data, column) as HTMLSpanElement;
         span.style.background = "rgb(30, 30, 30)";
@@ -483,21 +484,21 @@ export class PromptExampleFactory {
         callback: async (prompt) => {
           // https://github.com/zotero/zotero/blob/7262465109c21919b56a7ab214f7c7a8e1e63909/chrome/content/zotero/integration/quickFormat.js#L589
           function getItemDescription(item: Zotero.Item) {
-            var nodes = [];
-            var str = "";
-            var author,
+            const nodes = [];
+            let str = "";
+            let author,
               authorDate = "";
             if (item.firstCreator) {
               author = authorDate = item.firstCreator;
             }
-            var date = item.getField("date", true, true) as string;
+            let date = item.getField("date", true, true) as string;
             if (date && (date = date.substr(0, 4)) !== "0000") {
               authorDate += " (" + parseInt(date) + ")";
             }
             authorDate = authorDate.trim();
             if (authorDate) nodes.push(authorDate);
 
-            var publicationTitle = item.getField(
+            const publicationTitle = item.getField(
               "publicationTitle",
               false,
               true
@@ -505,34 +506,34 @@ export class PromptExampleFactory {
             if (publicationTitle) {
               nodes.push(`<i>${publicationTitle}</i>`);
             }
-            var volumeIssue = item.getField("volume");
-            var issue = item.getField("issue");
+            let volumeIssue = item.getField("volume");
+            const issue = item.getField("issue");
             if (issue) volumeIssue += "(" + issue + ")";
             if (volumeIssue) nodes.push(volumeIssue);
 
-            var publisherPlace = [],
-              field;
+            const publisherPlace = [];
+            let field;
             if ((field = item.getField("publisher")))
               publisherPlace.push(field);
             if ((field = item.getField("place"))) publisherPlace.push(field);
             if (publisherPlace.length) nodes.push(publisherPlace.join(": "));
 
-            var pages = item.getField("pages");
+            const pages = item.getField("pages");
             if (pages) nodes.push(pages);
 
             if (!nodes.length) {
-              var url = item.getField("url");
+              const url = item.getField("url");
               if (url) nodes.push(url);
             }
 
             // compile everything together
-            for (var i = 0, n = nodes.length; i < n; i++) {
-              var node = nodes[i];
+            for (let i = 0, n = nodes.length; i < n; i++) {
+              const node = nodes[i];
 
               if (i != 0) str += ", ";
 
               if (typeof node === "object") {
-                var label = document.createElement("label");
+                const label = document.createElement("label");
                 label.setAttribute("value", str);
                 label.setAttribute("crop", "end");
                 str = "";
@@ -578,12 +579,12 @@ export class PromptExampleFactory {
               "beginsWith",
             ];
             let hasValidCondition = false;
-            let joinMode: string = "all";
+            let joinMode = "all";
             if (/\s*\|\|\s*/.test(text)) {
               joinMode = "any";
             }
             text.split(/\s*(&&|\|\|)\s*/g).forEach((conditinString: string) => {
-              let conditions = conditinString.split(/\s+/g);
+              const conditions = conditinString.split(/\s+/g);
               if (
                 conditions.length == 3 &&
                 operators.indexOf(conditions[1]) != -1
