@@ -352,7 +352,7 @@ This section shows the directory structure of a template.
 |   |       `-- preferences.ftl
 |   |-- manifest.json              # addon config
 |   `-- prefs.js
-|-- builds/                        # build dir
+|-- build/                         # build dir
 |-- scripts                        # scripts for dev
 |   |-- build.mjs                  # esbuild and replace
 |   |-- reload.mjs
