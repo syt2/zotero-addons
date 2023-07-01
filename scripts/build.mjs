@@ -87,7 +87,7 @@ function dateFormat(fmt, date) {
 async function main() {
   const t = new Date();
   const buildTime = dateFormat("YYYY-mm-dd HH:MM:SS", t);
-  const buildDir = "builds";
+  const buildDir = "build";
 
   console.log(
     `[Build] BUILD_DIR=${buildDir}, VERSION=${version}, BUILD_TIME=${buildTime}, ENV=${[
