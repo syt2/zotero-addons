@@ -7,22 +7,23 @@ This is a plugin template for [Zotero](https://www.zotero.org/).
 
 Plugins created with this template:
 
-![GitHub Repo stars](https://img.shields.io/github/stars/windingwind/zotero-better-notes?label=zotero-better-notes&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/windingwind/zotero-pdf-preview?label=zotero-pdf-preview&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/windingwind/zotero-pdf-translate?label=zotero-pdf-translate&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/windingwind/zotero-tag?label=zotero-tag&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/iShareStuff/ZoteroTheme?label=zotero-theme&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/zotero-reference?label=zotero-reference&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/zotero-citation?label=zotero-citation&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/ZoteroStyle?label=zotero-style&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/volatile-static/Chartero?label=Chartero&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/l0o0/tara?label=tara&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/redleafnew/delitemwithatt?label=delitemwithatt&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/redleafnew/zotero-updateifsE?label=zotero-updateifsE&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/inciteful-xyz/inciteful-zotero-plugin?label=inciteful-zotero-plugin&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/zotero-gpt?label=zotero-gpt&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/zoushucai/zotero-journalabbr?label=zotero-journalabbr&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/zotero-figure?label=zotero-figure&style=flat-square)
+[![GitHub Repo stars](https://img.shields.io/github/stars/windingwind/zotero-better-notes?label=zotero-better-notes&style=flat-square)](https://github.com/windingwind/zotero-better-notes)
+[![GitHub Repo stars](https://img.shields.io/github/stars/windingwind/zotero-pdf-preview?label=zotero-pdf-preview&style=flat-square)](https://github.com/windingwind/zotero-pdf-preview)
+[![GitHub Repo stars](https://img.shields.io/github/stars/windingwind/zotero-pdf-translate?label=zotero-pdf-translate&style=flat-square)](https://github.com/windingwind/zotero-pdf-translate)
+[![GitHub Repo stars](https://img.shields.io/github/stars/windingwind/zotero-tag?label=zotero-tag&style=flat-square)](https://github.com/windingwind/zotero-tag)
+[![GitHub Repo stars](https://img.shields.io/github/stars/iShareStuff/ZoteroTheme?label=zotero-theme&style=flat-square)](https://github.com/iShareStuff/ZoteroTheme)
+[![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/zotero-reference?label=zotero-reference&style=flat-square)](https://github.com/MuiseDestiny/zotero-reference)
+[![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/zotero-citation?label=zotero-citation&style=flat-square)](https://github.com/MuiseDestiny/zotero-citation)
+[![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/ZoteroStyle?label=zotero-style&style=flat-square)](https://github.com/MuiseDestiny/ZoteroStyle)
+[![GitHub Repo stars](https://img.shields.io/github/stars/volatile-static/Chartero?label=Chartero&style=flat-square)](https://github.com/volatile-static/Chartero)
+[![GitHub Repo stars](https://img.shields.io/github/stars/l0o0/tara?label=tara&style=flat-square)](https://github.com/l0o0/tara)
+[![GitHub Repo stars](https://img.shields.io/github/stars/redleafnew/delitemwithatt?label=delitemwithatt&style=flat-square)](https://github.com/redleafnew/delitemwithatt)
+[![GitHub Repo stars](https://img.shields.io/github/stars/redleafnew/zotero-updateifsE?label=zotero-updateifsE&style=flat-square)](https://github.com/redleafnew/zotero-updateifsE)
+[![GitHub Repo stars](https://img.shields.io/github/stars/northword/zotero-format-metadata?label=zotero-format-metadata&style=flat-square)](https://github.com/northword/zotero-format-metadata)
+[![GitHub Repo stars](https://img.shields.io/github/stars/inciteful-xyz/inciteful-zotero-plugin?label=inciteful-zotero-plugin&style=flat-square)](https://github.com/inciteful-xyz/inciteful-zotero-plugin)
+[![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/zotero-gpt?label=zotero-gpt&style=flat-square)](https://github.com/MuiseDestiny/zotero-gpt)
+[![GitHub Repo stars](https://img.shields.io/github/stars/zoushucai/zotero-journalabbr?label=zotero-journalabbr&style=flat-square)](https://github.com/zoushucai/zotero-journalabbr)
+[![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/zotero-figure?label=zotero-figure&style=flat-square)](https://github.com/MuiseDestiny/zotero-figure)
 
 📖[Plugin Development Documentation](https://zotero.yuque.com/books/share/8d230829-6004-4934-b4c6-685a7001bfa0/vec88d)(Chinese, provides English translation)
 
@@ -141,32 +142,32 @@ This is also how your plugin will be released and used by others.
 - Enter the repo folder;
 - Modify the settings in `./package.json`, including:
 
-```json5
-{
-  version,
-  author,
-  description,
-  homepage,
-  config {
-    releasepage, // URL to releases(`.xpi`)
-    updaterdf, // URL to update.json
-    addonName, // name to be displayed in the plugin manager
-    addonID, // ID to avoid confliction. IMPORTANT!
-    addonRef, // e.g. Element ID prefix
-    addonInstance // the plugin's root instance: Zotero.${addonInstance}
+  ```json5
+  {
+    version,
+    author,
+    description,
+    homepage,
+    config {
+      releasepage, // URL to releases(`.xpi`)
+      updaterdf, // URL to update.json
+      addonName, // name to be displayed in the plugin manager
+      addonID, // ID to avoid confliction. IMPORTANT!
+      addonRef, // e.g. Element ID prefix
+      addonInstance // the plugin's root instance: Zotero.${addonInstance}
+    }
   }
-}
-```
+  ```
 
-> Be careful to set the addonID and addonRef to avoid confliction.
+  > Be careful to set the addonID and addonRef to avoid confliction.
 
 - Run `npm install` to set up the plugin and install dependencies. If you don't have NodeJS installed, please download it [here](https://nodejs.org/en/);
 - Run `npm run build` to build the plugin in production mode. Run `npm run build-dev` to build the plugin in development mode. The xpi for installation and the built code is under `builds` folder.
 
-> What the difference between dev & prod?
->
-> - This environment variable is stored in `Zotero.${addonInstance}.data.env`. The outputs to console is disabled in prod mode.
-> - You can decide what users cannot see/use based on this variable.
+  > What the difference between dev & prod?
+  >
+  > - This environment variable is stored in `Zotero.${addonInstance}.data.env`. The outputs to console is disabled in prod mode.
+  > - You can decide what users cannot see/use based on this variable.
 
 ### Release
 
@@ -181,19 +182,19 @@ npm run release
 
 ### Setup Development Environment
 
-1. Install a beta version of Zotero: https://www.zotero.org/support/beta_builds (Zotero 7 beta: https://www.zotero.org/support/dev/zotero_7_for_developers)
+1. Install a beta version of Zotero: <https://www.zotero.org/support/beta_builds> (Zotero 7 beta: <https://www.zotero.org/support/dev/zotero_7_for_developers>)
 
 2. Install Firefox 102(for Zotero 7)
 
 3. Copy zotero command line config file. Modify the commands that starts your installation of the beta Zotero.
 
-> (Optional) Do this only once: Start the beta Zotero with `/path/to/zotero -p`. Create a new profile and use it as your development profile.
-> Use `/path/to/zotero -p {profile_name}` to specify which profile to run with.
+    > (Optional) Do this only once: Start the beta Zotero with `/path/to/zotero -p`. Create a new profile and use it as your development profile.
+    > Use `/path/to/zotero -p {profile_name}` to specify which profile to run with.
 
-```sh
-cp ./scripts/zotero-cmd-default.json ./scripts/zotero-cmd.json
-vim ./scripts/zotero-cmd.json
-```
+    ```sh
+    cp ./scripts/zotero-cmd-default.json ./scripts/zotero-cmd.json
+    vim ./scripts/zotero-cmd.json
+    ```
 
 4. Setup plugin development environment following this [link](https://www.zotero.org/support/dev/client_coding/plugin_development#setting_up_a_plugin_development_environment).
 
@@ -203,7 +204,7 @@ vim ./scripts/zotero-cmd.json
 
 7. In Firefox, go to devtools, go to settings, click "enable remote debugging" and the one next to it that's also about debugging
 
-> Enter `about:debugging#/setup` in FF 102.
+    > Enter `about:debugging#/setup` in FF 102.
 
 8. In Zotero, go to setting, advanced, config editor, look up "debugging" and click on "allow remote debugging".
 
@@ -239,7 +240,7 @@ You can also:
 - Test code snipastes in Tools->Developer->Run Javascript;
 - Debug output with `Zotero.debug()`. Find the outputs in Help->Debug Output Logging->View Output;
 - Debug UI. Zotero is built on the Firefox XUL framework. Debug XUL UI with software like [XUL Explorer](https://udn.realityripple.com/docs/Archive/Mozilla/XUL_Explorer).
-  > XUL Documentation: http://www.devdoc.net/web/developer.mozilla.org/en-US/docs/XUL.html
+  > XUL Documentation: <http://www.devdoc.net/web/developer.mozilla.org/en-US/docs/XUL.html>
 
 ## Details
 
@@ -298,7 +299,7 @@ Steps in `scripts/build.js`:
 
 ### About Zotero API
 
-Zotero docs are outdated and incomplete. Clone https://github.com/zotero/zotero and search the keyword globally.
+Zotero docs are outdated and incomplete. Clone <https://github.com/zotero/zotero> and search the keyword globally.
 
 > ⭐The [zotero-types](https://github.com/windingwind/zotero-types) provides most frequently used Zotero APIs. It's included in this template by default. Your IDE would provide hint for most of the APIs.
 
@@ -319,56 +320,66 @@ This section shows the directory structure of a template.
   > Don't break the lines in the `defaults.js`
 
 ```shell
-│  .gitignore
-│  .release-it.json # release-it conf
-|  tsconfig.json    # https://code.visualstudio.com/docs/languages/jsconfig#
-│  build.js         # esbuild
-│  LICENSE
-│  package.json     # npm conf
-│  README.md        # readme
-│  update.rdf       # addon update
-│
-├─.github           # github conf
-│
-├─addon             # addon dir
-│  │  manifest.json # addon config
-│  │  bootstrap.js  # addon load/unload script, like a main.c
-│  │
-│  └─chrome
-│      ├─content    # UI
-│      │  │  preferences.xhtml
-│      │  │
-│      │  ├─icons
-│      │  │      favicon.png
-│      │  │      favicon@0.5x.png
-│      │  │
-│      │  └─scripts
-│      └─locale     # locale
-│         ├─en-US
-│         │      overlay.dtd
-│         │      addon.properties
-│         │
-│         ├─zh-CN
-│         |      overlay.dtd
-│         └─     addon.properties
-│
-├─builds            # build dir
-│  └─.xpi
-│
-└─src               # source code
-    │  index.ts     # main entry
-    │  addon.ts     # base class
-    │  hooks.ts     # lifecycle hooks
-    |
-    └─modules       # sub modules
-       │  examples.ts           # examples factory
-       │  locale.ts             # locale .properties
-       │  preferenceScript.ts   # script runs in preferences.xhtml
-       └─ progressWindow.ts     # progressWindow tool
+.
+|-- .eslintrc.json            # eslint conf
+|-- .gitattributes            # git conf
+|-- .github/                  # github conf
+|-- .gitignore                # git conf
+|-- .prettierrc               # prettier conf
+|-- .release-it.json          # release-it conf
+|-- .vscode                   # vs code conf
+|   |-- extensions.json
+|   |-- launch.json
+|   |-- setting.json
+|   `-- toolkit.code-snippets
+|-- package-lock.json         # npm conf
+|-- package.json              # npm conf
+|-- LICENSE
+|-- README.md
+|-- addon
+|   |-- bootstrap.js               # addon load/unload script, like a main.c
+|   |-- chrome
+|   |   `-- content
+|   |       |-- icons/
+|   |       |-- preferences.xhtml  # preference panel
+|   |       `-- zoteroPane.css
+|   |-- locale                     # locale
+|   |   |-- en-US
+|   |   |   |-- addon.ftl
+|   |   |   `-- preferences.ftl
+|   |   `-- zh-CN
+|   |       |-- addon.ftl
+|   |       `-- preferences.ftl
+|   |-- manifest.json              # addon config
+|   `-- prefs.js
+|-- builds/                        # build dir
+|-- scripts                        # scripts for dev
+|   |-- build.mjs                  # esbuild and replace
+|   |-- reload.mjs
+|   |-- start.mjs
+|   |-- stop.mjs
+|   `-- zotero-cmd-default.json
+|-- src                           # source code
+|   |-- addon.ts                  # base class
+|   |-- hooks.ts                  # lifecycle hooks
+|   |-- index.ts                  # main entry
+|   |-- modules                   # sub modules
+|   |   |-- examples.ts
+|   |   `-- preferenceScript.ts
+|   `-- utils                     # utilities
+|       |-- locale.ts
+|       |-- prefs.ts
+|       |-- wait.ts
+|       `-- window.ts
+|-- tsconfig.json                 # https://code.visualstudio.com/docs/languages/jsconfig
+|-- typings                       # ts typings
+|   `-- global.d.ts
+|-- update-template.json          # template of `update.json`
+`-- update.json
 ```
 
 ## Disclaimer
 
 Use this code under AGPL. No warranties are provided. Keep the laws of your locality in mind!
 
-If you want to change the license, please contact me at wyzlshx@foxmail.com
+If you want to change the license, please contact me at <wyzlshx@foxmail.com>
