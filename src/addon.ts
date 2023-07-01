@@ -45,7 +45,7 @@ class Addon {
  *    and comment line 31:                      `ztoolkit: new ZoteroToolkit(),`.
  * 2. Uncomment this file's line 10:            `ztoolkit: MyToolkit;` in this file
  *    and comment line 11:                      `ztoolkit: ZoteroToolkit;`.
- * 3. Uncomment `./typing/global.d.ts` line 12: `declare const ztoolkit: import("../src/addon").MyToolkit;`
+ * 3. Uncomment `../typings/global.d.ts` line 12: `declare const ztoolkit: import("../src/addon").MyToolkit;`
  *    and comment line 13:                      `declare const ztoolkit: import("zotero-plugin-toolkit").ZoteroToolkit;`.
  *
  * You can now add the modules under the `MyToolkit` class.
