@@ -25,15 +25,15 @@ Plugins created with this template:
 [![GitHub Repo stars](https://img.shields.io/github/stars/zoushucai/zotero-journalabbr?label=zotero-journalabbr&style=flat-square)](https://github.com/zoushucai/zotero-journalabbr)
 [![GitHub Repo stars](https://img.shields.io/github/stars/MuiseDestiny/zotero-figure?label=zotero-figure&style=flat-square)](https://github.com/MuiseDestiny/zotero-figure)
 
-📖[Plugin Development Documentation](https://zotero.yuque.com/books/share/8d230829-6004-4934-b4c6-685a7001bfa0/vec88d)(Chinese, provides English translation)
+📖 [Plugin Development Documentation](https://zotero.yuque.com/books/share/8d230829-6004-4934-b4c6-685a7001bfa0/vec88d) (Chinese, provides English translation)
 
-🛠️[Zotero Plugin Toolkit](https://github.com/windingwind/zotero-plugin-toolkit) | [API Documentation](https://github.com/windingwind/zotero-plugin-toolkit/blob/master/docs/zotero-plugin-toolkit.md)
+🛠️ [Zotero Plugin Toolkit](https://github.com/windingwind/zotero-plugin-toolkit) | [API Documentation](https://github.com/windingwind/zotero-plugin-toolkit/blob/master/docs/zotero-plugin-toolkit.md)
 
-ℹ️[Zotero Type Definitions](https://github.com/windingwind/zotero-types)
+ℹ️ [Zotero Type Definitions](https://github.com/windingwind/zotero-types)
 
-📜[Zotero Source Code](https://github.com/zotero/zotero)
+📜 [Zotero Source Code](https://github.com/zotero/zotero)
 
-📌[Zotero Plugin Template](https://github.com/windingwind/zotero-plugin-template)(This repo)
+📌 [Zotero Plugin Template](https://github.com/windingwind/zotero-plugin-template) (This repo)
 
 > 👁 Watch this repo so that you can be notified whenever there are fixes & updates.
 
@@ -162,7 +162,7 @@ This is also how your plugin will be released and used by others.
   > Be careful to set the addonID and addonRef to avoid confliction.
 
 - Run `npm install` to set up the plugin and install dependencies. If you don't have NodeJS installed, please download it [here](https://nodejs.org/en/);
-- Run `npm run build` to build the plugin in production mode. Run `npm run build-dev` to build the plugin in development mode. The xpi for installation and the built code is under `builds` folder.
+- Run `npm run build` to build the plugin in production mode. Run `npm run build-dev` to build the plugin in development mode. The xpi for installation and the built code is under `build` folder.
 
   > What the difference between dev & prod?
   >
@@ -184,27 +184,27 @@ npm run release
 
 1. Install a beta version of Zotero: <https://www.zotero.org/support/beta_builds> (Zotero 7 beta: <https://www.zotero.org/support/dev/zotero_7_for_developers>)
 
-2. Install Firefox 102(for Zotero 7)
+2. Install Firefox 102 (for Zotero 7)
 
 3. Copy zotero command line config file. Modify the commands that starts your installation of the beta Zotero.
 
-    > (Optional) Do this only once: Start the beta Zotero with `/path/to/zotero -p`. Create a new profile and use it as your development profile.
-    > Use `/path/to/zotero -p {profile_name}` to specify which profile to run with.
+   > (Optional) Do this only once: Start the beta Zotero with `/path/to/zotero -p`. Create a new profile and use it as your development profile.
+   > Use `/path/to/zotero -p {profile_name}` to specify which profile to run with.
 
-    ```sh
-    cp ./scripts/zotero-cmd-default.json ./scripts/zotero-cmd.json
-    vim ./scripts/zotero-cmd.json
-    ```
+   ```sh
+   cp ./scripts/zotero-cmd-default.json ./scripts/zotero-cmd.json
+   vim ./scripts/zotero-cmd.json
+   ```
 
 4. Setup plugin development environment following this [link](https://www.zotero.org/support/dev/client_coding/plugin_development#setting_up_a_plugin_development_environment).
 
 5. Build plugin and restart Zotero with `npm run restart`.
 
-6. Launch Firefox 102(Zotero 7)
+6. Launch Firefox 102 (Zotero 7)
 
 7. In Firefox, go to devtools, go to settings, click "enable remote debugging" and the one next to it that's also about debugging
 
-    > Enter `about:debugging#/setup` in FF 102.
+   > Enter `about:debugging#/setup` in FF 102.
 
 8. In Zotero, go to setting, advanced, config editor, look up "debugging" and click on "allow remote debugging".
 
@@ -287,15 +287,15 @@ createElement(document, "button", { namespace: "xul" }); // manually set namespa
 
 Use Esbuild to build `.ts` source code to `.js`.
 
-Use `replace-in-file` to replace keywords and configurations defined in `package.json` in non-build files (`.xul/xhtml`, `.dtd`, and `.properties`).
+Use `replace-in-file` to replace keywords and configurations defined in `package.json` in non-build files (`xhtml`, `.flt`, et. al.).
 
-Steps in `scripts/build.js`:
+Steps in `scripts/build.mjs`:
 
-1. Clean `./builds`
-2. Copy `./addon` to `./builds`
-3. Esbuild to `./builds/addon/chrome/content/scripts`
-4. Replace `__buildVersion__` and `__buildTime__` in `./builds/addon`
-5. Zip the `./builds/addon` to `./builds/*.xpi`
+1. Clean `./build`
+2. Copy `./addon` to `./build`
+3. Esbuild to `./build/addon/chrome/content/scripts`
+4. Replace `__buildVersion__` and `__buildTime__` in `./build/addon`
+5. Zip the `./build/addon` to `./build/*.xpi`
 
 ### About Zotero API
 
@@ -305,19 +305,18 @@ Zotero docs are outdated and incomplete. Clone <https://github.com/zotero/zotero
 
 A trick for finding the API you want:
 
-Search the UI label in `.xul`(`.xhtml`)/`.dtd`/`.properties` files, find the corresponding key in locale file. Then search this keys in `.js`/`.jsx` files.
+Search the UI label in `.xhtml`/`.flt` files, find the corresponding key in locale file. Then search this keys in `.js`/`.jsx` files.
 
 ### Directory Structure
 
 This section shows the directory structure of a template.
 
 - All `.js/.ts` code files are in `./src`;
-- Addon config files: `./addon/chrome.manifest`, `./addon/install.rdf`, and `./addon/manifest.json`;
+- Addon config files: `./addon/manifest.json`;
 - UI files: `./addon/chrome/content/*.xhtml`.
-- Locale files: `./addon/chrome/locale/[*.dtd, *.properties]`;
-- Resource files: `./addon/chrome/skin/default/__addonRef__/*.dtd`;
-- Preferences file: `./addon/chrome/defaults/preferences/defaults.js`;
-  > Don't break the lines in the `defaults.js`
+- Locale files: `./addon/locale/**/*.flt`;
+- Preferences file: `./addon/prefs.js`;
+  > Don't break the lines in the `prefs.js`
 
 ```shell
 .
