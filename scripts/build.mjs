@@ -131,13 +131,9 @@ async function main() {
 
   const optionsAddon = {
     files: [
-      join(buildDir, "**/*.rdf"),
-      join(buildDir, "**/*.dtd"),
-      join(buildDir, "**/*.xul"),
       join(buildDir, "**/*.xhtml"),
       join(buildDir, "**/*.json"),
       join(buildDir, "addon/prefs.js"),
-      join(buildDir, "addon/chrome.manifest"),
       join(buildDir, "addon/manifest.json"),
       join(buildDir, "addon/bootstrap.js"),
       "update.json",
