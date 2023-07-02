@@ -23,7 +23,7 @@
     "@typescript-eslint/no-non-null-assertion": "off"
   },
   "ignorePatterns": [
-    "**/builds/**",
+    "**/build/**",
     "**/dist/**",
     "**/node_modules/**",
     "**/scripts/**",
