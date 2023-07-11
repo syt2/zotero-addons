@@ -120,6 +120,7 @@ async function main() {
       __env__: `"${env.NODE_ENV}"`,
     },
     bundle: true,
+    target: "firefox102",
     outfile: join(buildDir, "addon/chrome/content/scripts/index.js"),
     // Don't turn minify on
     // minify: true,
