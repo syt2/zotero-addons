@@ -84,6 +84,19 @@ function dateFormat(fmt, date) {
   return fmt;
 }
 
+function addAddonRefToFlt(fltContent) {
+  const lines = fltContent.split("\n");
+  const prefixedLines = lines.map((line) => {
+    if (line.match(/^(?<message>[a-zA-Z]\S*)([ ]*=[ ]*)(?<pattern>.*)$/gm)) {
+      // https://regex101.com/r/lQ9x5p/1
+      return `${config.addonRef}-${line}`;
+    } else {
+      return line;
+    }
+  });
+  return prefixedLines.join("\n");
+}
+
 async function main() {
   const t = new Date();
   const buildTime = dateFormat("YYYY-mm-dd HH:MM:SS", t);
@@ -121,13 +134,15 @@ async function main() {
     /__buildVersion__/g,
     /__buildTime__/g,
   ];
-
   const replaceTo = [author, description, homepage, version, buildTime];
 
   replaceFrom.push(
     ...Object.keys(config).map((k) => new RegExp(`__${k}__`, "g"))
   );
   replaceTo.push(...Object.values(config));
+
+  replaceFrom.push(/(data-l10n-id=")(.*")/gm);
+  replaceTo.push(`$1${config.addonRef}-$2`);
 
   const optionsAddon = {
     files: [
@@ -144,11 +159,18 @@ async function main() {
   };
 
   const replaceResult = sync(optionsAddon);
+
+  const replaceResultFlt = sync({
+    files: [join(buildDir, "addon/**/*.ftl")],
+    processor: [addAddonRefToFlt],
+  });
+
   console.log(
     "[Build] Run replace in ",
     replaceResult
       .filter((f) => f.hasChanged)
-      .map((f) => `${f.file} : ${f.numReplacements} / ${f.numMatches}`)
+      .map((f) => `${f.file} : ${f.numReplacements} / ${f.numMatches}`),
+    replaceResultFlt.filter((f) => f.hasChanged).map((f) => `${f.file} : OK`)
   );
 
   console.log("[Build] Replace OK");
