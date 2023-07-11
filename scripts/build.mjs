@@ -142,7 +142,7 @@ async function main() {
   );
   replaceTo.push(...Object.values(config));
 
-  replaceFrom.push(/(data-l10n-id=")(.*")/gm);
+  replaceFrom.push(/(data-l10n-id=")(\S*")/gm);
   replaceTo.push(`$1${config.addonRef}-$2`);
 
   const optionsAddon = {
