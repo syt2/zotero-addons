@@ -189,30 +189,28 @@ npm run release
 3. Copy zotero command line config file. Modify the commands that starts your installation of the beta Zotero.
 
    > (Optional) Do this only once: Start the beta Zotero with `/path/to/zotero -p`. Create a new profile and use it as your development profile.
-   > Use `/path/to/zotero -p {profile_name}` to specify which profile to run with.
+   > Put the path of the profile into the `profilePath` in `zotero-cmd.json` to specify which profile to use.
 
    ```sh
    cp ./scripts/zotero-cmd-default.json ./scripts/zotero-cmd.json
    vim ./scripts/zotero-cmd.json
    ```
 
-4. Setup plugin development environment following this [link](https://www.zotero.org/support/dev/client_coding/plugin_development#setting_up_a_plugin_development_environment).
+4. Build plugin and restart Zotero with `npm run restart`.
 
-5. Build plugin and restart Zotero with `npm run restart`.
+5. Launch Firefox 102 (Zotero 7)
 
-6. Launch Firefox 102 (Zotero 7)
-
-7. In Firefox, go to devtools, go to settings, click "enable remote debugging" and the one next to it that's also about debugging
+6. In Firefox, go to devtools, go to settings, click "enable remote debugging" and the one next to it that's also about debugging
 
    > Enter `about:debugging#/setup` in FF 102.
 
-8. In Zotero, go to setting, advanced, config editor, look up "debugging" and click on "allow remote debugging".
+7. In Zotero, go to setting, advanced, config editor, look up "debugging" and click on "allow remote debugging".
 
-9. Connect to Zotero in Firefox. In FF 102, enter `localhost:6100` in the bottom input of remote-debugging page and click `add`.
+8. Connect to Zotero in Firefox. In FF 102, enter `localhost:6100` in the bottom input of remote-debugging page and click `add`.
 
-10. Click `connect` in the leftside-bar of Firefox remote-debugging page.
+9. Click `connect` in the leftside-bar of Firefox remote-debugging page.
 
-11. Click "Inspect Main Process"
+10. Click "Inspect Main Process"
 
 ### Auto Hot Reload
 
