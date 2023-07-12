@@ -4,7 +4,7 @@
   "killZoteroUnix": "kill -9 $(ps -x | grep zotero)",
   "exec": {
     "@comment-zoteroBinPath": "Please input the path of the Zotero binary file in `zoteroBinPath`.",
-    "@comment-zoteroBinPath-tip": "The path delimiter should be escaped as `\\` for win32.",
+    "@comment-zoteroBinPath-tip": "The path delimiter should be escaped as `\\` for win32. The path is `*/Zotero.app/Contents/MacOS/zotero` for MacOS.",
     "zoteroBinPath": "/path/to/zotero.exe",
 
     "@comment-profilePath": "Please input the path of the profile used for development in `profilePath`.",
