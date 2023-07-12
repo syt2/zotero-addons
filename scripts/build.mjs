@@ -18,6 +18,9 @@ import details from "../package.json" assert { type: "json" };
 
 const { name, author, description, homepage, version, config } = details;
 
+const localeMessage = new Set();
+const localeMessageMiss = new Set();
+
 function copyFileSync(source, target) {
   var targetFile = target;
 
@@ -87,14 +90,33 @@ function dateFormat(fmt, date) {
 function addAddonRefToFlt(fltContent) {
   const lines = fltContent.split("\n");
   const prefixedLines = lines.map((line) => {
-    if (line.match(/^(?<message>[a-zA-Z]\S*)([ ]*=[ ]*)(?<pattern>.*)$/gm)) {
-      // https://regex101.com/r/lQ9x5p/1
+    // https://regex101.com/r/lQ9x5p/1
+    const match = line.match(
+      /^(?<message>[a-zA-Z]\S*)([ ]*=[ ]*)(?<pattern>.*)$/m
+    );
+    if (match) {
+      localeMessage.add(match.groups.message);
       return `${config.addonRef}-${line}`;
     } else {
       return line;
     }
   });
   return prefixedLines.join("\n");
+}
+
+function replaceLocaleIdInXHtml(input) {
+  const matchs = [...input.matchAll(/(data-l10n-id)="(\S*)"/g)];
+  matchs.map((match) => {
+    if (localeMessage.has(match[2])) {
+      input = input.replace(
+        match[0],
+        `${match[1]}="${config.addonRef}-${match[2]}"`
+      );
+    } else {
+      localeMessageMiss.add(match[1]);
+    }
+  });
+  return input;
 }
 
 async function main() {
@@ -142,9 +164,6 @@ async function main() {
   );
   replaceTo.push(...Object.values(config));
 
-  replaceFrom.push(/(data-l10n-id=")(\S*")/gm);
-  replaceTo.push(`$1${config.addonRef}-$2`);
-
   const optionsAddon = {
     files: [
       join(buildDir, "**/*.xhtml"),
@@ -166,13 +185,27 @@ async function main() {
     processor: [addAddonRefToFlt],
   });
 
+  const replaceResultXhtml = sync({
+    files: [join(buildDir, "addon/**/*.xhtml")],
+    processor: [replaceLocaleIdInXHtml],
+  });
+
   console.log(
     "[Build] Run replace in ",
     replaceResult
       .filter((f) => f.hasChanged)
       .map((f) => `${f.file} : ${f.numReplacements} / ${f.numMatches}`),
-    replaceResultFlt.filter((f) => f.hasChanged).map((f) => `${f.file} : OK`)
+    replaceResultFlt.filter((f) => f.hasChanged).map((f) => `${f.file} : OK`),
+    replaceResultXhtml.filter((f) => f.hasChanged).map((f) => `${f.file} : OK`)
   );
+
+  if (localeMessageMiss.size !== 0) {
+    console.warn(
+      `[Build] [Warn] Fluent message [${new Array(
+        ...localeMessageMiss
+      )}] do not exsit in addon's locale files.`
+    );
+  }
 
   console.log("[Build] Replace OK");
 
