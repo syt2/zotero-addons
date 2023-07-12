@@ -14,9 +14,23 @@ if (!existsSync(zoteroBinPath)) {
 
 if (existsSync(profilePath)) {
   const addonProxyFilePath = join(profilePath, `extensions/${addonID}`);
-  if (!existsSync(addonProxyFilePath)) {
-    console.log("Addon proxy file do not exist, creating it.");
-    writeFileSync(addonProxyFilePath, resolve("build/addon"));
+  const buildPath = resolve("build/addon");
+
+  function writeAddonProxyFile() {
+    writeFileSync(addonProxyFilePath, buildPath);
+    console.log(
+      `[info] Addon proxy file has been updated. \n
+      File path: ${addonProxyFilePath} \n
+      Addon path: ${buildPath} \n`
+    );
+  }
+
+  if (existsSync(addonProxyFilePath)) {
+    if (readFileSync(addonProxyFilePath, "utf-8") !== buildPath) {
+      writeAddonProxyFile();
+    }
+  } else {
+    writeAddonProxyFile();
   }
 
   const prefsPath = join(profilePath, "prefs.js");
@@ -36,7 +50,7 @@ if (existsSync(profilePath)) {
     });
     const updatedPrefs = filteredLines.join("\n");
     writeFileSync(prefsPath, updatedPrefs, "utf-8");
-    console.log("The <profile>/prefs.js modified.");
+    console.log("[info] The <profile>/prefs.js has been modified.");
   }
 }
 
