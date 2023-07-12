@@ -178,7 +178,7 @@ function replaceString() {
             `${match[1]}="${config.addonRef}-${match[2]}"`
           );
         } else {
-          localeMessageMiss.add(match[1]);
+          localeMessageMiss.add(match[2]);
         }
       });
       return input;
