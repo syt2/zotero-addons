@@ -1,6 +1,6 @@
 import { build } from "esbuild";
 import { zip } from "compressing";
-import { join, basename } from "path";
+import path from "path";
 import {
   existsSync,
   lstatSync,
@@ -13,7 +13,7 @@ import {
 } from "fs";
 import { env, exit } from "process";
 import replaceInFile from "replace-in-file";
-const { sync } = replaceInFile;
+const { replaceInFileSync } = replaceInFile;
 import details from "../package.json" assert { type: "json" };
 
 const { name, author, description, homepage, version, config } = details;
@@ -28,7 +28,7 @@ function copyFileSync(source, target) {
   // If target is a directory, a new file with the same name will be created
   if (existsSync(target)) {
     if (lstatSync(target).isDirectory()) {
-      targetFile = join(target, basename(source));
+      targetFile = path.join(target, path.basename(source));
     }
   }
 
@@ -39,7 +39,7 @@ function copyFolderRecursiveSync(source, target) {
   var files = [];
 
   // Check if folder needs to be created or integrated
-  var targetFolder = join(target, basename(source));
+  var targetFolder = path.join(target, path.basename(source));
   if (!existsSync(targetFolder)) {
     mkdirSync(targetFolder);
   }
@@ -48,7 +48,7 @@ function copyFolderRecursiveSync(source, target) {
   if (lstatSync(source).isDirectory()) {
     files = readdirSync(source);
     files.forEach(function (file) {
-      var curSource = join(source, file);
+      var curSource = path.join(source, file);
       if (lstatSync(curSource).isDirectory()) {
         copyFolderRecursiveSync(curSource, targetFolder);
       } else {
@@ -89,13 +89,13 @@ function dateFormat(fmt, date) {
 }
 
 function renameLocaleFiles() {
-  const localeDir = join(buildDir, "addon/locale");
+  const localeDir = path.join(buildDir, "addon/locale");
   const localeFolders = readdirSync(localeDir, { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name);
 
   for (const localeSubFolder of localeFolders) {
-    const localeSubDir = join(localeDir, localeSubFolder);
+    const localeSubDir = path.join(localeDir, localeSubFolder);
     const localeSubFiles = readdirSync(localeSubDir, {
       withFileTypes: true,
     })
@@ -105,8 +105,8 @@ function renameLocaleFiles() {
     for (const localeSubFile of localeSubFiles) {
       if (localeSubFile.endsWith(".ftl")) {
         renameSync(
-          join(localeSubDir, localeSubFile),
-          join(localeSubDir, `${config.addonRef}-${localeSubFile}`)
+          path.join(localeSubDir, localeSubFile),
+          path.join(localeSubDir, `${config.addonRef}-${localeSubFile}`)
         );
       }
     }
@@ -130,11 +130,11 @@ function replaceString() {
 
   const optionsAddon = {
     files: [
-      join(buildDir, "**/*.xhtml"),
-      join(buildDir, "**/*.json"),
-      join(buildDir, "addon/prefs.js"),
-      join(buildDir, "addon/manifest.json"),
-      join(buildDir, "addon/bootstrap.js"),
+      path.join(buildDir, "**/*.xhtml"),
+      path.join(buildDir, "**/*.json"),
+      path.join(buildDir, "addon/prefs.js"),
+      path.join(buildDir, "addon/manifest.json"),
+      path.join(buildDir, "addon/bootstrap.js"),
       "update.json",
     ],
     from: replaceFrom,
@@ -142,13 +142,13 @@ function replaceString() {
     countMatches: true,
   };
 
-  const replaceResult = sync(optionsAddon);
+  const replaceResult = replaceInFileSync(optionsAddon);
 
   const localeMessage = new Set();
   const localeMessageMiss = new Set();
 
-  const replaceResultFlt = sync({
-    files: [join(buildDir, "addon/**/*.ftl")],
+  const replaceResultFlt = replaceInFileSync({
+    files: [path.join(buildDir, "addon/**/*.ftl")],
     processor: (fltContent) => {
       const lines = fltContent.split("\n");
       const prefixedLines = lines.map((line) => {
@@ -167,8 +167,8 @@ function replaceString() {
     },
   });
 
-  const replaceResultXhtml = sync({
-    files: [join(buildDir, "addon/**/*.xhtml")],
+  const replaceResultXhtml = replaceInFileSync({
+    files: [path.join(buildDir, "addon/**/*.xhtml")],
     processor: (input) => {
       const matchs = [...input.matchAll(/(data-l10n-id)="(\S*)"/g)];
       matchs.map((match) => {
@@ -211,7 +211,7 @@ async function esbuild() {
     },
     bundle: true,
     target: "firefox102",
-    outfile: join(buildDir, "addon/chrome/content/scripts/index.js"),
+    outfile: path.join(buildDir, "addon/chrome/content/scripts/index.js"),
     // Don't turn minify on
     // minify: true,
   }).catch(() => exit(1));
@@ -244,8 +244,8 @@ async function main() {
   console.log("[Build] Addon prepare OK");
 
   await zip.compressDir(
-    join(buildDir, "addon"),
-    join(buildDir, `${name}.xpi`),
+    path.join(buildDir, "addon"),
+    path.join(buildDir, `${name}.xpi`),
     {
       ignoreBase: true,
     }
