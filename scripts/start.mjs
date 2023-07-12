@@ -52,6 +52,8 @@ if (existsSync(profilePath)) {
     writeFileSync(prefsPath, updatedPrefs, "utf-8");
     console.log("[info] The <profile>/prefs.js has been modified.");
   }
+} else {
+  throw new Error("The given Zotero profile does not exist.");
 }
 
 const startZotero = `"${zoteroBinPath}" --debugger --purgecaches -profile ${profilePath}`;
