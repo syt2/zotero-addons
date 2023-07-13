@@ -7,7 +7,7 @@ const { addonID, addonName } = details.config;
 const { version } = details;
 const { zoteroBinPath, profilePath } = cmd.exec;
 
-const startZotero = `${zoteroBinPath} --debugger --purgecaches -profile ${profilePath}`;
+const startZotero = `"${zoteroBinPath}" --debugger --purgecaches -profile "${profilePath}"`;
 
 const script = `
 (async () => {
