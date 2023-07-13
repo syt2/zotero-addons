@@ -66,7 +66,7 @@ async function updatePrefsUI() {
         addon.data.prefs?.rows[index] || {
           title: "no data",
           detail: "no data",
-        }
+        },
     )
     // Show a progress window when selection changes
     .setProp("onSelectionChange", (selection) => {
@@ -86,7 +86,7 @@ async function updatePrefsUI() {
       if (event.key == "Delete" || (Zotero.isMac && event.key == "Backspace")) {
         addon.data.prefs!.rows =
           addon.data.prefs?.rows.filter(
-            (v, i) => !tableHelper.treeInstance.selection.isSelected(i)
+            (v, i) => !tableHelper.treeInstance.selection.isSelected(i),
           ) || [];
         tableHelper.render();
         return false;
@@ -96,7 +96,7 @@ async function updatePrefsUI() {
     // For find-as-you-type
     .setProp(
       "getRowString",
-      (index) => addon.data.prefs?.rows[index].title || ""
+      (index) => addon.data.prefs?.rows[index].title || "",
     )
     // Render the table.
     .render(-1, () => {
@@ -109,23 +109,23 @@ async function updatePrefsUI() {
 function bindPrefEvents() {
   addon.data
     .prefs!.window.document.querySelector(
-      `#zotero-prefpane-${config.addonRef}-enable`
+      `#zotero-prefpane-${config.addonRef}-enable`,
     )
     ?.addEventListener("command", (e) => {
       ztoolkit.log(e);
       addon.data.prefs!.window.alert(
-        `Successfully changed to ${(e.target as XUL.Checkbox).checked}!`
+        `Successfully changed to ${(e.target as XUL.Checkbox).checked}!`,
       );
     });
 
   addon.data
     .prefs!.window.document.querySelector(
-      `#zotero-prefpane-${config.addonRef}-input`
+      `#zotero-prefpane-${config.addonRef}-input`,
     )
     ?.addEventListener("change", (e) => {
       ztoolkit.log(e);
       addon.data.prefs!.window.alert(
-        `Successfully changed to ${(e.target as HTMLInputElement).value}!`
+        `Successfully changed to ${(e.target as HTMLInputElement).value}!`,
       );
     });
 }

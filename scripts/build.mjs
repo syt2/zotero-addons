@@ -81,7 +81,7 @@ function dateFormat(fmt, date) {
     if (ret) {
       fmt = fmt.replace(
         ret[1],
-        ret[1].length == 1 ? opt[k] : opt[k].padStart(ret[1].length, "0")
+        ret[1].length == 1 ? opt[k] : opt[k].padStart(ret[1].length, "0"),
       );
     }
   }
@@ -106,7 +106,7 @@ function renameLocaleFiles() {
       if (localeSubFile.endsWith(".ftl")) {
         renameSync(
           path.join(localeSubDir, localeSubFile),
-          path.join(localeSubDir, `${config.addonRef}-${localeSubFile}`)
+          path.join(localeSubDir, `${config.addonRef}-${localeSubFile}`),
         );
       }
     }
@@ -124,7 +124,7 @@ function replaceString() {
   const replaceTo = [author, description, homepage, version, buildTime];
 
   replaceFrom.push(
-    ...Object.keys(config).map((k) => new RegExp(`__${k}__`, "g"))
+    ...Object.keys(config).map((k) => new RegExp(`__${k}__`, "g")),
   );
   replaceTo.push(...Object.values(config));
 
@@ -154,7 +154,7 @@ function replaceString() {
       const prefixedLines = lines.map((line) => {
         // https://regex101.com/r/lQ9x5p/1
         const match = line.match(
-          /^(?<message>[a-zA-Z]\S*)([ ]*=[ ]*)(?<pattern>.*)$/m
+          /^(?<message>[a-zA-Z]\S*)([ ]*=[ ]*)(?<pattern>.*)$/m,
         );
         if (match) {
           localeMessage.add(match.groups.message);
@@ -175,7 +175,7 @@ function replaceString() {
         if (localeMessage.has(match[2])) {
           input = input.replace(
             match[0],
-            `${match[1]}="${config.addonRef}-${match[2]}"`
+            `${match[1]}="${config.addonRef}-${match[2]}"`,
           );
         } else {
           localeMessageMiss.add(match[2]);
@@ -191,14 +191,14 @@ function replaceString() {
       .filter((f) => f.hasChanged)
       .map((f) => `${f.file} : ${f.numReplacements} / ${f.numMatches}`),
     replaceResultFlt.filter((f) => f.hasChanged).map((f) => `${f.file} : OK`),
-    replaceResultXhtml.filter((f) => f.hasChanged).map((f) => `${f.file} : OK`)
+    replaceResultXhtml.filter((f) => f.hasChanged).map((f) => `${f.file} : OK`),
   );
 
   if (localeMessageMiss.size !== 0) {
     console.warn(
       `[Build] [Warn] Fluent message [${new Array(
-        ...localeMessageMiss
-      )}] do not exsit in addon's locale files.`
+        ...localeMessageMiss,
+      )}] do not exsit in addon's locale files.`,
     );
   }
 }
@@ -221,7 +221,7 @@ async function main() {
   console.log(
     `[Build] BUILD_DIR=${buildDir}, VERSION=${version}, BUILD_TIME=${buildTime}, ENV=${[
       env.NODE_ENV,
-    ]}`
+    ]}`,
   );
 
   clearFolder(buildDir);
@@ -248,12 +248,12 @@ async function main() {
     path.join(buildDir, `${name}.xpi`),
     {
       ignoreBase: true,
-    }
+    },
   );
 
   console.log("[Build] Addon pack OK");
   console.log(
-    `[Build] Finished in ${(new Date().getTime() - t.getTime()) / 1000} s.`
+    `[Build] Finished in ${(new Date().getTime() - t.getTime()) / 1000} s.`,
   );
 }
 

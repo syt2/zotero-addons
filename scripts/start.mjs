@@ -1,7 +1,7 @@
 import { execSync } from "child_process";
 import { exit } from "process";
 import { existsSync, writeFileSync, readFileSync } from "fs";
-import path from "path"
+import path from "path";
 import details from "../package.json" assert { type: "json" };
 import cmd from "./zotero-cmd.json" assert { type: "json" };
 
@@ -21,7 +21,7 @@ if (existsSync(profilePath)) {
     console.log(
       `[info] Addon proxy file has been updated. \n
       File path: ${addonProxyFilePath} \n
-      Addon path: ${buildPath} \n`
+      Addon path: ${buildPath} \n`,
     );
   }
 
