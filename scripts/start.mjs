@@ -56,7 +56,7 @@ if (existsSync(profilePath)) {
   throw new Error("The given Zotero profile does not exist.");
 }
 
-const startZotero = `"${zoteroBinPath}" --debugger --purgecaches -profile ${profilePath}`;
+const startZotero = `"${zoteroBinPath}" --debugger --purgecaches -profile "${profilePath}"`;
 
 execSync(startZotero);
 exit(0);

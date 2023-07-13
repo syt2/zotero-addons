@@ -130,11 +130,11 @@ function replaceString() {
 
   const optionsAddon = {
     files: [
-      path.join(buildDir, "**/*.xhtml"),
-      path.join(buildDir, "**/*.json"),
-      path.join(buildDir, "addon/prefs.js"),
-      path.join(buildDir, "addon/manifest.json"),
-      path.join(buildDir, "addon/bootstrap.js"),
+      `${buildDir}/addon/**/*.xhtml`,
+      `${buildDir}/addon/**/*.json`,
+      `${buildDir}/addon/prefs.js`,
+      `${buildDir}/addon/manifest.json`,
+      `${buildDir}/addon/bootstrap.js`,
       "update.json",
     ],
     from: replaceFrom,
@@ -148,7 +148,7 @@ function replaceString() {
   const localeMessageMiss = new Set();
 
   const replaceResultFlt = replaceInFileSync({
-    files: [path.join(buildDir, "addon/**/*.ftl")],
+    files: [`${buildDir}/addon/locale/**/*.ftl`],
     processor: (fltContent) => {
       const lines = fltContent.split("\n");
       const prefixedLines = lines.map((line) => {
@@ -168,7 +168,7 @@ function replaceString() {
   });
 
   const replaceResultXhtml = replaceInFileSync({
-    files: [path.join(buildDir, "addon/**/*.xhtml")],
+    files: [`${buildDir}/addon/**/*.xhtml`],
     processor: (input) => {
       const matchs = [...input.matchAll(/(data-l10n-id)="(\S*)"/g)];
       matchs.map((match) => {
