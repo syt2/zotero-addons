@@ -4,7 +4,7 @@ import { getString } from "../utils/locale";
 function example(
   target: any,
   propertyKey: string | symbol,
-  descriptor: PropertyDescriptor
+  descriptor: PropertyDescriptor,
 ) {
   const original = descriptor.value;
   descriptor.value = function (...args: any) {
@@ -27,7 +27,7 @@ export class BasicExampleFactory {
         event: string,
         type: string,
         ids: number[] | string[],
-        extraData: { [key: string]: any }
+        extraData: { [key: string]: any },
       ) => {
         if (!addon?.data.alive) {
           this.unregisterNotifier(notifierID);
@@ -50,7 +50,7 @@ export class BasicExampleFactory {
       (e: Event) => {
         this.unregisterNotifier(notifierID);
       },
-      false
+      false,
     );
   }
 
@@ -175,7 +175,7 @@ export class KeyExampleFactory {
       "Conflicting:",
       conflictingGroups,
       "All keys:",
-      ztoolkit.Shortcut.getAll()
+      ztoolkit.Shortcut.getAll(),
     );
   }
 }
@@ -226,8 +226,8 @@ export class UIExampleFactory {
       },
       "before",
       document.querySelector(
-        "#zotero-itemmenu-addontemplate-test"
-      ) as XUL.MenuItem
+        "#zotero-itemmenu-addontemplate-test",
+      ) as XUL.MenuItem,
     );
   }
 
@@ -253,13 +253,13 @@ export class UIExampleFactory {
         field: string,
         unformatted: boolean,
         includeBaseMapped: boolean,
-        item: Zotero.Item
+        item: Zotero.Item,
       ) => {
         return field + String(item.id);
       },
       {
         iconPath: "chrome://zotero/skin/cross.png",
-      }
+      },
     );
   }
 
@@ -272,7 +272,7 @@ export class UIExampleFactory {
         field: string,
         unformatted: boolean,
         includeBaseMapped: boolean,
-        item: Zotero.Item
+        item: Zotero.Item,
       ) => {
         return String(item.id);
       },
@@ -280,13 +280,13 @@ export class UIExampleFactory {
         renderCellHook(index, data, column) {
           const span = document.createElementNS(
             "http://www.w3.org/1999/xhtml",
-            "span"
+            "span",
           );
           span.style.background = "#0dd068";
           span.innerText = "⭐" + data;
           return span;
         },
-      }
+      },
     );
   }
 
@@ -300,7 +300,7 @@ export class UIExampleFactory {
         span.style.background = "rgb(30, 30, 30)";
         span.style.color = "rgb(156, 220, 240)";
         return span;
-      }
+      },
     );
     await ztoolkit.ItemTree.refresh();
   }
@@ -322,12 +322,12 @@ export class UIExampleFactory {
           ztoolkit.ExtraField.setExtraField(
             item,
             "itemBoxFieldEditable",
-            value
+            value,
           );
           return true;
         },
         index: 1,
-      }
+      },
     );
 
     await ztoolkit.ItemBox.register(
@@ -341,7 +341,7 @@ export class UIExampleFactory {
       {
         editable: false,
         index: 2,
-      }
+      },
     );
   }
 
@@ -385,7 +385,7 @@ export class UIExampleFactory {
       },
       {
         targetIndex: 1,
-      }
+      },
     );
   }
 
@@ -397,11 +397,11 @@ export class UIExampleFactory {
         panel: XUL.TabPanel | undefined,
         deck: XUL.Deck,
         win: Window,
-        reader: _ZoteroTypes.ReaderInstance
+        reader: _ZoteroTypes.ReaderInstance,
       ) => {
         if (!panel) {
           ztoolkit.log(
-            "This reader do not have right-side bar. Adding reader tab skipped."
+            "This reader do not have right-side bar. Adding reader tab skipped.",
           );
           return;
         }
@@ -457,7 +457,7 @@ export class UIExampleFactory {
       },
       {
         targetIndex: 1,
-      }
+      },
     );
   }
 }
@@ -501,7 +501,7 @@ export class PromptExampleFactory {
             const publicationTitle = item.getField(
               "publicationTitle",
               false,
-              true
+              true,
             );
             if (publicationTitle) {
               nodes.push(`<i>${publicationTitle}</i>`);
@@ -558,7 +558,7 @@ export class PromptExampleFactory {
           s.addCondition("itemType", "isNot", "attachment");
           let ids = await s.search();
           // prompt.exit will remove current container element.
-          // @ts-ignore
+          // @ts-ignore ignore
           prompt.exit();
           const container = prompt.createCommandsContainer();
           container.classList.add("suggestions");
@@ -593,12 +593,12 @@ export class PromptExampleFactory {
                 s.addCondition(
                   "joinMode",
                   joinMode as Zotero.Search.Operator,
-                  ""
+                  "",
                 );
                 s.addCondition(
                   conditions[0] as string,
                   conditions[1] as Zotero.Search.Operator,
-                  conditions[2] as string
+                  conditions[2] as string,
                 );
               }
             });
@@ -619,7 +619,7 @@ export class PromptExampleFactory {
                   {
                     type: "mousemove",
                     listener: function () {
-                      // @ts-ignore
+                      // @ts-ignore ignore
                       prompt.selectItem(this);
                     },
                   },
@@ -666,7 +666,7 @@ export class PromptExampleFactory {
               container.appendChild(ele);
             });
           } else {
-            // @ts-ignore
+            // @ts-ignore ignore
             prompt.exit();
             prompt.showTip("Not Found.");
           }
@@ -693,9 +693,9 @@ export class PromptExampleFactory {
             `You select ${items.length} items!\n\n${items
               .map(
                 (item, index) =>
-                  String(index + 1) + ". " + item.getDisplayTitle()
+                  String(index + 1) + ". " + item.getDisplayTitle(),
               )
-              .join("\n")}`
+              .join("\n")}`,
           );
         },
       },
@@ -757,7 +757,7 @@ export class HelperExampleFactory {
           },
           properties: { label: "Cell 1,0" },
         },
-        false
+        false,
       )
       .addCell(4, 0, {
         tag: "label",
@@ -780,7 +780,7 @@ export class HelperExampleFactory {
             type: "text",
           },
         },
-        false
+        false,
       )
       .addCell(5, 0, {
         tag: "h2",
@@ -815,7 +815,7 @@ export class HelperExampleFactory {
             },
           ],
         },
-        false
+        false,
       )
       .addCell(
         7,
@@ -846,7 +846,7 @@ export class HelperExampleFactory {
             },
           ],
         },
-        false
+        false,
       )
       .addCell(
         8,
@@ -877,7 +877,7 @@ export class HelperExampleFactory {
             },
           ],
         },
-        false
+        false,
       )
       .addCell(
         9,
@@ -908,7 +908,7 @@ export class HelperExampleFactory {
             },
           ],
         },
-        false
+        false,
       )
       .addButton("Confirm", "confirm")
       .addButton("Cancel", "cancel")
@@ -916,7 +916,7 @@ export class HelperExampleFactory {
         noClose: true,
         callback: (e) => {
           dialogHelper.window?.alert(
-            "Help Clicked! Dialog will not be closed."
+            "Help Clicked! Dialog will not be closed.",
           );
         },
       })
@@ -927,7 +927,7 @@ export class HelperExampleFactory {
     addon.data.dialog = undefined;
     addon.data.alive &&
       ztoolkit.getGlobal("alert")(
-        `Close dialog with ${dialogData._lastButtonId}.\nCheckbox: ${dialogData.checkboxValue}\nInput: ${dialogData.inputValue}.`
+        `Close dialog with ${dialogData._lastButtonId}.\nCheckbox: ${dialogData.checkboxValue}\nInput: ${dialogData.inputValue}.`,
       );
     ztoolkit.log(dialogData);
   }
@@ -937,11 +937,11 @@ export class HelperExampleFactory {
     new ztoolkit.Clipboard()
       .addText(
         "![Plugin Template](https://github.com/windingwind/zotero-plugin-template)",
-        "text/unicode"
+        "text/unicode",
       )
       .addText(
         '<a href="https://github.com/windingwind/zotero-plugin-template">Plugin Template</a>',
-        "text/html"
+        "text/html",
       )
       .copy();
     ztoolkit.getGlobal("alert")("Copied!");
@@ -956,7 +956,7 @@ export class HelperExampleFactory {
         ["PNG File(*.png)", "*.png"],
         ["Any", "*.*"],
       ],
-      "image.png"
+      "image.png",
     ).open();
     ztoolkit.getGlobal("alert")(`Selected ${path}`);
   }

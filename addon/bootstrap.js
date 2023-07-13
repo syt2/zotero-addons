@@ -51,7 +51,7 @@ async function waitForZotero() {
                 resolve();
               }
             },
-            false
+            false,
           );
         },
       };
@@ -92,7 +92,7 @@ async function startup({ id, version, resourceURI, rootURI }, reason) {
 
   Services.scriptloader.loadSubScript(
     `${rootURI}/chrome/content/scripts/index.js`,
-    ctx
+    ctx,
   );
 }
 
@@ -102,7 +102,7 @@ function shutdown({ id, version, resourceURI, rootURI }, reason) {
   }
   if (typeof Zotero === "undefined") {
     Zotero = Components.classes["@zotero.org/Zotero;1"].getService(
-      Components.interfaces.nsISupports
+      Components.interfaces.nsISupports,
     ).wrappedJSObject;
   }
   Zotero.__addonInstance__.hooks.onShutdown();

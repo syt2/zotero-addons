@@ -43,7 +43,7 @@ function getString(localString: string): string;
 function getString(localString: string, branch: string): string;
 function getString(
   localString: string,
-  options: { branch?: string | undefined; args?: Record<string, unknown> }
+  options: { branch?: string | undefined; args?: Record<string, unknown> },
 ): string;
 function getString(...inputs: any[]) {
   if (inputs.length === 1) {
@@ -61,7 +61,7 @@ function getString(...inputs: any[]) {
 
 function _getString(
   localString: string,
-  options: { branch?: string | undefined; args?: Record<string, unknown> } = {}
+  options: { branch?: string | undefined; args?: Record<string, unknown> } = {},
 ): string {
   const localStringWithPrefix = `${config.addonRef}-${localString}`;
   const { branch, args } = options;

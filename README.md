@@ -143,7 +143,7 @@ This is also how your plugin will be released and used by others.
 <details >
 <summary>💡 Start with GitHub Codespace</summary>
 
-*GitHub CodeSpace* enables you getting started without the need to download code/IDE/dependencies locally.
+_GitHub CodeSpace_ enables you getting started without the need to download code/IDE/dependencies locally.
 
 Replace the steps above and build you first plugin in 30 seconds!
 
