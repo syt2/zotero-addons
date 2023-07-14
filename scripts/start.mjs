@@ -9,12 +9,18 @@ const { addonID } = details.config;
 const { zoteroBinPath, profilePath, dataDir } = cmd.exec;
 
 if (!existsSync(zoteroBinPath)) {
-  throw new Error("Zotero bin do no exist.");
+  throw new Error("Zotero binary does not exist.");
 }
 
 if (existsSync(profilePath)) {
   const addonProxyFilePath = path.join(profilePath, `extensions/${addonID}`);
   const buildPath = path.resolve("build/addon");
+
+  if (!existsSync(path.join(buildPath, "./manifest.json"))) {
+    throw new Error(
+      `The built file does not exist, maybe you need to build the addon first.`,
+    );
+  }
 
   function writeAddonProxyFile() {
     writeFileSync(addonProxyFilePath, buildPath);
