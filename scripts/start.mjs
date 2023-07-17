@@ -25,9 +25,9 @@ if (existsSync(profilePath)) {
   function writeAddonProxyFile() {
     writeFileSync(addonProxyFilePath, buildPath);
     console.log(
-      `[info] Addon proxy file has been updated. \n
-      File path: ${addonProxyFilePath} \n
-      Addon path: ${buildPath} \n`,
+      `[info] Addon proxy file has been updated. 
+      File path: ${addonProxyFilePath} 
+      Addon path: ${buildPath} `,
     );
   }
 
