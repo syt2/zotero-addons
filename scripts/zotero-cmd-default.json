@@ -13,7 +13,7 @@
     "profilePath": "/path/to/profile",
 
     "@comment-dataDir": "Please input the directory where the database is located in dataDir",
-    "@comment-dataDir-tip": "If this field is kept empty, Zotero will start with the default date.",
+    "@comment-dataDir-tip": "If this field is kept empty, Zotero will start with the default data.",
     "@comment-dataDir-see": "https://www.zotero.org/support/zotero_data",
     "dataDir": ""
   }
