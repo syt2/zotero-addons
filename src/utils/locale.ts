@@ -42,7 +42,7 @@ function initLocale() {
 function getString(localString: string): string;
 function getString(localString: string, branch: string): string;
 function getString(
-  localString: string,
+  localeString: string,
   options: { branch?: string | undefined; args?: Record<string, unknown> },
 ): string;
 function getString(...inputs: any[]) {
@@ -60,10 +60,10 @@ function getString(...inputs: any[]) {
 }
 
 function _getString(
-  localString: string,
+  localeString: string,
   options: { branch?: string | undefined; args?: Record<string, unknown> } = {},
 ): string {
-  const localStringWithPrefix = `${config.addonRef}-${localString}`;
+  const localStringWithPrefix = `${config.addonRef}-${localeString}`;
   const { branch, args } = options;
   const pattern = addon.data.locale?.current.formatMessagesSync([
     { id: localStringWithPrefix, args },
