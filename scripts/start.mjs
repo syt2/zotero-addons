@@ -36,6 +36,12 @@ if (existsSync(profilePath)) {
       writeAddonProxyFile();
     }
   } else {
+    if (
+      existsSync(profilePath) &&
+      !existsSync(path.join(profilePath, "extensions"))
+    ) {
+      mkdirSync(path.join(profilePath, "extensions"));
+    }
     writeAddonProxyFile();
   }
 
