@@ -211,7 +211,10 @@ async function esbuild() {
     },
     bundle: true,
     target: "firefox102",
-    outfile: path.join(buildDir, "addon/chrome/content/scripts/index.js"),
+    outfile: path.join(
+      buildDir,
+      `addon/chrome/content/scripts/${config.addonRef}.js`,
+    ),
     // Don't turn minify on
     // minify: true,
   }).catch(() => exit(1));
