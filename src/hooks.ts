@@ -8,6 +8,7 @@ import {
 import { config } from "../package.json";
 import { getString, initLocale } from "./utils/locale";
 import { registerPrefsScripts } from "./modules/preferenceScript";
+import { createZToolkit } from "./utils/ztoolkit";
 
 async function onStartup() {
   await Promise.all([
@@ -16,10 +17,19 @@ async function onStartup() {
     Zotero.uiReadyPromise,
   ]);
   initLocale();
-  ztoolkit.ProgressWindow.setIconURI(
-    "default",
-    `chrome://${config.addonRef}/content/icons/favicon.png`,
-  );
+
+  BasicExampleFactory.registerPrefs();
+
+  BasicExampleFactory.registerNotifier();
+
+  await onMainWindowLoad(window);
+}
+
+async function onMainWindowLoad(win: Window): Promise<void> {
+  // Create ztoolkit for every window
+  const _ztoolkit = createZToolkit();
+  addon.data.ztoolkit = _ztoolkit;
+  _globalThis.ztoolkit = _ztoolkit;
 
   const popupWin = new ztoolkit.ProgressWindow(config.addonName, {
     closeOnClick: true,
@@ -31,10 +41,6 @@ async function onStartup() {
       progress: 0,
     })
     .show();
-
-  BasicExampleFactory.registerPrefs();
-
-  BasicExampleFactory.registerNotifier();
 
   KeyExampleFactory.registerShortcuts();
 
@@ -79,6 +85,11 @@ async function onStartup() {
   popupWin.startCloseTimer(5000);
 
   addon.hooks.onDialogEvents("dialogExample");
+}
+
+async function onMainWindowUnload(win: Window): Promise<void> {
+  ztoolkit.unregisterAll();
+  addon.data.dialog?.window?.close();
 }
 
 function onShutdown(): void {
@@ -173,6 +184,8 @@ function onDialogEvents(type: string) {
 export default {
   onStartup,
   onShutdown,
+  onMainWindowLoad,
+  onMainWindowUnload,
   onNotify,
   onPrefsEvent,
   onShortcuts,
