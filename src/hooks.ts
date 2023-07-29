@@ -29,7 +29,6 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   // Create ztoolkit for every window
   const _ztoolkit = createZToolkit();
   addon.data.ztoolkit = _ztoolkit;
-  _globalThis.ztoolkit = _ztoolkit;
 
   const popupWin = new ztoolkit.ProgressWindow(config.addonName, {
     closeOnClick: true,
