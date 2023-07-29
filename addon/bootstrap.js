@@ -42,11 +42,11 @@ async function startup({ id, version, resourceURI, rootURI }, reason) {
   );
 }
 
-async function onMainWindowLoad(window) {
+async function onMainWindowLoad({ window }, reason) {
   Zotero.__addonInstance__?.hooks.onMainWindowLoad(window);
 }
 
-async function onMainWindowUnload(window) {
+async function onMainWindowUnload({ window }, reason) {
   Zotero.__addonInstance__?.hooks.onMainWindowUnload(window);
 }
 
