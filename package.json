@@ -41,7 +41,7 @@
   },
   "homepage": "https://github.com/windingwind/zotero-addon-template#readme",
   "dependencies": {
-    "zotero-plugin-toolkit": "^2.2.2"
+    "zotero-plugin-toolkit": "^2.2.8"
   },
   "devDependencies": {
     "@types/node": "^20.4.2",
