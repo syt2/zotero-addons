@@ -277,32 +277,19 @@ export class UIExampleFactory {
         return String(item.id);
       },
       {
-        renderCellHook(index, data, column) {
+        renderCell(index, data, column) {
+          ztoolkit.log("Custom column cell is rendered!");
           const span = document.createElementNS(
             "http://www.w3.org/1999/xhtml",
             "span",
           );
+          span.className = `cell ${column.className}`;
           span.style.background = "#0dd068";
           span.innerText = "⭐" + data;
           return span;
         },
       },
     );
-  }
-
-  @example
-  static async registerCustomCellRenderer() {
-    await ztoolkit.ItemTree.addRenderCellHook(
-      "title",
-      // eslint-disable-next-line @typescript-eslint/ban-types
-      (index: number, data: string, column: any, original: Function) => {
-        const span = original(index, data, column) as HTMLSpanElement;
-        span.style.background = "rgb(30, 30, 30)";
-        span.style.color = "rgb(156, 220, 240)";
-        return span;
-      },
-    );
-    await ztoolkit.ItemTree.refresh();
   }
 
   @example

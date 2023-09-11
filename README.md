@@ -88,7 +88,6 @@ Search `@example` in `src/examples.ts`. The examples are called in `src/hooks.ts
 - registerExtraColumn
 - registerExtraColumnWithCustomCell
 - registerCustomItemBoxRow
-- registerCustomCellRenderer
 - registerLibraryTabPanel
 - registerReaderTabPanel
 

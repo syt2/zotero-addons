@@ -60,8 +60,6 @@ async function onMainWindowLoad(win: Window): Promise<void> {
 
   await UIExampleFactory.registerExtraColumnWithCustomCell();
 
-  await UIExampleFactory.registerCustomCellRenderer();
-
   await UIExampleFactory.registerCustomItemBoxRow();
 
   UIExampleFactory.registerLibraryTabPanel();
