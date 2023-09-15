@@ -1,10 +1,10 @@
 {
   "addons": {
-    "__addonID__": {
+    "addontemplate@euclpts.com": {
       "updates": [
         {
-          "version": "__buildVersion__",
-          "update_link": "__updateLink__",
+          "version": "1.0.0",
+          "update_link": "https://github.com/windingwind/zotero-addon-template/releases/latest/download/zotero-addon-template.xpi",
           "applications": {
             "zotero": {
               "strict_min_version": "6.999"

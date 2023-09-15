@@ -8,8 +8,9 @@
     "addonRef": "addontemplate",
     "addonInstance": "AddonTemplate",
     "prefsPrefix": "extensions.zotero.addontemplate",
-    "releasepage": "https://github.com/windingwind/zotero-addon-template/releases/latest/download/zotero-addon-template.xpi",
-    "updaterdf": "https://raw.githubusercontent.com/windingwind/zotero-addon-template/main/update.json"
+    "releasePage": "https://github.com/windingwind/zotero-addon-template/releases",
+    "updateJSON": "https://raw.githubusercontent.com/windingwind/zotero-addon-template/main/update.json",
+    "updateBetaJSON": "https://raw.githubusercontent.com/windingwind/zotero-addon-template/main/update-beta.json"
   },
   "main": "src/index.ts",
   "scripts": {
