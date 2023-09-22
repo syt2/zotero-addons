@@ -1,5 +1,7 @@
+import { VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
+import { registerPrefsScripts } from "./preferenceScript";
 
 function example(
   target: any,
@@ -241,6 +243,20 @@ export class UIExampleFactory {
       tag: "menuitem",
       label: getString("menuitem-filemenulabel"),
       oncommand: "alert('Hello World! File Menuitem.')",
+    });
+
+    ztoolkit.Menu.register("menuTools", {
+      tag: "menuseparator",
+    });
+    ztoolkit.Menu.register("menuTools", {
+      tag: "menuitem",
+      label: getString("menuitem-addons"),
+      commandListener: (event) => {
+        ztoolkit.log("xxxx");
+        (async () => {
+          await HelperExampleFactory.addonsListTable();
+        })();
+      },
     });
   }
 
@@ -959,8 +975,86 @@ export class HelperExampleFactory {
       .show();
   }
 
-  @example
-  static vtableExample() {
-    ztoolkit.getGlobal("alert")("See src/modules/preferenceScript.ts");
+  static async addonsListTable() {
+    const rows: { [key: string]: string }[] = [];
+    const appendsItems = () => {
+      rows.push({title:"chrome,centerscreen,resizable,status,width=800,height=400,dialog=nochrome,centerscreen,resizable,status,width=800,height=400,dialog=no",
+       state: "chrome,centerscreen,resizable,status,width=800,height=400,dialog=nochrome,centerscreen,resizable,status,width=800,height=400,dialog=nochrome,centerscreen,resizable,status,width=800,height=400,dialog=no"});
+    };
+    appendsItems();
+    appendsItems();
+
+    const windowArgs = {
+      _initPromise: Zotero.Promise.defer(),
+    };
+    const win = window.openDialog(
+      `chrome://${config.addonRef}/content/addons.xhtml`,
+      `${config.addonRef}-addons`,
+      `chrome,centerscreen,resizable,status,width=800,height=400,dialog=no`,
+      windowArgs
+    )!;
+    await windowArgs._initPromise.promise;
+    const columns = [
+      {
+        dataKey: "title",
+        label: getString("xx"),
+        fixedWidth: true,
+      },
+      {
+        dataKey: "state",
+        label: getString("xx"),
+      }
+    ];
+
+    const tableHelper = new ztoolkit.VirtualizedTable(win!)
+      .setContainerId(`table-container`)
+      .setProp({
+        id: `header`,
+        columns: columns,
+        showHeader: true,
+        multiSelect: true,
+        staticColumns: true,
+        disableFontSizeScaling: true,
+      })
+      .setProp("getRowCount", () => rows.length)
+      .setProp("getRowData", (index) => rows[index] || {
+        title: "?", 
+        state: "?"
+      })
+      .setProp("onSelectionChange", (selection) => {
+        // updateButtons();
+      })
+      // .setProp("onKeyDown", (event: KeyboardEvent) => {
+      //   if (event.key == "Delete" || (Zotero.isMac && event.key == "Backspace")) {
+      //     rows =
+      //       rows.filter(
+      //         (v, i) => !tableHelper.treeInstance.selection.isSelected(i),
+      //       ) || [];
+      //     tableHelper.render();
+      //     return false;
+      //   }
+      //   return true;
+      // })
+      .setProp(
+        "getRowString",
+        (index) => rows[index].title || ""
+      )
+      // .setProp("onActivate", (ev) => {
+        // const noteIds = getSelectedNoteIds();
+        // noteIds.forEach((noteId) =>
+        //   addon.hooks.onOpenNote(noteId, "standalone")
+        // );
+        // return true;
+      // })
+      .render();
+    const retryButton = win.document.querySelector("#retry") as HTMLButtonElement;
+    // if (failedItems.length == 0) {
+    //   retryButton.hidden = true;
+    // }
+    retryButton.addEventListener("click", (ev) => {
+      // addon.hooks.onSyncItems(failedItems);
+      // win.close();
+    });
+    win.open();
   }
 }
