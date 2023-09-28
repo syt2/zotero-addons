@@ -1,10 +1,10 @@
 {
   "addons": {
-    "addontemplate@euclpts.com": {
+    "zoteroAddons@ytshen.com": {
       "updates": [
         {
           "version": "1.0.0",
-          "update_link": "https://github.com/windingwind/zotero-addon-template/releases/latest/download/zotero-addon-template.xpi",
+          "update_link": "https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi",
           "applications": {
             "zotero": {
               "strict_min_version": "6.999"

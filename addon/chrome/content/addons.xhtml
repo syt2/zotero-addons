@@ -3,6 +3,7 @@
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://__addonRef__/content/virtualizedTable.css" type="text/css"?>
 <!DOCTYPE html>
 <html
   lang="en"
@@ -15,22 +16,22 @@
   persist="screenX screenY width height sizemode"
 >
   <head>
-    <!-- <title locale-target="innerHTML"></title> -->
+    <title data-l10n-id="title"></title>
     <meta charset="utf-8" />
     <script>
       document.addEventListener("DOMContentLoaded", (ev) => {
         const { Services } = ChromeUtils.import(
-          "resource://gre/modules/Services.jsm"
+          "resource://gre/modules/Services.jsm",
         );
 
         Services.scriptloader.loadSubScript(
           "chrome://zotero/content/include.js",
-          this
+          this,
         );
 
         Services.scriptloader.loadSubScript(
           "resource://zotero/require.js",
-          this
+          this,
         );
         window.arguments[0]._initPromise.resolve();
       });
@@ -61,15 +62,6 @@
         overflow: hidden;
         background-color: #f0f0f0;
       }
-      .footer-container {
-        padding: 5px;
-        margin: 0;
-        height: 30px;
-        display: flex;
-        flex-direction: row;
-        overflow: hidden;
-        background-color: #f0f0f0;
-      }
       .list-viewport {
         width: 100%;
         background-color: #ffffff;
@@ -80,15 +72,8 @@
         width: 100%;
         overflow: hidden;
       }
-      .tool-button {
-        width: 75px;
-        max-width: 75px;
-        min-width: 75px;
-        padding: 5px;
-        text-align: center;
-        margin: 0 10px 0 10px;
-      }
     </style>
+    <link rel="localization" href="__addonRef__-addonTable.ftl" />
   </head>
   <body>
     <div class="viewport-container">
@@ -96,14 +81,14 @@
         <div id="table-container"></div>
       </div>
     </div>
-
     <div
       class="footer-container"
       style="justify-content: flex-start; padding: 10px"
+      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     >
-      <button class="tool-button" id="retry" locale-target="innerHTML">
-        Retry For Failed
-      </button>
+      <button id="refresh" data-l10n-id="refresh"></button>
+      <button id="gotoPage" data-l10n-id="gotoPage"></button>
+      <button id="install" data-l10n-id="install"></button>
     </div>
   </body>
 </html>
