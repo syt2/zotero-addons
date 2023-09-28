@@ -2,6 +2,7 @@ import { VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtu
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoAPI, AddonInfoManager } from "./addonInfo";
+import { isWindowAlive } from "../utils/window";
 
 
 
@@ -27,9 +28,19 @@ export class AddonTable {
   }
 
   private static addonInfos: [AddonInfo[], { [key: string]: string; }[]] = [[], []]
+  private static window?: Window;
+  private static tableHelper?: VirtualizedTableHelper;
 
   // display addon table window
   static async showAddonsWindow() {
+    Zotero.log(isWindowAlive(this.window));
+    
+    if (isWindowAlive(this.window)) {
+      this.window?.focus();
+      this.refresh();
+      return;
+    }
+
     const windowArgs = { _initPromise: Zotero.Promise.defer(), };
     const win = (window as any).openDialog(
       `chrome://${config.addonRef}/content/addons.xhtml`,
@@ -38,6 +49,7 @@ export class AddonTable {
       windowArgs
     )!;
     await windowArgs._initPromise.promise;
+    this.window = win;
     const columns = [
       {
         dataKey: "name",
@@ -56,7 +68,7 @@ export class AddonTable {
       }
     ].map((column) => Object.assign(column, { label: getString(column.label), }));
 
-    const tableHelper = new ztoolkit.VirtualizedTable(win!)
+    this.tableHelper = new ztoolkit.VirtualizedTable(win!)
       .setContainerId(`table-container`)
       .setProp({
         id: `header`,
@@ -75,16 +87,16 @@ export class AddonTable {
           if (select < 0 || select >= this.addonInfos[1].length) { return; }
           selectAddons.push(this.addonInfos[0][select]);
         }
-        this.updateButtons(win, tableHelper, selectAddons);
+        this.updateButtons(selectAddons);
       })
       .render(undefined, _ => {
-        this.refresh(tableHelper);
+        this.refresh();
       });
     (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", event => {
-      this.refresh(tableHelper, true);
+      this.refresh(true);
     });
     (win.document.querySelector("#gotoPage") as HTMLButtonElement).addEventListener("click", event => {
-      tableHelper.treeInstance.selection.selected.forEach(select => {
+      this.tableHelper?.treeInstance.selection.selected.forEach(select => {
         if (select < 0 || select >= this.addonInfos[1].length) { return; }
         const pageURL = this.addonInfos[0][select].page;
         if (pageURL) {
@@ -94,7 +106,7 @@ export class AddonTable {
     });
     (win.document.querySelector("#install") as HTMLButtonElement).addEventListener("click", event => {
       const selectAddons: AddonInfo[] = []
-      for (const select of tableHelper.treeInstance.selection.selected) {
+      for (const select of this.tableHelper?.treeInstance.selection.selected ?? []) {
         if (select < 0 || select >= this.addonInfos[1].length) { return; }
         selectAddons.push(this.addonInfos[0][select]);
       }
@@ -122,9 +134,9 @@ export class AddonTable {
     });
   }
 
-  private static async updateButtons(win: Window, tableHelper: VirtualizedTableHelper, selectAddons: AddonInfo[]) {
-    const gotoPageButton = win.document.querySelector("#gotoPage") as HTMLButtonElement;
-    const installButton = win.document.querySelector("#install") as HTMLButtonElement;
+  private static async updateButtons(selectAddons: AddonInfo[]) {
+    const gotoPageButton = this.window?.document.querySelector("#gotoPage") as HTMLButtonElement;
+    const installButton = this.window?.document.querySelector("#install") as HTMLButtonElement;
     gotoPageButton.disabled = (selectAddons.length !== 1 || (selectAddons[0].page?.length ?? 0) === 0);
     const installDisabled = selectAddons.reduce((previous, current) => {
       return previous && (current.downloadLink?.length ?? 0) === 0;
@@ -132,9 +144,9 @@ export class AddonTable {
     installButton.disabled = installDisabled;
   }
 
-  private static async refresh(tableHelper: VirtualizedTableHelper, force = false) {
+  private static async refresh(force = false) {
     await this.updateAddonInfos(force);
-    this.updateTable(tableHelper);
+    this.updateTable();
   }
 
   private static async updateAddonInfos(force = false) {
@@ -153,9 +165,9 @@ export class AddonTable {
     ];
   }
 
-  private static async updateTable(tableHelper: VirtualizedTableHelper) {
+  private static async updateTable() {
     return new Promise<void>((resolve) => {
-      tableHelper.render(undefined, _ => { resolve(); });
+      this.tableHelper?.render(undefined, _ => { resolve(); });
     });
   }
 }

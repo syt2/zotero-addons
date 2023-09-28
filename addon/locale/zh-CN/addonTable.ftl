@@ -1,4 +1,4 @@
-title = 插件列表
+title = 插件集合
 refresh = 
     .label = 刷新
 gotoPage = 
