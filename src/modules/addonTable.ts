@@ -30,8 +30,6 @@ export class AddonTable {
 
   // display addon table window
   static async showAddonsWindow() {
-    await this.updateAddonInfos();
-    
     const windowArgs = { _initPromise: Zotero.Promise.defer(), };
     const win = (window as any).openDialog(
       `chrome://${config.addonRef}/content/addons.xhtml`,
@@ -71,12 +69,12 @@ export class AddonTable {
       .setProp("getRowCount", () => this.addonInfos[1].length)
       .setProp("getRowData", (index) => this.addonInfos[1][index])
       .setProp("getRowString", (index) => this.addonInfos[1][index].name || "")
-      .setProp("onSelectionChange", (selection) => {
+      // .setProp("onSelectionChange", (selection) => {
         // updateButtons();
-        ztoolkit.log("onSelectionChange");
-        ztoolkit.log(selection);
-      })
-      .render();
+      // })
+      .render(undefined, _ => {
+        this.refresh(tableHelper);
+      });
     (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", event => {
       this.refresh(tableHelper);
     });
@@ -100,6 +98,12 @@ export class AddonTable {
     win.open();
   }
 
+  private static async refresh(tableHelper: VirtualizedTableHelper) {
+    await this.updateAddonInfos();
+    ztoolkit.log(this.addonInfos[0])
+    this.updateTable(tableHelper);
+  }
+
   private static async updateAddonInfos() {
     const addonInfos = await AddonInfoManager.shared.fetchAddonInfos(false);
     this.addonInfos = [
@@ -114,11 +118,6 @@ export class AddonTable {
         return result;
       }),
     ];
-  }
-
-  private static async refresh(tableHelper: VirtualizedTableHelper) {
-    await this.updateAddonInfos();
-    this.updateTable(tableHelper);
   }
 
   private static async updateTable(tableHelper: VirtualizedTableHelper) {
