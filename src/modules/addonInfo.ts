@@ -15,6 +15,8 @@ export interface AddonObject {
   description?: string;
   // addon download link
   downloadLink?: string;
+  // addon guthub start count
+  startCount?: number;
 }
 
 
@@ -109,6 +111,7 @@ export class AddonInfoAPI {
         page: addonObject.page,
         description: addonObject.description,
         downloadLink: addonObject.downloadLink,
+        startCount: addonObject.startCount,
       }
       if (addonObject.githubRepos) {
         addonObject.page = `https://github.com/${addonObject.githubRepos}`;
