@@ -114,7 +114,7 @@ export class AddonInfoAPI {
         startCount: addonObject.startCount,
       }
       if (addonObject.githubRepos) {
-        addonObject.page = `https://github.com/${addonObject.githubRepos}`;
+        addonInfo.page = `https://github.com/${addonObject.githubRepos}`;
         try {
           const response = await Zotero.HTTP.request("GET", `https://api.github.com/repos/${addonObject.githubRepos}`);
           const githubInfo = JSON.parse(response.response);
