@@ -3,7 +3,7 @@ import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoAPI, AddonInfoManager } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
-
+const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 export class AddonTable {
   // register an item in menu tools
@@ -52,17 +52,24 @@ export class AddonTable {
       {
         dataKey: "name",
         label: "name",
-        fixedWidth: true,
+        fixedWidth: false,
       },
       {
         dataKey: "description",
         label: "description",
-        fixedWidth: true,
+        fixedWidth: false,
       },
       {
         dataKey: "start_count",
         label: "stars",
-        fixedWidth: false,
+        staticWidth: true,
+        width: 50,
+      },
+      {
+        dataKey: "isInstalled",
+        label: "state",
+        staticWidth: true,
+        width: 60,
       }
     ].map((column) => Object.assign(column, { label: getString(column.label), }));
 
@@ -113,8 +120,7 @@ export class AddonTable {
     win.open();
   }
 
-  private static installAddons(addons: AddonInfo[]) {
-    const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+  private static async installAddons(addons: AddonInfo[]) {
     addons.forEach(async addon => {
       if ((addon.download_link?.length ?? 0) == 0) { return; }
       try {
@@ -126,6 +132,15 @@ export class AddonTable {
         const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
         const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
         xpiInstaller.install();
+        const installsucceed = await AddonManager.getAddonByID(addon.id);
+        new ztoolkit.ProgressWindow(config.addonName, {
+          closeOnClick: true,
+          closeTime: 3000,
+        }).createLine({
+          text: `${addon.name} ${installsucceed ? getString("install-succeed") : getString("install-failed")}`,
+          type: installsucceed ? "success" : "fail",
+          progress: 0,
+        }).show();
       } catch (error) {
         ztoolkit.log(`download from ${addon.download_link} failed: ${error}`)
       }
@@ -151,15 +166,20 @@ export class AddonTable {
     const addonInfos = await AddonInfoManager.shared.fetchAddonInfos(force);
     this.addonInfos = [
       addonInfos,
-      addonInfos.map(addonInfo => {
+      await Promise.all(addonInfos.map(async addonInfo => {
         const result: { [key: string]: string } = {};
         for (const prop in addonInfo) {
           if (Object.prototype.hasOwnProperty.call(addonInfo, prop)) {
             result[prop] = String(addonInfo[prop]);
           }
         }
+        if (await AddonManager.getAddonByID(addonInfo.id)) {
+          result['isInstalled'] = "installed"
+        } else {
+          result['isInstalled'] = ""
+        }
         return result;
-      }),
+      })),
     ];
   }
 
