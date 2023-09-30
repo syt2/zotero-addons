@@ -60,7 +60,7 @@ export class AddonTable {
         fixedWidth: true,
       },
       {
-        dataKey: "startCount",
+        dataKey: "start_count",
         label: "stars",
         fixedWidth: false,
       }
