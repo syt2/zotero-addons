@@ -118,7 +118,7 @@ export class AddonTable {
     addons.forEach(async addon => {
       if ((addon.download_link?.length ?? 0) == 0) { return; }
       try {
-        const response = await Zotero.HTTP.request('get', addon.downloadLink, {
+        const response = await Zotero.HTTP.request('get', addon.download_link, {
           responseType: "arraybuffer",
         });
         const xpiDownloadPath = PathUtils.join(PathUtils.tempDir, `${addon.id}.xpi`);
@@ -127,7 +127,7 @@ export class AddonTable {
         const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
         xpiInstaller.install();
       } catch (error) {
-        ztoolkit.log(`download from ${addon.downloadLink} failed: ${error}`)
+        ztoolkit.log(`download from ${addon.download_link} failed: ${error}`)
       }
     });
   }
