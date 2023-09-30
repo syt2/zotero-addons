@@ -5,8 +5,6 @@ import { AddonInfo, AddonInfoAPI, AddonInfoManager } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 
 
-
-
 export class AddonTable {
   // register an item in menu tools
   static registerInMenuTool() {
@@ -34,7 +32,7 @@ export class AddonTable {
   // display addon table window
   static async showAddonsWindow() {
     Zotero.log(isWindowAlive(this.window));
-    
+
     if (isWindowAlive(this.window)) {
       this.window?.focus();
       this.refresh();
@@ -54,7 +52,7 @@ export class AddonTable {
       {
         dataKey: "name",
         label: "name",
-        fixedWidth: false,
+        fixedWidth: true,
       },
       {
         dataKey: "description",
@@ -98,7 +96,7 @@ export class AddonTable {
     (win.document.querySelector("#gotoPage") as HTMLButtonElement).addEventListener("click", event => {
       this.tableHelper?.treeInstance.selection.selected.forEach(select => {
         if (select < 0 || select >= this.addonInfos[1].length) { return; }
-        const pageURL = this.addonInfos[0][select].page;
+        const pageURL = this.addonInfos[0][select].homepage;
         if (pageURL) {
           Zotero.launchURL(pageURL);
         }
@@ -118,7 +116,7 @@ export class AddonTable {
   private static installAddons(addons: AddonInfo[]) {
     const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
     addons.forEach(async addon => {
-      if ((addon.downloadLink?.length ?? 0) == 0) { return; }
+      if ((addon.download_link?.length ?? 0) == 0) { return; }
       try {
         const response = await Zotero.HTTP.request('get', addon.downloadLink, {
           responseType: "arraybuffer",
@@ -137,9 +135,9 @@ export class AddonTable {
   private static async updateButtons(selectAddons: AddonInfo[]) {
     const gotoPageButton = this.window?.document.querySelector("#gotoPage") as HTMLButtonElement;
     const installButton = this.window?.document.querySelector("#install") as HTMLButtonElement;
-    gotoPageButton.disabled = (selectAddons.length !== 1 || (selectAddons[0].page?.length ?? 0) === 0);
+    gotoPageButton.disabled = (selectAddons.length !== 1 || (selectAddons[0].homepage?.length ?? 0) === 0);
     const installDisabled = selectAddons.reduce((previous, current) => {
-      return previous && (current.downloadLink?.length ?? 0) === 0;
+      return previous && (current.download_link?.length ?? 0) === 0;
     }, true);
     installButton.disabled = installDisabled;
   }
