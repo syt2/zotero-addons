@@ -4,3 +4,4 @@ description = 简介
 stars = ⭐️
 state = 状态
 install-failed = 安装失败
+install-succeed = 安装成功
