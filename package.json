@@ -35,7 +35,7 @@
     "type": "git",
     "url": "git+https://github.com/syt2/zotero-addons.git"
   },
-  "author": "windingwind",
+  "author": "ytshen",
   "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/syt2/zotero-addons/issues"
