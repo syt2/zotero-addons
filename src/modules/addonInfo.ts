@@ -11,7 +11,7 @@ export interface AddonInfo {
 export class AddonInfoManager {
   static shared = new AddonInfoManager();
   private _fetching = false;
-  private _addonInfos: AddonInfo[] = []
+  private _addonInfos: AddonInfo[] = [];
   private constructor() {
     this.fetchAddonInfos();
   }
@@ -28,7 +28,7 @@ export class AddonInfoManager {
     // 正在刷新，直到刷新成功后返回
     if (this._fetching) {
       while (this._fetching) {
-        await new Promise(reslove => setTimeout(reslove, 500));
+        await new Promise((reslove) => setTimeout(reslove, 500));
       }
       return this.addonInfos;
     }
@@ -38,15 +38,15 @@ export class AddonInfoManager {
     this._fetching = false;
     return this.addonInfos;
   }
-
 }
 
 export class AddonInfoAPI {
-  // fetch addon infos from source 
+  // fetch addon infos from source
   static async fetchAddonInfos(): Promise<AddonInfo[]> {
-    const url = 'https://github.com/syt2/zotero-addons-scraper/releases/latest/download/addon_infos.json'
+    const url =
+      "https://github.com/syt2/zotero-addons-scraper/releases/latest/download/addon_infos.json";
     try {
-      const response = await Zotero.HTTP.request('GET', url);
+      const response = await Zotero.HTTP.request("GET", url);
       return JSON.parse(response.response);
     } catch (error) {
       ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);

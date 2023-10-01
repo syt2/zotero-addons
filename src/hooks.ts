@@ -18,7 +18,7 @@ async function onStartup() {
 async function onMainWindowLoad(win: Window): Promise<void> {
   // Create ztoolkit for every window
   addon.data.ztoolkit = createZToolkit();
-  
+
   AddonTable.registerInMenuTool();
 
   AddonInfoManager.shared.fetchAddonInfos(true);

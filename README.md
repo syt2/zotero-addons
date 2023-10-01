@@ -3,11 +3,9 @@
 [![zotero target version](https://img.shields.io/badge/Zotero-7-green?style=flat-square&logo=zotero&logoColor=CC2936)](https://www.zotero.org)
 [![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)
 
-
 ## Introduction
 
 This is a Zotero Addon for collecting and installing addons in [Zotero7+](https://www.zotero.org).
-
 
 ## Install & Usage
 
@@ -15,7 +13,8 @@ This is a Zotero Addon for collecting and installing addons in [Zotero7+](https:
 2. Install in Zotero (Tools) -> (Add-ons)
 3. Opened in (Tools) -> (Addon Collection)
 
-
 ## related
+
 ### [zotero addons scraper](https://github.com/syt2/zotero-addons-scraper)
+
 The script for scrape, parse, and publish Addon infomations that used by this repository.

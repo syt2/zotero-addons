@@ -3,7 +3,9 @@ import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoAPI, AddonInfoManager } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
-const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+const { AddonManager } = ChromeUtils.import(
+  "resource://gre/modules/AddonManager.jsm",
+);
 
 export class AddonTable {
   // register an item in menu tools
@@ -25,7 +27,10 @@ export class AddonTable {
     });
   }
 
-  private static addonInfos: [AddonInfo[], { [key: string]: string; }[]] = [[], []]
+  private static addonInfos: [AddonInfo[], { [key: string]: string }[]] = [
+    [],
+    [],
+  ];
   private static window?: Window;
   private static tableHelper?: VirtualizedTableHelper;
 
@@ -39,12 +44,12 @@ export class AddonTable {
       return;
     }
 
-    const windowArgs = { _initPromise: Zotero.Promise.defer(), };
+    const windowArgs = { _initPromise: Zotero.Promise.defer() };
     const win = (window as any).openDialog(
       `chrome://${config.addonRef}/content/addons.xhtml`,
       `${config.addonRef}-addons`,
       `chrome,centerscreen,resizable,status,width=800,height=400,dialog=no`,
-      windowArgs
+      windowArgs,
     )!;
     await windowArgs._initPromise.promise;
     this.window = win;
@@ -70,8 +75,10 @@ export class AddonTable {
         label: "state",
         staticWidth: true,
         width: 60,
-      }
-    ].map((column) => Object.assign(column, { label: getString(column.label), }));
+      },
+    ].map((column) =>
+      Object.assign(column, { label: getString(column.label) }),
+    );
 
     this.tableHelper = new ztoolkit.VirtualizedTable(win!)
       .setContainerId(`table-container`)
@@ -87,32 +94,45 @@ export class AddonTable {
       .setProp("getRowData", (index) => this.addonInfos[1][index])
       .setProp("getRowString", (index) => this.addonInfos[1][index].name || "")
       .setProp("onSelectionChange", (selection) => {
-        const selectAddons: AddonInfo[] = []
+        const selectAddons: AddonInfo[] = [];
         for (const select of selection.selected) {
-          if (select < 0 || select >= this.addonInfos[1].length) { return; }
+          if (select < 0 || select >= this.addonInfos[1].length) {
+            return;
+          }
           selectAddons.push(this.addonInfos[0][select]);
         }
         this.updateButtons(selectAddons);
       })
-      .render(undefined, _ => {
+      .render(undefined, (_) => {
         this.refresh();
       });
-    (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", event => {
+    (
+      win.document.querySelector("#refresh") as HTMLButtonElement
+    ).addEventListener("click", (event) => {
       this.refresh(true);
     });
-    (win.document.querySelector("#gotoPage") as HTMLButtonElement).addEventListener("click", event => {
-      this.tableHelper?.treeInstance.selection.selected.forEach(select => {
-        if (select < 0 || select >= this.addonInfos[1].length) { return; }
+    (
+      win.document.querySelector("#gotoPage") as HTMLButtonElement
+    ).addEventListener("click", (event) => {
+      this.tableHelper?.treeInstance.selection.selected.forEach((select) => {
+        if (select < 0 || select >= this.addonInfos[1].length) {
+          return;
+        }
         const pageURL = this.addonInfos[0][select].homepage;
         if (pageURL) {
           Zotero.launchURL(pageURL);
         }
       });
     });
-    (win.document.querySelector("#install") as HTMLButtonElement).addEventListener("click", event => {
-      const selectAddons: AddonInfo[] = []
-      for (const select of this.tableHelper?.treeInstance.selection.selected ?? []) {
-        if (select < 0 || select >= this.addonInfos[1].length) { return; }
+    (
+      win.document.querySelector("#install") as HTMLButtonElement
+    ).addEventListener("click", (event) => {
+      const selectAddons: AddonInfo[] = [];
+      for (const select of this.tableHelper?.treeInstance.selection.selected ??
+        []) {
+        if (select < 0 || select >= this.addonInfos[1].length) {
+          return;
+        }
         selectAddons.push(this.addonInfos[0][select]);
       }
       this.installAddons(selectAddons);
@@ -121,13 +141,18 @@ export class AddonTable {
   }
 
   private static async installAddons(addons: AddonInfo[]) {
-    addons.forEach(async addon => {
-      if ((addon.download_link?.length ?? 0) == 0) { return; }
+    addons.forEach(async (addon) => {
+      if ((addon.download_link?.length ?? 0) == 0) {
+        return;
+      }
       try {
-        const response = await Zotero.HTTP.request('get', addon.download_link, {
+        const response = await Zotero.HTTP.request("get", addon.download_link, {
           responseType: "arraybuffer",
         });
-        const xpiDownloadPath = PathUtils.join(PathUtils.tempDir, `${addon.id}.xpi`);
+        const xpiDownloadPath = PathUtils.join(
+          PathUtils.tempDir,
+          `${addon.id}.xpi`,
+        );
         await IOUtils.write(xpiDownloadPath, new Uint8Array(response.response));
         const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
         const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
@@ -136,21 +161,33 @@ export class AddonTable {
         new ztoolkit.ProgressWindow(config.addonName, {
           closeOnClick: true,
           closeTime: 3000,
-        }).createLine({
-          text: `${addon.name} ${installsucceed ? getString("install-succeed") : getString("install-failed")}`,
-          type: installsucceed ? "success" : "fail",
-          progress: 0,
-        }).show();
+        })
+          .createLine({
+            text: `${addon.name} ${
+              installsucceed
+                ? getString("install-succeed")
+                : getString("install-failed")
+            }`,
+            type: installsucceed ? "success" : "fail",
+            progress: 0,
+          })
+          .show();
       } catch (error) {
-        ztoolkit.log(`download from ${addon.download_link} failed: ${error}`)
+        ztoolkit.log(`download from ${addon.download_link} failed: ${error}`);
       }
     });
   }
 
   private static async updateButtons(selectAddons: AddonInfo[]) {
-    const gotoPageButton = this.window?.document.querySelector("#gotoPage") as HTMLButtonElement;
-    const installButton = this.window?.document.querySelector("#install") as HTMLButtonElement;
-    gotoPageButton.disabled = (selectAddons.length !== 1 || (selectAddons[0].homepage?.length ?? 0) === 0);
+    const gotoPageButton = this.window?.document.querySelector(
+      "#gotoPage",
+    ) as HTMLButtonElement;
+    const installButton = this.window?.document.querySelector(
+      "#install",
+    ) as HTMLButtonElement;
+    gotoPageButton.disabled =
+      selectAddons.length !== 1 ||
+      (selectAddons[0].homepage?.length ?? 0) === 0;
     const installDisabled = selectAddons.reduce((previous, current) => {
       return previous && (current.download_link?.length ?? 0) === 0;
     }, true);
@@ -166,26 +203,30 @@ export class AddonTable {
     const addonInfos = await AddonInfoManager.shared.fetchAddonInfos(force);
     this.addonInfos = [
       addonInfos,
-      await Promise.all(addonInfos.map(async addonInfo => {
-        const result: { [key: string]: string } = {};
-        for (const prop in addonInfo) {
-          if (Object.prototype.hasOwnProperty.call(addonInfo, prop)) {
-            result[prop] = String(addonInfo[prop]);
+      await Promise.all(
+        addonInfos.map(async (addonInfo) => {
+          const result: { [key: string]: string } = {};
+          for (const prop in addonInfo) {
+            if (Object.prototype.hasOwnProperty.call(addonInfo, prop)) {
+              result[prop] = String(addonInfo[prop]);
+            }
           }
-        }
-        if (await AddonManager.getAddonByID(addonInfo.id)) {
-          result['isInstalled'] = "installed"
-        } else {
-          result['isInstalled'] = ""
-        }
-        return result;
-      })),
+          if (await AddonManager.getAddonByID(addonInfo.id)) {
+            result["isInstalled"] = "installed";
+          } else {
+            result["isInstalled"] = "";
+          }
+          return result;
+        }),
+      ),
     ];
   }
 
   private static async updateTable() {
     return new Promise<void>((resolve) => {
-      this.tableHelper?.render(undefined, _ => { resolve(); });
+      this.tableHelper?.render(undefined, (_) => {
+        resolve();
+      });
     });
   }
 }
