@@ -13,8 +13,10 @@ This is a Zotero Addon for collecting and installing addons in [Zotero7+](https:
 2. Install in Zotero (Tools) -> (Add-ons)
 3. Opened in (Tools) -> (Addon Collection)
 
-## related
+## Related Addons
 
 ### [zotero addons scraper](https://github.com/syt2/zotero-addons-scraper)
 
 The script for scrape, parse, and publish Addon infomations that used by this repository.
+
+**If you have a new addon that you want to add to the addon collection, please commit a record to this repository.**
