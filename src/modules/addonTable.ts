@@ -141,7 +141,7 @@ export class AddonTable {
   }
 
   private static async installAddons(addons: AddonInfo[]) {
-    addons.forEach(async (addon) => {
+    await Promise.all(addons.map(async addon => {
       if ((addon.download_link?.length ?? 0) == 0) {
         return;
       }
@@ -163,11 +163,10 @@ export class AddonTable {
           closeTime: 3000,
         })
           .createLine({
-            text: `${addon.name} ${
-              installsucceed
-                ? getString("install-succeed")
-                : getString("install-failed")
-            }`,
+            text: `${addon.name} ${installsucceed
+              ? getString("install-succeed")
+              : getString("install-failed")
+              }`,
             type: installsucceed ? "success" : "fail",
             progress: 0,
           })
@@ -175,7 +174,8 @@ export class AddonTable {
       } catch (error) {
         ztoolkit.log(`download from ${addon.download_link} failed: ${error}`);
       }
-    });
+    }));
+    await this.refresh(false);
   }
 
   private static async updateButtons(selectAddons: AddonInfo[]) {
