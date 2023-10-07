@@ -5,7 +5,7 @@
 
 ## Introduction
 
-This is a Zotero Addon for collecting and installing addons in [Zotero7+](https://www.zotero.org).
+This is a Zotero Addon for collect and install addons in [Zotero7+](https://www.zotero.org).
 
 ## Install & Usage
 
@@ -13,10 +13,8 @@ This is a Zotero Addon for collecting and installing addons in [Zotero7+](https:
 2. Install in Zotero (Tools) -> (Add-ons)
 3. Opened in (Tools) -> (Addon Collection)
 
-## Related Addons
+## Data source
 
-### [zotero addons scraper](https://github.com/syt2/zotero-addons-scraper)
+The data source for add-ons comes from [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
 
-The script for scrape, parse, and publish Addon infomations that used by this repository.
-
-**If you have a new addon that you want to add to the addon collection, please commit a record to this repository.**
+If you have new add-ons to add, submit it to [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
