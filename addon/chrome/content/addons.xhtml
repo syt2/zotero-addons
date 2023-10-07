@@ -70,7 +70,8 @@
       #table-container {
         height: 100%;
         width: 100%;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: scroll;
       }
     </style>
     <link rel="localization" href="__addonRef__-addonTable.ftl" />
@@ -92,7 +93,6 @@
       <groupbox>
         <hbox>
           <label data-l10n-id="selectSource" style="margin-top: 5px;"></label>
-          <!-- Replace -->
           <div id="sourceContainerPlaceholder"></div>
         </hbox>
       </groupbox>
