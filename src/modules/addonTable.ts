@@ -1,7 +1,7 @@
 import { VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
-import { AddonInfo, AddonInfoManager } from "./addonInfo";
+import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
@@ -178,10 +178,8 @@ export class AddonTable {
 
   private static async installAddons(addons: AddonInfo[]) {
     await Promise.all(addons.map(async addon => {
-      const z7DownloadUrls = addon.releases.find(release => release.targetZoteroVersion === "7")?.xpiDownloadUrl; 
-      if (!z7DownloadUrls) { return; }
-      const xpiUrls = [z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub];
-      for (const xpiUrl of xpiUrls) {
+      const z7XpiUrls = z7XpiDownloadUrls(addon);
+      for (const xpiUrl of z7XpiUrls) {
         ztoolkit.log(`downloading ${addon.name} from ${xpiUrl}`);
         try {
           const response = await Zotero.HTTP.request("get", xpiUrl, {
@@ -195,6 +193,7 @@ export class AddonTable {
           const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
           const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
           xpiInstaller.install();
+          await Zotero.Promise.delay(1000);
           const installsucceed = await AddonManager.getAddonByID(xpiInstaller.addon.id);
           new ztoolkit.ProgressWindow(config.addonName, {
             closeOnClick: true,

@@ -57,6 +57,23 @@ export interface AddonInfo {
   id?: string;
 }
 
+export function z7XpiDownloadUrls(addonInfo: AddonInfo) {
+  const z7DownloadUrls = addonInfo.releases.find(release => release.targetZoteroVersion === "7")?.xpiDownloadUrl; 
+  if (!z7DownloadUrls) { return []; }
+  switch (currentSource().id) {
+    case "source-zotero-chinese-github":
+      return [z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub];
+    case "source-zotero-chinese-ghproxy":
+      return [z7DownloadUrls.ghProxy, z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.kgithub];
+    case "source-zotero-chinese-jsdelivr":
+      return [z7DownloadUrls.jsdeliver, z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub];
+    case "source-zotero-chinese-gitee":
+      return [z7DownloadUrls.gitee, z7DownloadUrls.github, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub];
+    default:
+      return [z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub];
+  }
+}
+
 export class AddonInfoManager {
   static shared = new AddonInfoManager();
   private _fetching = false;
