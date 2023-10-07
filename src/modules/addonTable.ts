@@ -1,11 +1,10 @@
 import { VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
-import { AddonInfo, AddonInfoAPI, AddonInfoManager } from "./addonInfo";
+import { AddonInfo, AddonInfoManager } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
-const { AddonManager } = ChromeUtils.import(
-  "resource://gre/modules/AddonManager.jsm",
-);
+import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/Config";
+const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 export class AddonTable {
   // register an item in menu tools
@@ -106,14 +105,44 @@ export class AddonTable {
       .render(undefined, (_) => {
         this.refresh();
       });
-    (
-      win.document.querySelector("#refresh") as HTMLButtonElement
-    ).addEventListener("click", (event) => {
+
+    ztoolkit.UI.replaceElement({
+      tag: "menulist",
+      id: `sources`,
+      attributes: {
+        value: currentSource().id,
+        native: "true",
+      },
+      listeners: [{
+        type: "command",
+        listener: ev => {
+          const selectSource = (win.document.querySelector("#sources") as XUL.MenuList).getAttribute("value");
+          const oldSource = currentSource();
+          setCurrentSource(selectSource ?? undefined);
+          const newSource = currentSource();
+          if (oldSource.id === newSource.id) { return; }
+          const hideCustomInput = newSource.id !== "source-custom";
+          (win.document.querySelector("#customSource-container") as HTMLElement).hidden = hideCustomInput;
+          this.refresh(true);
+        },
+      }],
+      children: [{
+        tag: "menupopup",
+        children: Sources.map(source => ({
+          tag: "menuitem",
+          attributes: {
+            label: getString(source.id),
+            value: source.id,
+          }
+        }))
+      },
+      ]
+    }, win.document.querySelector("#sourceContainerPlaceholder"));
+
+    (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", event => {
       this.refresh(true);
     });
-    (
-      win.document.querySelector("#gotoPage") as HTMLButtonElement
-    ).addEventListener("click", (event) => {
+    (win.document.querySelector("#gotoPage") as HTMLButtonElement).addEventListener("click", event => {
       this.tableHelper?.treeInstance.selection.selected.forEach((select) => {
         if (select < 0 || select >= this.addonInfos[1].length) {
           return;
@@ -124,18 +153,21 @@ export class AddonTable {
         }
       });
     });
-    (
-      win.document.querySelector("#install") as HTMLButtonElement
-    ).addEventListener("click", (event) => {
+    (win.document.querySelector("#install") as HTMLButtonElement).addEventListener("click", event => {
       const selectAddons: AddonInfo[] = [];
-      for (const select of this.tableHelper?.treeInstance.selection.selected ??
-        []) {
+      for (const select of this.tableHelper?.treeInstance.selection.selected ?? []) {
         if (select < 0 || select >= this.addonInfos[1].length) {
           return;
         }
         selectAddons.push(this.addonInfos[0][select]);
       }
       this.installAddons(selectAddons);
+    });
+    (win.document.querySelector("#customSource-container") as HTMLElement).hidden = currentSource().id !== "source-custom";
+    (win.document.querySelector("#customSourceInput") as HTMLInputElement).value = customSourceApi();
+    (win.document.querySelector("#customSourceInput") as HTMLInputElement).addEventListener("change", event => {
+      setCustomSourceApi((event.target as HTMLInputElement).value);
+      this.refresh(true);
     });
     win.open();
   }
@@ -163,10 +195,7 @@ export class AddonTable {
           closeTime: 3000,
         })
           .createLine({
-            text: `${addon.name} ${installsucceed
-              ? getString("install-succeed")
-              : getString("install-failed")
-              }`,
+            text: `${addon.name} ${installsucceed ? getString("install-succeed") : getString("install-failed")}`,
             type: installsucceed ? "success" : "fail",
             progress: 0,
           })
@@ -179,12 +208,8 @@ export class AddonTable {
   }
 
   private static async updateButtons(selectAddons: AddonInfo[]) {
-    const gotoPageButton = this.window?.document.querySelector(
-      "#gotoPage",
-    ) as HTMLButtonElement;
-    const installButton = this.window?.document.querySelector(
-      "#install",
-    ) as HTMLButtonElement;
+    const gotoPageButton = this.window?.document.querySelector("#gotoPage") as HTMLButtonElement;
+    const installButton = this.window?.document.querySelector("#install") as HTMLButtonElement;
     gotoPageButton.disabled =
       selectAddons.length !== 1 ||
       (selectAddons[0].homepage?.length ?? 0) === 0;

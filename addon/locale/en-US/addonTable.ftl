@@ -5,3 +5,5 @@ gotoPage =
     .label = Homepage
 install = 
     .label = Install
+selectSource = Select Source:
+customSource = Custom Source:

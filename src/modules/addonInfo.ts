@@ -1,3 +1,5 @@
+import { currentSource, customSourceApi } from "../utils/Config";
+
 export interface AddonInfo {
   [key: string]: string | number | undefined;
   name: string;
@@ -40,11 +42,10 @@ export class AddonInfoManager {
   }
 }
 
-export class AddonInfoAPI {
+class AddonInfoAPI {
   // fetch addon infos from source
   static async fetchAddonInfos(): Promise<AddonInfo[]> {
-    const url =
-      "https://github.com/syt2/zotero-addons-scraper/releases/latest/download/addon_infos.json";
+    const url = currentSource().api ?? customSourceApi();
     try {
       const response = await Zotero.HTTP.request("GET", url);
       return JSON.parse(response.response);

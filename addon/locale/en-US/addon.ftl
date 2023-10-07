@@ -5,3 +5,6 @@ stars = ⭐️
 state = state
 install-failed = install failed
 install-succeed = install succeed
+
+source-default = github
+source-custom = custom
