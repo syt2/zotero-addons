@@ -5,6 +5,7 @@ import { AddonInfo, AddonInfoManager } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+declare const ZoteroStandalone: any;
 
 export class AddonTable {
   // register an item in menu tools
@@ -139,6 +140,9 @@ export class AddonTable {
       ]
     }, win.document.querySelector("#sourceContainerPlaceholder"));
 
+    (win.document.querySelector("#manageAddons") as HTMLButtonElement).addEventListener("click", event => {
+      Zotero.openInViewer('chrome://mozapps/content/extensions/aboutaddons.html', doc => ZoteroStandalone.updateAddonsPane);
+    });
     (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", event => {
       this.refresh(true);
     });

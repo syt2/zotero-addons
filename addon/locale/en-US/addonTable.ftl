@@ -5,5 +5,7 @@ gotoPage =
     .label = Homepage
 install = 
     .label = Install
+manageAddons =
+    .label = Manage Addons
 selectSource = Select Source:
 customSource = Custom Source:
