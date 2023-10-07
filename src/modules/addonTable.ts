@@ -3,7 +3,7 @@ import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
-import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/Config";
+import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 export class AddonTable {

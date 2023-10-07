@@ -1,4 +1,4 @@
-import { currentSource, customSourceApi } from "../utils/Config";
+import { currentSource, customSourceApi } from "../utils/configuration";
 
 export interface AddonInfo {
   [key: string]: string | number | undefined;
