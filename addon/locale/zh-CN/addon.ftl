@@ -6,5 +6,9 @@ state = 状态
 install-failed = 安装失败
 install-succeed = 安装成功
 
-source-default = github
 source-custom = 自定义
+source-zotero-chinese-github = github
+source-zotero-chinese-gitee = gitee
+source-zotero-chinese-jsdelivr = jsdelivr
+source-zotero-chinese-ghproxy = ghproxy
+source-zotero-chinese-github-backup = github(备份)

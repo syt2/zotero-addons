@@ -3,15 +3,30 @@ import { getPref, setPref } from "./prefs";
 
 interface Source {
   id: 
-  "source-default" | 
+  "source-zotero-chinese-github" |
+  "source-zotero-chinese-gitee" |
+  "source-zotero-chinese-jsdelivr" |
+  "source-zotero-chinese-ghproxy" |
   "source-custom";
   api?: string;
 };
 
 export const Sources: Readonly<Readonly<Source>[]> = <const>[
   {
-    id: "source-default",
-    api: "https://github.com/syt2/zotero-addons-scraper/releases/latest/download/addon_infos.json",
+    id: "source-zotero-chinese-github",
+    api: "https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json",
+  },
+  {
+    id: "source-zotero-chinese-gitee",
+    api: "https://gitee.com/northword/zotero-plugins/raw/gh-pages/dist/plugins.json",
+  },
+  {
+    id: "source-zotero-chinese-jsdelivr",
+    api: "https://cdn.jsdelivr.net/gh/northword/zotero-plugins@gh-pages/dist/plugins.json",
+  },
+  {
+    id: "source-zotero-chinese-ghproxy",
+    api: "https://ghproxy.com/?q=https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json",
   },
   {
     id: "source-custom",

@@ -65,17 +65,17 @@ export class AddonTable {
         fixedWidth: false,
       },
       {
-        dataKey: "start_count",
+        dataKey: "star",
         label: "stars",
         staticWidth: true,
         width: 50,
       },
-      {
-        dataKey: "isInstalled",
-        label: "state",
-        staticWidth: true,
-        width: 60,
-      },
+      // {
+      //   dataKey: "isInstalled",
+      //   label: "state",
+      //   staticWidth: true,
+      //   width: 50,
+      // },
     ].map((column) =>
       Object.assign(column, { label: getString(column.label) }),
     );
@@ -151,7 +151,7 @@ export class AddonTable {
         if (select < 0 || select >= this.addonInfos[1].length) {
           return;
         }
-        const pageURL = this.addonInfos[0][select].homepage;
+        const pageURL = `https://github.com/${this.addonInfos[0][select].repo}`;
         if (pageURL) {
           Zotero.launchURL(pageURL);
         }
@@ -178,34 +178,36 @@ export class AddonTable {
 
   private static async installAddons(addons: AddonInfo[]) {
     await Promise.all(addons.map(async addon => {
-      if ((addon.download_link?.length ?? 0) == 0) {
-        return;
-      }
-      try {
-        const response = await Zotero.HTTP.request("get", addon.download_link, {
-          responseType: "arraybuffer",
-        });
-        const xpiDownloadPath = PathUtils.join(
-          PathUtils.tempDir,
-          `${addon.id}.xpi`,
-        );
-        await IOUtils.write(xpiDownloadPath, new Uint8Array(response.response));
-        const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
-        const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
-        xpiInstaller.install();
-        const installsucceed = await AddonManager.getAddonByID(addon.id);
-        new ztoolkit.ProgressWindow(config.addonName, {
-          closeOnClick: true,
-          closeTime: 3000,
-        })
-          .createLine({
+      const z7DownloadUrls = addon.releases.find(release => release.targetZoteroVersion === "7")?.xpiDownloadUrl; 
+      if (!z7DownloadUrls) { return; }
+      const xpiUrls = [z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub];
+      for (const xpiUrl of xpiUrls) {
+        ztoolkit.log(`downloading ${addon.name} from ${xpiUrl}`);
+        try {
+          const response = await Zotero.HTTP.request("get", xpiUrl, {
+            responseType: "arraybuffer",
+          });
+          const xpiDownloadPath = PathUtils.join(
+            PathUtils.tempDir,
+            `${addon.name}.xpi`,
+          );
+          await IOUtils.write(xpiDownloadPath, new Uint8Array(response.response));
+          const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
+          const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
+          xpiInstaller.install();
+          const installsucceed = await AddonManager.getAddonByID(xpiInstaller.addon.id);
+          new ztoolkit.ProgressWindow(config.addonName, {
+            closeOnClick: true,
+            closeTime: 3000,
+          }).createLine({
             text: `${addon.name} ${installsucceed ? getString("install-succeed") : getString("install-failed")}`,
             type: installsucceed ? "success" : "fail",
             progress: 0,
-          })
-          .show();
-      } catch (error) {
-        ztoolkit.log(`download from ${addon.download_link} failed: ${error}`);
+          }).show();
+          break;
+        } catch (error) {
+          ztoolkit.log(`download from ${xpiUrl} failed: ${error}`);
+        }
       }
     }));
     await this.refresh(false);
@@ -216,9 +218,9 @@ export class AddonTable {
     const installButton = this.window?.document.querySelector("#install") as HTMLButtonElement;
     gotoPageButton.disabled =
       selectAddons.length !== 1 ||
-      (selectAddons[0].homepage?.length ?? 0) === 0;
+      (selectAddons[0].repo?.length ?? 0) === 0;
     const installDisabled = selectAddons.reduce((previous, current) => {
-      return previous && (current.download_link?.length ?? 0) === 0;
+      return previous && (current.releases.find(release => release.targetZoteroVersion >= "7")?.xpiDownloadUrl?.github.length ?? 0) === 0;
     }, true);
     installButton.disabled = installDisabled;
   }
@@ -233,18 +235,24 @@ export class AddonTable {
     this.addonInfos = [
       addonInfos,
       await Promise.all(
-        addonInfos.map(async (addonInfo) => {
+        addonInfos.map(async addonInfo => {
           const result: { [key: string]: string } = {};
-          for (const prop in addonInfo) {
-            if (Object.prototype.hasOwnProperty.call(addonInfo, prop)) {
-              result[prop] = String(addonInfo[prop]);
-            }
-          }
-          if (await AddonManager.getAddonByID(addonInfo.id)) {
-            result["isInstalled"] = "installed";
+          result["name"] = addonInfo.name;
+          result["description"] = addonInfo.description ?? "?";
+          if (addonInfo.star) {
+            result["star"] = String(addonInfo.star);
           } else {
-            result["isInstalled"] = "";
+            result["star"] = "?"
           }
+          // if (addonInfo.id) {
+          //   if (await AddonManager.getAddonByID(addonInfo.id)) {
+          //     result["isInstalled"] = "✓";
+          //   } else {
+          //     result["isInstalled"] = "";
+          //   }
+          // } else {
+          //   result["isInstalled"] = "?";
+          // }
           return result;
         }),
       ),
