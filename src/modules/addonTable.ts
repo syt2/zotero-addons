@@ -48,12 +48,12 @@ export class AddonTable {
     const win = (window as any).openDialog(
       `chrome://${config.addonRef}/content/addons.xhtml`,
       `${config.addonRef}-addons`,
-      `chrome,centerscreen,resizable,status,width=800,height=400,dialog=no`,
+      `chrome,centerscreen,resizable,status,width=960,height=480,dialog=no`,
       windowArgs,
     )!;
     await windowArgs._initPromise.promise;
     this.window = win;
-    let columns = [
+    const columns = [
       {
         dataKey: "name",
         label: "name",
@@ -70,16 +70,13 @@ export class AddonTable {
         staticWidth: true,
         width: 50,
       },
-    ];
-    if (currentSource().id === "source-zotero-chinese-github-backup") {
-      columns.push({
+      {
         dataKey: "isInstalled",
         label: "state",
         staticWidth: true,
         width: 50,
-      });
-    }
-    columns = columns.map(column => Object.assign(column, { label: getString(column.label) }));
+      },
+    ].map(column => Object.assign(column, { label: getString(column.label) }));
 
     this.tableHelper = new ztoolkit.VirtualizedTable(win!)
       .setContainerId(`table-container`)
@@ -144,6 +141,10 @@ export class AddonTable {
     (win.document.querySelector("#manageAddons") as HTMLButtonElement).addEventListener("click", event => {
       Zotero.openInViewer('chrome://mozapps/content/extensions/aboutaddons.html', doc => ZoteroStandalone.updateAddonsPane);
     });
+    (win.document.querySelector("#updateAllAddons") as HTMLButtonElement).hidden = (await this.outdateAddons()).length <= 0;
+    (win.document.querySelector("#updateAllAddons") as HTMLButtonElement).addEventListener("click", event => {
+      this.updateExistAddons();
+    });
     (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", event => {
       this.refresh(true);
     });
@@ -166,7 +167,7 @@ export class AddonTable {
         }
         selectAddons.push(this.addonInfos[0][select]);
       }
-      this.installAddons(selectAddons);
+      this.installAddons(selectAddons, true);
     });
     (win.document.querySelector("#customSource-container") as HTMLElement).hidden = currentSource().id !== "source-custom";
     (win.document.querySelector("#customSourceInput") as HTMLInputElement).value = customSourceApi();
@@ -177,8 +178,9 @@ export class AddonTable {
     win.open();
   }
 
-  private static async installAddons(addons: AddonInfo[]) {
+  private static async installAddons(addons: AddonInfo[], forceInstall: boolean) {
     await Promise.all(addons.map(async addon => {
+      let installSucceed = false;
       const z7XpiUrls = z7XpiDownloadUrls(addon).filter(url => (url?.length ?? 0) > 0);
       for (const xpiUrl of z7XpiUrls) {
         ztoolkit.log(`downloading ${addon.name} from ${xpiUrl}`);
@@ -193,22 +195,36 @@ export class AddonTable {
           await IOUtils.write(xpiDownloadPath, new Uint8Array(response.response));
           const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
           const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
+
+          // 插件包解析不到插件
+          if (!xpiInstaller.addon) { continue; }
+
+          // 非强制安装，下载插件后检查版本号，如果已有版本>=现存版本，跳过
+          if (!forceInstall && 
+            xpiInstaller.existingAddon &&
+            xpiInstaller.existingAddon.version && 
+            xpiInstaller.addon.version && 
+            xpiInstaller.existingAddon.version >= xpiInstaller.addon.version) {
+            installSucceed = true;
+            break;
+          }
+          
           xpiInstaller.install();
           await Zotero.Promise.delay(1000);
-          const installsucceed = await AddonManager.getAddonByID(xpiInstaller.addon.id);
-          new ztoolkit.ProgressWindow(config.addonName, {
-            closeOnClick: true,
-            closeTime: 3000,
-          }).createLine({
-            text: `${addon.name} ${installsucceed ? getString("install-succeed") : getString("install-failed")}`,
-            type: installsucceed ? "success" : "fail",
-            progress: 0,
-          }).show();
+          installSucceed = await AddonManager.getAddonByID(xpiInstaller.addon.id);
           break;
         } catch (error) {
           ztoolkit.log(`download from ${xpiUrl} failed: ${error}`);
         }
       }
+      new ztoolkit.ProgressWindow(config.addonName, {
+        closeOnClick: true,
+        closeTime: 3000,
+      }).createLine({
+        text: `${addon.name} ${installSucceed ? getString("install-succeed") : getString("install-failed")}`,
+        type: installSucceed ? "success" : "fail",
+        progress: 0,
+      }).show();
     }));
     await this.refresh(false);
   }
@@ -223,6 +239,7 @@ export class AddonTable {
       return previous && (current.releases.find(release => release.targetZoteroVersion >= "7")?.xpiDownloadUrl?.github.length ?? 0) === 0;
     }, true);
     installButton.disabled = installDisabled;
+    (this.window?.document.querySelector("#updateAllAddons") as HTMLButtonElement).hidden = (await this.outdateAddons()).length <= 0;
   }
 
   private static async refresh(force = false) {
@@ -232,23 +249,18 @@ export class AddonTable {
 
   private static async updateAddonInfos(force = false) {
     const addonInfos = await AddonInfoManager.shared.fetchAddonInfos(force);
+    const relateAddons = await this.relatedAddons(addonInfos);
     this.addonInfos = [
       addonInfos,
       await Promise.all(
         addonInfos.map(async addonInfo => {
           const result: { [key: string]: string } = {};
           result["name"] = addonInfo.name;
-          result["description"] = addonInfo.description ?? "?";
+          result["description"] = addonInfo.description ?? "";
           result['star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
-          if (addonInfo.id) {
-            if (await AddonManager.getAddonByID(addonInfo.id)) {
-              result["isInstalled"] = "✓";
-            } else {
-              result["isInstalled"] = "";
-            }
-          } else {
-            result["isInstalled"] = "?";
-          }
+          result["isInstalled"] = relateAddons.find(addonPair => {
+            return addonInfo.repo === addonPair[0].repo;
+          }) ? "✅" : addonInfo.id ? "" : getString('state-unknown');
           return result;
         }),
       ),
@@ -261,5 +273,59 @@ export class AddonTable {
         resolve();
       });
     });
+  }
+
+  private static async relatedAddons(addonInfos: AddonInfo[]) {
+    const addons: [AddonInfo, any][] = [];
+    for (const addon of await AddonManager.getAllAddons()) {
+      if (!addon.id) { continue; }
+      const relateAddon = addonInfos.find(addonInfo => {
+        if (addonInfo.id === addon.id) { return true; }
+        if (addonInfo.name.length > 0 && addonInfo.name === addon.name) { return true; }
+        if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) { return true; }
+        if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) { return true; }
+        return false;
+      });
+      if (relateAddon) {
+        addons.push([relateAddon, addon]);
+      }
+    }
+    return addons;
+  }
+
+  private static async outdateAddons() {
+    const addons = await this.relatedAddons(this.addonInfos[0]);
+    return addons.filter(([addonInfo, addon]) => {
+      const release = addonInfo.releases.find(release => release.targetZoteroVersion >= "7");
+      if (!release || (release.xpiDownloadUrl?.github.length ?? 0) == 0) { return false; }
+      const version = release.currentVersion;
+      if (!version || !addon.version) { return false; }
+      return addon.version.toLowerCase().replace("v", "") < version.toLowerCase().replace("v", "");
+    });
+  }
+
+  private static async updateExistAddons() {
+    const addons = await this.outdateAddons();
+    if (addons.length <= 0) { return; }
+    const progressWin = new ztoolkit.ProgressWindow(config.addonName, {
+      closeOnClick: true,
+    }).createLine({
+      type: "default",
+      progress: 0,
+    }).show();
+    let num = 0;
+    for (const addon of addons) {
+      progressWin.changeLine({
+        text: `${addon[0].name} ${addon[1].version} => ${addon[0].releases[0].currentVersion}`,
+        progress: num++ / addons.length,
+      });
+      await this.installAddons([addon[0]], false);
+    }
+    progressWin.changeLine({
+      text: getString('update-succeed'),
+      progress: 100,
+      type: "success",
+    });
+    progressWin.startCloseTimer(3000);
   }
 }

@@ -5,6 +5,8 @@ stars = ⭐️
 state = state
 install-failed = install failed
 install-succeed = install succeed
+update-succeed = update succeed
+state-unknown = unknown
 
 source-custom = custom
 source-zotero-chinese-github = github
