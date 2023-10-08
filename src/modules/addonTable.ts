@@ -4,6 +4,7 @@ import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
+import { compareVersion } from "./selfAutoUpdate";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 declare const ZoteroStandalone: any;
 
@@ -204,7 +205,7 @@ export class AddonTable {
             xpiInstaller.existingAddon &&
             xpiInstaller.existingAddon.version && 
             xpiInstaller.addon.version && 
-            xpiInstaller.existingAddon.version >= xpiInstaller.addon.version) {
+            compareVersion(xpiInstaller.existingAddon.version, xpiInstaller.addon.version) >= 0) {
             installSucceed = true;
             break;
           }
@@ -236,7 +237,7 @@ export class AddonTable {
       selectAddons.length !== 1 ||
       (selectAddons[0].repo?.length ?? 0) === 0;
     const installDisabled = selectAddons.reduce((previous, current) => {
-      return previous && (current.releases.find(release => release.targetZoteroVersion >= "7")?.xpiDownloadUrl?.github.length ?? 0) === 0;
+      return previous && (current.releases.find(release => compareVersion(release.targetZoteroVersion, "7") >= 0)?.xpiDownloadUrl?.github.length ?? 0) === 0;
     }, true);
     installButton.disabled = installDisabled;
     (this.window?.document.querySelector("#updateAllAddons") as HTMLButtonElement).hidden = (await this.outdateAddons()).length <= 0;
@@ -296,11 +297,11 @@ export class AddonTable {
   private static async outdateAddons() {
     const addons = await this.relatedAddons(this.addonInfos[0]);
     return addons.filter(([addonInfo, addon]) => {
-      const release = addonInfo.releases.find(release => release.targetZoteroVersion >= "7");
+      const release = addonInfo.releases.find(release => compareVersion(release.targetZoteroVersion, "7") >= 0);
       if (!release || (release.xpiDownloadUrl?.github.length ?? 0) == 0) { return false; }
       const version = release.currentVersion;
       if (!version || !addon.version) { return false; }
-      return addon.version.toLowerCase().replace("v", "") < version.toLowerCase().replace("v", "");
+      return compareVersion(addon.version, version) < 0;
     });
   }
 

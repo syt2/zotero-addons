@@ -4,6 +4,7 @@ import { createZToolkit } from "./utils/ztoolkit";
 import { AddonTable } from "./modules/addonTable";
 import { AddonInfoManager } from "./modules/addonInfo";
 import { Sources, setCurrentSource, setCustomSourceApi } from "./utils/configuration";
+import { updateSelfIfNeed } from "./modules/selfAutoUpdate";
 
 async function onStartup() {
   await Promise.all([
@@ -16,6 +17,8 @@ async function onStartup() {
   registerConfigScheme();
 
   await onMainWindowLoad(window);
+
+  updateSelfIfNeed();
 }
 
 async function onMainWindowLoad(win: Window): Promise<void> {
