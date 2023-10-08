@@ -7,6 +7,7 @@ install-failed = install failed
 install-succeed = install succeed
 update-succeed = update succeed
 state-unknown = unknown
+scheme-config-success = config source succeed
 
 source-custom = custom
 source-zotero-chinese-github = github
