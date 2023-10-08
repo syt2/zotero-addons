@@ -15,6 +15,14 @@ This is a Zotero Addon for collect and install addons in [Zotero7+](https://www.
 
 ## Data source
 
-The data source for add-ons comes from [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
+The main data source for add-ons comes from [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
 
 If you have new add-ons to add, submit it to [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
+
+### Custom Data Source
+
+A Custom Scheme
+
+`zotero://zoteroaddoncollection/configSource?source=source-custom&customURL={SOME URL}`
+
+can change add-on data source automatically to your custom url.
