@@ -53,7 +53,7 @@ export class AddonTable {
     )!;
     await windowArgs._initPromise.promise;
     this.window = win;
-    const columns = [
+    let columns = [
       {
         dataKey: "name",
         label: "name",
@@ -70,15 +70,16 @@ export class AddonTable {
         staticWidth: true,
         width: 50,
       },
-      // {
-      //   dataKey: "isInstalled",
-      //   label: "state",
-      //   staticWidth: true,
-      //   width: 50,
-      // },
-    ].map((column) =>
-      Object.assign(column, { label: getString(column.label) }),
-    );
+    ];
+    if (currentSource().id === "source-zotero-chinese-github-backup") {
+      columns.push({
+        dataKey: "isInstalled",
+        label: "state",
+        staticWidth: true,
+        width: 50,
+      });
+    }
+    columns = columns.map(column => Object.assign(column, { label: getString(column.label) }));
 
     this.tableHelper = new ztoolkit.VirtualizedTable(win!)
       .setContainerId(`table-container`)
@@ -178,7 +179,7 @@ export class AddonTable {
 
   private static async installAddons(addons: AddonInfo[]) {
     await Promise.all(addons.map(async addon => {
-      const z7XpiUrls = z7XpiDownloadUrls(addon);
+      const z7XpiUrls = z7XpiDownloadUrls(addon).filter(url => (url?.length ?? 0) > 0);
       for (const xpiUrl of z7XpiUrls) {
         ztoolkit.log(`downloading ${addon.name} from ${xpiUrl}`);
         try {
@@ -238,20 +239,16 @@ export class AddonTable {
           const result: { [key: string]: string } = {};
           result["name"] = addonInfo.name;
           result["description"] = addonInfo.description ?? "?";
-          if (addonInfo.star) {
-            result["star"] = String(addonInfo.star);
+          result['star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
+          if (addonInfo.id) {
+            if (await AddonManager.getAddonByID(addonInfo.id)) {
+              result["isInstalled"] = "✓";
+            } else {
+              result["isInstalled"] = "";
+            }
           } else {
-            result["star"] = "?"
+            result["isInstalled"] = "?";
           }
-          // if (addonInfo.id) {
-          //   if (await AddonManager.getAddonByID(addonInfo.id)) {
-          //     result["isInstalled"] = "✓";
-          //   } else {
-          //     result["isInstalled"] = "";
-          //   }
-          // } else {
-          //   result["isInstalled"] = "?";
-          // }
           return result;
         }),
       ),

@@ -35,10 +35,10 @@ export interface AddonInfo {
     currentVersion?: string;
     xpiDownloadUrl?: {
       github: string;
-      gitee: string;
-      ghProxy: string;
-      jsdeliver: string;
-      kgithub: string;
+      gitee?: string;
+      ghProxy?: string;
+      jsdeliver?: string;
+      kgithub?: string;
     };
     releaseData?: string;
     downloadCount?: number;
@@ -110,6 +110,7 @@ class AddonInfoAPI {
   // fetch addon infos from source
   static async fetchAddonInfos(filterZ7 = true): Promise<AddonInfo[]> {
     const url = currentSource().api ?? customSourceApi();
+    ztoolkit.log(`fetch addon infos from ${url}`);
     try {
       const response = await Zotero.HTTP.request("GET", url);
       const addons = JSON.parse(response.response) as AddonInfo[];

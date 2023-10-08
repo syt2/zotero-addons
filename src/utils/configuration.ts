@@ -7,6 +7,7 @@ interface Source {
   "source-zotero-chinese-gitee" |
   "source-zotero-chinese-jsdelivr" |
   "source-zotero-chinese-ghproxy" |
+  "source-zotero-chinese-github-backup" |
   "source-custom";
   api?: string;
 };
@@ -27,6 +28,10 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
   {
     id: "source-zotero-chinese-ghproxy",
     api: "https://ghproxy.com/?q=https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json",
+  },
+  {
+    id: "source-zotero-chinese-github-backup",
+    api: "https://github.com/syt2/zotero-addons-scraper/releases/latest/download/addon_infos.json",
   },
   {
     id: "source-custom",
