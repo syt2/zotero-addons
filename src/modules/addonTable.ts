@@ -328,4 +328,8 @@ export class AddonTable {
     });
     progressWin.startCloseTimer(3000);
   }
+
+  static async close() {
+    this.window?.close();
+  }
 }

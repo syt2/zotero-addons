@@ -32,6 +32,7 @@ async function onMainWindowUnload(win: Window): Promise<void> {
 function onShutdown(): void {
   ztoolkit.unregisterAll();
   addon.data.dialog?.window?.close();
+  AddonTable.close();
   // Remove addon object
   addon.data.alive = false;
   delete Zotero[config.addonInstance];
