@@ -4,7 +4,7 @@ import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { compareVersion, installAddonFrom } from "./utils";
+import { compareVersion, installAddonFrom } from "../utils/utils";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 declare const ZoteroStandalone: any;
 
@@ -73,7 +73,7 @@ export class AddonTable {
       {
         dataKey: "name",
         label: "name",
-        fixedWidth: false,
+        staticWidth: true,
       },
       {
         dataKey: "description",

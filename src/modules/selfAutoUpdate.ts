@@ -1,5 +1,5 @@
 import { config } from "../../package.json";
-import { compareVersion, installAddonFrom } from "./utils";
+import { compareVersion, installAddonFrom } from "../utils/utils";
 
 export async function updateSelfIfNeed() {
   const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
