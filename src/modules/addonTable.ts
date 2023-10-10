@@ -52,8 +52,6 @@ export class AddonTable {
 
   // display addon table window
   static async showAddonsWindow() {
-    Zotero.log(isWindowAlive(this.window));
-
     if (isWindowAlive(this.window)) {
       this.window?.focus();
       this.refresh();
@@ -202,7 +200,7 @@ export class AddonTable {
         text: `${getString("installing")} ${addon.name}`,
         type: "default",
         progress: 0,
-      }).show(); 
+      }).show();
       let installSucceed = false;
       const z7XpiUrls = z7XpiDownloadUrls(addon);
       for (const xpiUrl of z7XpiUrls) {

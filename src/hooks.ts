@@ -4,7 +4,6 @@ import { createZToolkit } from "./utils/ztoolkit";
 import { AddonTable } from "./modules/addonTable";
 import { AddonInfoManager } from "./modules/addonInfo";
 import { Sources, setCurrentSource, setCustomSourceApi } from "./utils/configuration";
-import { updateSelfIfNeed } from "./modules/selfAutoUpdate";
 
 async function onStartup() {
   await Promise.all([
@@ -17,8 +16,6 @@ async function onStartup() {
   registerConfigScheme();
 
   await onMainWindowLoad(window);
-
-  updateSelfIfNeed();
 }
 
 async function onMainWindowLoad(win: Window): Promise<void> {
@@ -52,8 +49,8 @@ export default {
   onMainWindowUnload,
 };
 
-  // 注册自定义scheme处理
-  // zotero://zoteroaddoncollection/configSource?source=XXX&customURL=XXX
+// 注册自定义scheme处理
+// zotero://zoteroaddoncollection/configSource?source=XXX&customURL=XXX
 function registerConfigScheme() {
   const ZOTERO_SCHEME = "zotero";
   const ZOTERO_PROTOCOL_CONTRACTID = "@mozilla.org/network/protocol;1?name=" + ZOTERO_SCHEME;
@@ -61,11 +58,11 @@ function registerConfigScheme() {
   const CustomSchemeExtension = {
     noContent: true,
     loadAsChrome: false,
-    
+
     // eslint-disable-next-line require-yield
     doAction: (Zotero.Promise as any).coroutine(function* (uri: any) {
       let path = uri.pathQueryRef;
-      if (!path) { 
+      if (!path) {
         Zotero.log('invalid scheme URL');
         return 'Invalid URL';
       }
@@ -80,7 +77,7 @@ function registerConfigScheme() {
       });
       router.run(path);
       Zotero.API.parseParams(params);
-      
+
       if (params.action == "configSource") {
         let success = false;
         if ('source' in params && typeof params.source === 'string' && Sources.find(source => source.id === params.source)) {
@@ -112,7 +109,7 @@ function registerConfigScheme() {
         }
       }
     }),
-    
+
     newChannel: function (uri: any) {
       ztoolkit.log(uri);
       this.doAction(uri);
