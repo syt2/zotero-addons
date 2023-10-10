@@ -25,9 +25,9 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   // Create ztoolkit for every window
   addon.data.ztoolkit = createZToolkit();
 
-  AddonTable.registerInMenuTool();
-
-  AddonInfoManager.shared.fetchAddonInfos(true);
+  AddonInfoManager.shared.fetchAddonInfos(true).then(() => {
+    AddonTable.registerInToolbar();
+  });
 }
 
 async function onMainWindowUnload(win: Window): Promise<void> {
@@ -39,6 +39,7 @@ function onShutdown(): void {
   ztoolkit.unregisterAll();
   addon.data.dialog?.window?.close();
   AddonTable.close();
+  document.querySelector("#zotero-toolbaritem-addons")?.remove();
   // Remove addon object
   addon.data.alive = false;
   delete Zotero[config.addonInstance];

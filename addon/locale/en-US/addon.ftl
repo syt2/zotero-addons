@@ -5,6 +5,7 @@ stars = ⭐️
 state = state
 install-failed = install failed
 install-succeed = install succeed
+installing = installing
 update-succeed = update succeed
 state-unknown = unknown
 scheme-config-success = config source succeed

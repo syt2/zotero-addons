@@ -5,13 +5,16 @@
 
 ## Introduction
 
-This is a Zotero Addon for collect and install addons in [Zotero7+](https://www.zotero.org).
+This is a Zotero Addon for collecting and installing addons in [Zotero7+](https://www.zotero.org).
 
-## Install & Usage
+## Install
 
-1. Download the [latest release](https://github.com/syt2/zotero-tldr/releases/latest/download/zotero-addons.xpi) xpi file.
-2. Install in Zotero (Tools) -> (Add-ons)
-3. Opened in (Tools) -> (Addon Collection)
+1. Download the [latest release](https://github.com/syt2/zotero-tldr/releases/latest/download/zotero-addons.xpi) xpi file
+2. Install in Zotero `(Tools) -> (Add-ons)`
+
+## Usage
+
+click <img align="center" src="addon/chrome/content/icons/favicon.png" width=24/> in Toolbar
 
 ## Data source
 

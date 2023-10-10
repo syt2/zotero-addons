@@ -4,28 +4,43 @@ import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { compareVersion } from "./selfAutoUpdate";
+import { compareVersion, installAddonFrom } from "./utils";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 declare const ZoteroStandalone: any;
 
 export class AddonTable {
-  // register an item in menu tools
-  static registerInMenuTool() {
-    ztoolkit.Menu.register("menuTools", {
-      tag: "menuseparator",
+  // // register an item in menu tools
+  // static registerInMenuTool() {
+  //   ztoolkit.Menu.register("menuTools", {
+  //     tag: "menuseparator",
+  //   });
+  //   ztoolkit.Menu.register("menuTools", {
+  //     tag: "menuitem",
+  //     label: getString("menuitem-addons"),
+  //     commandListener: (event) => {
+  //       (async () => {
+  //         await this.showAddonsWindow();
+  //       })();
+  //     },
+  //   });
+  //   ztoolkit.Menu.register("menuTools", {
+  //     tag: "menuseparator",
+  //   });
+  // }
+
+  static registerInToolbar() {
+    const node = document.querySelector("#zotero-tb-advanced-search")!;
+    const newNode = node?.cloneNode(true) as XUL.ToolBarButton;
+    newNode.setAttribute("id", "zotero-toolbaritem-addons");
+    newNode.setAttribute("tooltiptext", getString("menuitem-addons"));
+    newNode.setAttribute("command", "");
+    newNode.setAttribute("oncommand", "");
+    newNode.setAttribute("mousedown", "");
+    newNode.addEventListener("click", async (event: any) => {
+      this.showAddonsWindow();
     });
-    ztoolkit.Menu.register("menuTools", {
-      tag: "menuitem",
-      label: getString("menuitem-addons"),
-      commandListener: (event) => {
-        (async () => {
-          await this.showAddonsWindow();
-        })();
-      },
-    });
-    ztoolkit.Menu.register("menuTools", {
-      tag: "menuseparator",
-    });
+    newNode.style.listStyleImage = `url(chrome://${config.addonRef}/content/icons/favicon.png)`;
+    document.querySelector("#zotero-items-toolbar")?.insertBefore(newNode, node?.nextElementSibling);
   }
 
   private static addonInfos: [AddonInfo[], { [key: string]: string }[]] = [
@@ -181,51 +196,35 @@ export class AddonTable {
 
   private static async installAddons(addons: AddonInfo[], forceInstall: boolean) {
     await Promise.all(addons.map(async addon => {
+      const popWin = new ztoolkit.ProgressWindow(config.addonName, {
+        closeOnClick: true,
+      }).createLine({
+        text: `${getString("installing")} ${addon.name}`,
+        type: "default",
+        progress: 0,
+      }).show(); 
       let installSucceed = false;
-      const z7XpiUrls = z7XpiDownloadUrls(addon).filter(url => (url?.length ?? 0) > 0);
+      const z7XpiUrls = z7XpiDownloadUrls(addon);
       for (const xpiUrl of z7XpiUrls) {
+        if (!xpiUrl || xpiUrl.length <= 0) { continue; }
         ztoolkit.log(`downloading ${addon.name} from ${xpiUrl}`);
         try {
-          const response = await Zotero.HTTP.request("get", xpiUrl, {
-            responseType: "arraybuffer",
-          });
-          const xpiDownloadPath = PathUtils.join(
-            PathUtils.tempDir,
-            `${addon.name}.xpi`,
-          );
-          await IOUtils.write(xpiDownloadPath, new Uint8Array(response.response));
-          const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
-          const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
-
-          // 插件包解析不到插件
-          if (!xpiInstaller.addon) { continue; }
-
-          // 非强制安装，下载插件后检查版本号，如果已有版本>=现存版本，跳过
-          if (!forceInstall && 
-            xpiInstaller.existingAddon &&
-            xpiInstaller.existingAddon.version && 
-            xpiInstaller.addon.version && 
-            compareVersion(xpiInstaller.existingAddon.version, xpiInstaller.addon.version) >= 0) {
-            installSucceed = true;
+          const addonID = await installAddonFrom(xpiUrl, addon.name, forceInstall);
+          if (addonID) {
+            await Zotero.Promise.delay(1000);
+            installSucceed = await AddonManager.getAddonByID(addonID);
             break;
           }
-          
-          xpiInstaller.install();
-          await Zotero.Promise.delay(1000);
-          installSucceed = await AddonManager.getAddonByID(xpiInstaller.addon.id);
-          break;
         } catch (error) {
           ztoolkit.log(`download from ${xpiUrl} failed: ${error}`);
         }
       }
-      new ztoolkit.ProgressWindow(config.addonName, {
-        closeOnClick: true,
-        closeTime: 3000,
-      }).createLine({
+      popWin.changeLine({
         text: `${addon.name} ${installSucceed ? getString("install-succeed") : getString("install-failed")}`,
         type: installSucceed ? "success" : "fail",
         progress: 0,
-      }).show();
+      });
+      popWin.startCloseTimer(1000);
     }));
     await this.refresh(false);
   }

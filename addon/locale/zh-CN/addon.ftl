@@ -5,6 +5,7 @@ stars = ⭐️
 state = 状态
 install-failed = 安装失败
 install-succeed = 安装成功
+installing = 正在安装
 update-succeed = 更新成功
 state-unknown = 未知
 scheme-config-success = 配置插件源成功
