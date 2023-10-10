@@ -24,8 +24,8 @@ If you have new add-ons to add, submit it to [zotero-chinese/zotero-plugins](htt
 
 ### Custom Data Source
 
-A Custom Scheme
+A custom scheme
 
 `zotero://zoteroaddoncollection/configSource?source=source-custom&customURL={SOME URL}`
 
-can change add-on data source automatically to your custom url.
+can change add-on data source automatically to a custom url.
