@@ -9,25 +9,6 @@ const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager
 declare const ZoteroStandalone: any;
 
 export class AddonTable {
-  // // register an item in menu tools
-  // static registerInMenuTool() {
-  //   ztoolkit.Menu.register("menuTools", {
-  //     tag: "menuseparator",
-  //   });
-  //   ztoolkit.Menu.register("menuTools", {
-  //     tag: "menuitem",
-  //     label: getString("menuitem-addons"),
-  //     commandListener: (event) => {
-  //       (async () => {
-  //         await this.showAddonsWindow();
-  //       })();
-  //     },
-  //   });
-  //   ztoolkit.Menu.register("menuTools", {
-  //     tag: "menuseparator",
-  //   });
-  // }
-
   static registerInToolbar() {
     const node = document.querySelector("#zotero-tb-advanced-search")!;
     const newNode = node?.cloneNode(true) as XUL.ToolBarButton;
@@ -207,7 +188,7 @@ export class AddonTable {
         if (!xpiUrl || xpiUrl.length <= 0) { continue; }
         ztoolkit.log(`downloading ${addon.name} from ${xpiUrl}`);
         try {
-          const addonID = await installAddonFrom(xpiUrl, addon.name, forceInstall);
+          const addonID = await installAddonFrom(xpiUrl, forceInstall);
           if (addonID) {
             await Zotero.Promise.delay(1000);
             installSucceed = await AddonManager.getAddonByID(addonID);

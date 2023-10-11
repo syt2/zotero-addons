@@ -12,7 +12,8 @@ export function compareVersion(versionA: string, versionB: string): number {
   return 0; // 版本号相同
 }
 
-export async function installAddonFrom(url: string, xpiName: string, forceInstall = false): Promise<string | undefined> {
+export async function installAddonFrom(url: string, forceInstall = false): Promise<string | undefined> {
+  const xpiName = extractFileNameFromUrl(url) ?? "tmp.xpi";
   try {
     const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
     const response = await Zotero.HTTP.request('GET', url, {
@@ -20,7 +21,7 @@ export async function installAddonFrom(url: string, xpiName: string, forceInstal
     });
     const xpiDownloadPath = PathUtils.join(
       PathUtils.tempDir,
-      `${xpiName}.xpi`,
+      xpiName,
     );
     await IOUtils.write(xpiDownloadPath, new Uint8Array(response.response));
     const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
@@ -46,6 +47,18 @@ export async function installAddonFrom(url: string, xpiName: string, forceInstal
     return xpiInstaller.addon.id;
   } catch (error) {
     ztoolkit.log(`install addon ${xpiName} from ${url} failed: ${error}`);
+    return;
+  }
+}
+
+export function extractFileNameFromUrl(url: string) {
+  try {
+    const parsedUrl = new URL(url);
+    const path = parsedUrl.pathname;
+    const pathParts = path.split('/');
+    const fileName = pathParts[pathParts.length - 1];
+    return fileName || undefined;
+  } catch (error) {
     return;
   }
 }
