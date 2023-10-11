@@ -214,7 +214,7 @@ export class AddonTable {
             break;
           }
         } catch (error) {
-          ztoolkit.log(`download from ${xpiUrl} failed: ${error}`);
+          ztoolkit.log(`install from ${xpiUrl} failed: ${error}`);
         }
       }
       popWin.changeLine({

@@ -26,8 +26,13 @@ export async function installAddonFrom(url: string, xpiName: string, forceInstal
     const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
     const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
 
-     // 插件包解析不到插件
-    if (!xpiInstaller.addon) { return; }
+     // url或插件无效
+    if (!xpiInstaller.addon 
+      || !xpiInstaller.addon.isCompatible 
+      || !xpiInstaller.addon.isPlatformCompatible 
+      || !xpiInstaller.addon.strictCompatibility) { 
+      return; 
+    }
 
     // 非强制安装，下载插件后检查版本号，如果已有版本>=现存版本，跳过
     if (!forceInstall && 
