@@ -69,7 +69,7 @@ export class AddonTable {
         dataKey: "isInstalled",
         label: "state",
         staticWidth: true,
-        width: 50,
+        width: 80,
       },
     ].map(column => Object.assign(column, { label: getString(column.label) }));
 
@@ -278,6 +278,7 @@ export class AddonTable {
       const release = addonInfo.releases.find(release => compareVersion(release.targetZoteroVersion, "7") >= 0);
       if (!release || (release.xpiDownloadUrl?.github.length ?? 0) == 0) { return false; }
       const version = release.currentVersion;
+      if (!addon.isCompatible || !addon.isPlatformCompatible || !addon.strictCompatibility) { return true; }
       if (!version || !addon.version) { return false; }
       return compareVersion(addon.version, version) < 0;
     });
