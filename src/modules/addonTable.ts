@@ -66,10 +66,10 @@ export class AddonTable {
         width: 50,
       },
       {
-        dataKey: "isInstalled",
+        dataKey: "installState",
         label: "state",
         staticWidth: true,
-        width: 80,
+        width: 90,
       },
     ].map(column => Object.assign(column, { label: getString(column.label) }));
 
@@ -237,9 +237,16 @@ export class AddonTable {
           result["name"] = addonInfo.name;
           result["description"] = addonInfo.description ?? "";
           result['star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
-          result["isInstalled"] = relateAddons.find(addonPair => {
-            return addonInfo.repo === addonPair[0].repo;
-          }) ? "✅" : addonInfo.id ? "" : getString('state-unknown');
+          const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
+          if (relateAddon) {
+            if (relateAddon[1] && relateAddon[1].isCompatible && relateAddon[1].isPlatformCompatible && relateAddon[1].strictCompatibility) {
+              result["installState"] = getString("state-installed");
+            } else {
+              result["installState"] = getString('state-uncompatible');
+            }
+          } else {
+            result["installState"] = addonInfo.id ? getString('state-notInstalled') : getString('state-unknown');
+          }
           return result;
         }),
       ),
