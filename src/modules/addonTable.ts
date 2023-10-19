@@ -69,7 +69,7 @@ export class AddonTable {
         dataKey: "installState",
         label: "state",
         staticWidth: true,
-        width: 90,
+        width: 95,
       },
     ].map(column => Object.assign(column, { label: getString(column.label) }));
 
@@ -239,7 +239,7 @@ export class AddonTable {
           result['star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
           const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
           if (relateAddon) {
-            if (relateAddon[1] && relateAddon[1].isCompatible && relateAddon[1].isPlatformCompatible && relateAddon[1].strictCompatibility) {
+            if (relateAddon[1] && relateAddon[1].isCompatible && relateAddon[1].isPlatformCompatible) {
               result["installState"] = getString("state-installed");
             } else {
               result["installState"] = getString('state-uncompatible');
@@ -285,7 +285,7 @@ export class AddonTable {
       const release = addonInfo.releases.find(release => compareVersion(release.targetZoteroVersion, "7") >= 0);
       if (!release || (release.xpiDownloadUrl?.github.length ?? 0) == 0) { return false; }
       const version = release.currentVersion;
-      if (!addon.isCompatible || !addon.isPlatformCompatible || !addon.strictCompatibility) { return true; }
+      // if (!addon.isCompatible || !addon.isPlatformCompatible) { return true; }
       if (!version || !addon.version) { return false; }
       return compareVersion(addon.version, version) < 0;
     });

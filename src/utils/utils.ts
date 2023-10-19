@@ -30,8 +30,7 @@ export async function installAddonFrom(url: string, forceInstall = false): Promi
      // url或插件无效
     if (!xpiInstaller.addon 
       || !xpiInstaller.addon.isCompatible 
-      || !xpiInstaller.addon.isPlatformCompatible 
-      || !xpiInstaller.addon.strictCompatibility) { 
+      || !xpiInstaller.addon.isPlatformCompatible) { 
       return; 
     }
 
