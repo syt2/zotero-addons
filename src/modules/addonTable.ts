@@ -6,7 +6,6 @@ import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
 import { compareVersion, installAddonFrom } from "../utils/utils";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
-declare const ZoteroStandalone: any;
 
 type TableMenuItemID = 
 "menu-install" |
@@ -246,7 +245,8 @@ export class AddonTable {
         this.refresh(true);
         break;
       case "menu-systemAddon":
-        Zotero.openInViewer('chrome://mozapps/content/extensions/aboutaddons.html', doc => ZoteroStandalone.updateAddonsPane);
+        // see in https://github.com/zotero/zotero/blob/c27bac2ad629b2ff216462515c220e2d5ce148ba/chrome/content/zotero/zoteroPane.xhtml#L559
+        (document.getElementById("menu_addons") as any).doCommand();
         break;
       case "menu-updateAllIfNeed":
         this.updateExistAddons();
