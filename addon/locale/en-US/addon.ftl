@@ -12,6 +12,9 @@ state-uncompatible = 🚫 Uncompatible
 state-installed = ✅ Installed
 state-notInstalled = 🚧 Not installed 
 scheme-config-success = Config source succeed
+scheme-install-confirm-title = Install unknown add-on?
+scheme-install-confirm-message = Are you sure you want to install add-on from unknown source? 
+scheme-install-confirm-confirm = Install
 
 source-custom = custom
 source-zotero-chinese-github = GitHub

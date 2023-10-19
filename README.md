@@ -22,10 +22,14 @@ The main data source for add-ons comes from [zotero-chinese/zotero-plugins](http
 
 If you have new add-ons to add, submit it to [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
 
+## Develop
+
 ### Custom Data Source
 
 A custom scheme
-
-`zotero://zoteroaddoncollection/configSource?source=source-custom&customURL={SOME URL}`
-
+`zotero://zoteroaddoncollection/configSource?source=source-custom&customURL={encodeURIComponent(SOME URL)}`
 can change add-on data source automatically to a custom url.
+
+A custom scheme
+`zotero://zoteroaddoncollection/install?source={encodeURIComponent(SOME URL)}`
+can install add-on from the custom url.

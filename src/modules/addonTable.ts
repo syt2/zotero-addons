@@ -259,11 +259,12 @@ export class AddonTable {
     await Promise.all(addons.map(async addon => {
       const popWin = new ztoolkit.ProgressWindow(config.addonName, {
         closeOnClick: true,
+        closeTime: -1,
       }).createLine({
         text: `${getString("installing")} ${addon.name}`,
         type: "default",
         progress: 0,
-      }).show();
+      }).show(-1);
       let installSucceed = false;
       const z7XpiUrls = z7XpiDownloadUrls(addon);
       for (const xpiUrl of z7XpiUrls) {
@@ -363,10 +364,11 @@ export class AddonTable {
     if (addons.length <= 0) { return; }
     const progressWin = new ztoolkit.ProgressWindow(config.addonName, {
       closeOnClick: true,
+      closeTime: -1,
     }).createLine({
       type: "default",
       progress: 0,
-    }).show();
+    }).show(-1);
     let num = 0;
     for (const addon of addons) {
       progressWin.changeLine({
