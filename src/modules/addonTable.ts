@@ -8,6 +8,15 @@ import { compareVersion, installAddonFrom } from "../utils/utils";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 declare const ZoteroStandalone: any;
 
+type TableMenuItemID = 
+"menu-install" |
+"menu-homepage" | 
+"menu-refresh" | 
+"menu-systemAddon" | 
+"menu-updateAllIfNeed" | 
+"menu-sep";
+type AssociatedAddonInfo = [AddonInfo, { [key: string]: string }]
+
 export class AddonTable {
   static registerInToolbar() {
     const node = document.querySelector("#zotero-tb-advanced-search")!;
@@ -24,10 +33,7 @@ export class AddonTable {
     document.querySelector("#zotero-items-toolbar")?.insertBefore(newNode, node?.nextElementSibling);
   }
 
-  private static addonInfos: [AddonInfo[], { [key: string]: string }[]] = [
-    [],
-    [],
-  ];
+  private static addonInfos: AssociatedAddonInfo[] = [];
   private static window?: Window;
   private static tableHelper?: VirtualizedTableHelper;
 
@@ -45,9 +51,50 @@ export class AddonTable {
       `${config.addonRef}-addons`,
       `chrome,centerscreen,resizable,status,width=960,height=480,dialog=no`,
       windowArgs,
-    )!;
+    );
     await windowArgs._initPromise.promise;
     this.window = win;
+    
+    await this.createTable();
+
+    await this.replaceSourceSelectList(win.document.querySelector("#sourceContainerPlaceholder"));
+    
+    (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", e => this.refresh(true));
+
+    win.open();
+  }
+
+  static async close() {
+    this.window?.close();
+  }
+
+
+  private static async tableMenuItems() {
+    const result: TableMenuItemID[] = [];
+    const selects = this.tableHelper?.treeInstance.selection.selected;
+    if (selects) {
+      result.push("menu-install");
+      if (selects.size == 1) {
+        result.push("menu-homepage");
+      }
+      result.push("menu-sep");
+    }
+
+    result.push("menu-refresh");
+    result.push("menu-sep");
+
+    if ((await this.outdateAddons()).length > 0) {
+      result.push("menu-updateAllIfNeed");
+      result.push("menu-sep");
+    }
+
+    result.push("menu-systemAddon");
+    return result;
+  }
+
+  private static async createTable() {
+    const win = this.window;
+    if (!win) { return; }
     const columns = [
       {
         dataKey: "name",
@@ -73,7 +120,7 @@ export class AddonTable {
       },
     ].map(column => Object.assign(column, { label: getString(column.label) }));
 
-    this.tableHelper = new ztoolkit.VirtualizedTable(win!)
+    this.tableHelper = new ztoolkit.VirtualizedTable(win)
       .setContainerId(`table-container`)
       .setProp({
         id: `header`,
@@ -84,64 +131,26 @@ export class AddonTable {
         disableFontSizeScaling: false,
       })
       .setProp("onItemContextMenu", (ev, x, y) => {
+        const replaceElem = win.document.querySelector("#listContainerPlaceholder") ?? win.document.querySelector("#listMenu");
+        if (!replaceElem) { return false; }
         (async () => {
+          await this.replaceRightClickMenu(replaceElem);
           await Zotero.Promise.delay(10);
           // found in Zotero.getActiveZoteroPane().onItemsContextMenuOpen
           if (Zotero.isWin) { x += 10; }
           (win.document.querySelector("#listMenu") as any).openPopupAtScreen(x + 1, y + 1, true);
         })();
-        return false;
+        return true;
       })
-      .setProp("getRowCount", () => this.addonInfos[1].length)
-      .setProp("getRowData", (index) => this.addonInfos[1][index])
-      .setProp("getRowString", (index) => this.addonInfos[1][index].name || "")
-      .setProp("onSelectionChange", (selection) => {
-        const selectAddons: AddonInfo[] = [];
-        for (const select of selection.selected) {
-          if (select < 0 || select >= this.addonInfos[1].length) {
-            return;
-          }
-          selectAddons.push(this.addonInfos[0][select]);
-        }
-        this.updateButtons(selectAddons);
-      })
+      .setProp("getRowCount", () => this.addonInfos.length)
+      .setProp("getRowData", (index) => this.addonInfos[index][1])
+      .setProp("getRowString", (index) => this.addonInfos[index][1].name || "")
       .render(undefined, (_) => {
         this.refresh();
       });
+  }
 
-    ztoolkit.UI.replaceElement({
-      tag: "menulist",
-      id: `sources`,
-      attributes: {
-        value: currentSource().id,
-        native: "true",
-      },
-      listeners: [{
-        type: "command",
-        listener: ev => {
-          const selectSource = (win.document.querySelector("#sources") as XUL.MenuList).getAttribute("value");
-          const oldSource = currentSource();
-          setCurrentSource(selectSource ?? undefined);
-          const newSource = currentSource();
-          if (oldSource.id === newSource.id) { return; }
-          const hideCustomInput = newSource.id !== "source-custom";
-          (win.document.querySelector("#customSource-container") as HTMLElement).hidden = hideCustomInput;
-          this.refresh(true);
-        },
-      }],
-      children: [{
-        tag: "menupopup",
-        children: Sources.map(source => ({
-          tag: "menuitem",
-          attributes: {
-            label: getString(source.id),
-            value: source.id,
-          }
-        }))
-      },
-      ]
-    }, win.document.querySelector("#sourceContainerPlaceholder"));
-
+  private static async replaceRightClickMenu(oldNode: Element) {
     ztoolkit.UI.replaceElement({
       tag: "menupopup",
       id: "listMenu",
@@ -156,59 +165,95 @@ export class AddonTable {
           await this.onSelectMenuItem(selectValue);
         },
       }],
-      children: Sources.map(source => ({
-        tag: "menuitem",
-        attributes: {
-          label: getString(source.id),
-          value: source.id,
-        },
-      }))
-    }, win.document.querySelector("#listContainerPlaceholder"));
+      children: (await this.tableMenuItems()).map(item => {
+        if (item === "menu-sep") {
+          return {
+            tag: "menuseparator",
+          }
+        } else {
+          return {
+            tag: "menuitem",
+            attributes: {
+              label: getString(item),
+              value: item,
+            },
+          }
+        }
+      })
+    }, oldNode);
+  }
 
-    (win.document.querySelector("#manageAddons") as HTMLButtonElement).addEventListener("click", event => {
-      Zotero.openInViewer('chrome://mozapps/content/extensions/aboutaddons.html', doc => ZoteroStandalone.updateAddonsPane);
-    });
-    (win.document.querySelector("#updateAllAddons") as HTMLButtonElement).hidden = (await this.outdateAddons()).length <= 0;
-    (win.document.querySelector("#updateAllAddons") as HTMLButtonElement).addEventListener("click", event => {
-      this.updateExistAddons();
-    });
-    (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", event => {
-      this.refresh(true);
-    });
-    (win.document.querySelector("#gotoPage") as HTMLButtonElement).addEventListener("click", event => {
-      this.tableHelper?.treeInstance.selection.selected.forEach((select) => {
-        if (select < 0 || select >= this.addonInfos[1].length) {
-          return;
-        }
-        const pageURL = `https://github.com/${this.addonInfos[0][select].repo}`;
-        if (pageURL) {
-          Zotero.launchURL(pageURL);
-        }
-      });
-    });
-    (win.document.querySelector("#install") as HTMLButtonElement).addEventListener("click", event => {
-      const selectAddons: AddonInfo[] = [];
-      for (const select of this.tableHelper?.treeInstance.selection.selected ?? []) {
-        if (select < 0 || select >= this.addonInfos[1].length) {
-          return;
-        }
-        selectAddons.push(this.addonInfos[0][select]);
-      }
-      this.installAddons(selectAddons, true);
-    });
-    (win.document.querySelector("#customSource-container") as HTMLElement).hidden = currentSource().id !== "source-custom";
-    (win.document.querySelector("#customSourceInput") as HTMLInputElement).value = customSourceApi();
-    (win.document.querySelector("#customSourceInput") as HTMLInputElement).addEventListener("change", event => {
+  private static async replaceSourceSelectList(oldNode: Element) {
+    ztoolkit.UI.replaceElement({
+      tag: "menulist",
+      id: `sources`,
+      attributes: {
+        value: currentSource().id,
+        native: "true",
+      },
+      listeners: [{
+        type: "command",
+        listener: ev => {
+          const selectSource = (this.window?.document.querySelector("#sources") as XUL.MenuList).getAttribute("value");
+          const oldSource = currentSource();
+          setCurrentSource(selectSource ?? undefined);
+          const newSource = currentSource();
+          if (oldSource.id === newSource.id) { return; }
+          const hideCustomInput = newSource.id !== "source-custom";
+          (this.window?.document.querySelector("#customSource-container") as HTMLElement).hidden = hideCustomInput;
+          this.refresh(true);
+        },
+      }],
+      children: [{
+        tag: "menupopup",
+        children: Sources.map(source => ({
+          tag: "menuitem",
+          attributes: {
+            label: getString(source.id),
+            value: source.id,
+          }
+        }))
+      },
+      ]
+    }, oldNode);
+    
+    (this.window?.document.querySelector("#customSource-container") as HTMLElement).hidden = currentSource().id !== "source-custom";
+    (this.window?.document.querySelector("#customSourceInput") as HTMLInputElement).value = customSourceApi();
+    (this.window?.document.querySelector("#customSourceInput") as HTMLInputElement).addEventListener("change", event => {
       setCustomSourceApi((event.target as HTMLInputElement).value);
       this.refresh(true);
     });
-    win.open();
   }
 
-  private static async onSelectMenuItem(item: string) {
+  private static async onSelectMenuItem(item: TableMenuItemID) {
     // TODO: develop
-    Zotero.log(item);
+    const selectAddons: AssociatedAddonInfo[] = [];
+    for (const select of this.tableHelper?.treeInstance.selection.selected ?? new Set()) {
+      if (select < 0 || select >= this.addonInfos.length) { continue; }
+      selectAddons.push(this.addonInfos[select]);
+    }
+    switch (item) {
+      case "menu-install":
+        this.installAddons(selectAddons.map(e => e[0]), true);
+        break;
+      case "menu-homepage":
+        selectAddons.forEach(addon => {
+          if (!addon[0].repo) { return; }
+          Zotero.launchURL(`https://github.com/${addon[0].repo}`);
+        });
+        break;
+      case "menu-refresh":
+        this.refresh(true);
+        break;
+      case "menu-systemAddon":
+        Zotero.openInViewer('chrome://mozapps/content/extensions/aboutaddons.html', doc => ZoteroStandalone.updateAddonsPane);
+        break;
+      case "menu-updateAllIfNeed":
+        this.updateExistAddons();
+        break;
+    }
   }
+
 
   private static async installAddons(addons: AddonInfo[], forceInstall: boolean) {
     await Promise.all(addons.map(async addon => {
@@ -245,19 +290,6 @@ export class AddonTable {
     await this.refresh(false);
   }
 
-  private static async updateButtons(selectAddons: AddonInfo[]) {
-    const gotoPageButton = this.window?.document.querySelector("#gotoPage") as HTMLButtonElement;
-    const installButton = this.window?.document.querySelector("#install") as HTMLButtonElement;
-    gotoPageButton.disabled =
-      selectAddons.length !== 1 ||
-      (selectAddons[0].repo?.length ?? 0) === 0;
-    const installDisabled = selectAddons.reduce((previous, current) => {
-      return previous && (current.releases.find(release => compareVersion(release.targetZoteroVersion, "7") >= 0)?.xpiDownloadUrl?.github.length ?? 0) === 0;
-    }, true);
-    installButton.disabled = installDisabled;
-    (this.window?.document.querySelector("#updateAllAddons") as HTMLButtonElement).hidden = (await this.outdateAddons()).length <= 0;
-  }
-
   private static async refresh(force = false) {
     await this.updateAddonInfos(force);
     this.updateTable();
@@ -266,28 +298,26 @@ export class AddonTable {
   private static async updateAddonInfos(force = false) {
     const addonInfos = await AddonInfoManager.shared.fetchAddonInfos(force);
     const relateAddons = await this.relatedAddons(addonInfos);
-    this.addonInfos = [
-      addonInfos,
-      await Promise.all(
-        addonInfos.map(async addonInfo => {
-          const result: { [key: string]: string } = {};
-          result["name"] = addonInfo.name;
-          result["description"] = addonInfo.description ?? "";
-          result['star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
-          const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
-          if (relateAddon) {
-            if (relateAddon[1] && relateAddon[1].isCompatible && relateAddon[1].isPlatformCompatible) {
-              result["installState"] = getString("state-installed");
-            } else {
-              result["installState"] = getString('state-uncompatible');
-            }
-          } else {
-            result["installState"] = addonInfo.id ? getString('state-notInstalled') : getString('state-unknown');
-          }
-          return result;
-        }),
-      ),
-    ];
+    this.addonInfos = await Promise.all(addonInfos.map(async addonInfo => {
+      const result: { [key: string]: string } = {};
+      result["name"] = addonInfo.name;
+      result["description"] = addonInfo.description ?? "";
+      result['star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
+      const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
+      if (relateAddon) {
+        if (relateAddon[1] && relateAddon[1].isCompatible && relateAddon[1].isPlatformCompatible) {
+          result["installState"] = getString("state-installed");
+        } else {
+          result["installState"] = getString('state-uncompatible');
+        }
+      } else {
+        result["installState"] = addonInfo.id ? getString('state-notInstalled') : getString('state-unknown');
+      }
+      return [
+        addonInfo,
+        result,
+      ]
+    }));
   }
 
   private static async updateTable() {
@@ -317,7 +347,7 @@ export class AddonTable {
   }
 
   private static async outdateAddons() {
-    const addons = await this.relatedAddons(this.addonInfos[0]);
+    const addons = await this.relatedAddons(this.addonInfos.map(infos => infos[0]));
     return addons.filter(([addonInfo, addon]) => {
       const release = addonInfo.releases.find(release => compareVersion(release.targetZoteroVersion, "7") >= 0);
       if (!release || (release.xpiDownloadUrl?.github.length ?? 0) == 0) { return false; }
@@ -351,9 +381,5 @@ export class AddonTable {
       type: "success",
     });
     progressWin.startCloseTimer(3000);
-  }
-
-  static async close() {
-    this.window?.close();
   }
 }

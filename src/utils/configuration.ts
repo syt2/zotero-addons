@@ -1,14 +1,17 @@
 import { getString } from "./locale";
 import { getPref, setPref } from "./prefs";
 
+
+type SourceID = 
+"source-zotero-chinese-github" |
+"source-zotero-chinese-gitee" |
+"source-zotero-chinese-jsdelivr" |
+"source-zotero-chinese-ghproxy" |
+"source-zotero-chinese-github-backup" |
+"source-custom";
+
 interface Source {
-  id: 
-  "source-zotero-chinese-github" |
-  "source-zotero-chinese-gitee" |
-  "source-zotero-chinese-jsdelivr" |
-  "source-zotero-chinese-ghproxy" |
-  "source-zotero-chinese-github-backup" |
-  "source-custom";
+  id: SourceID;
   api?: string;
 };
 

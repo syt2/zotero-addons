@@ -1,13 +1,5 @@
 title = Addons
 refresh = 
     .label = Refresh
-gotoPage = 
-    .label = Homepage
-install = 
-    .label = Install
-manageAddons =
-    .label = Manage Add-ons
-updateAllAddons =
-    .label = update exist Add-ons
 selectSource = Select Source:
 customSource = Custom Source:

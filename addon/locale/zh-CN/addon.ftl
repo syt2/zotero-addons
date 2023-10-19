@@ -19,3 +19,9 @@ source-zotero-chinese-gitee = Gitee
 source-zotero-chinese-jsdelivr = jsDelivr
 source-zotero-chinese-ghproxy = gh-proxy
 source-zotero-chinese-github-backup = GitHub(备份)
+
+menu-install = 安装
+menu-homepage = 主页
+menu-refresh = 刷新
+menu-systemAddon = 管理插件
+menu-updateAllIfNeed = 更新现有插件
