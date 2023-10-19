@@ -58,7 +58,7 @@ export interface AddonInfo {
 }
 
 export function z7XpiDownloadUrls(addonInfo: AddonInfo) {
-  const z7DownloadUrls = addonInfo.releases.find(release => release.targetZoteroVersion === "7")?.xpiDownloadUrl; 
+  const z7DownloadUrls = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"))?.xpiDownloadUrl; 
   if (!z7DownloadUrls) { return []; }
   switch (currentSource().id) {
     case "source-zotero-chinese-github":
@@ -108,18 +108,16 @@ export class AddonInfoManager {
 
 class AddonInfoAPI {
   // fetch addon infos from source
-  static async fetchAddonInfos(filterZ7 = true): Promise<AddonInfo[]> {
+  static async fetchAddonInfos(): Promise<AddonInfo[]> {
     const url = currentSource().api ?? customSourceApi();
     ztoolkit.log(`fetch addon infos from ${url}`);
     try {
       const response = await Zotero.HTTP.request("GET", url);
       const addons = JSON.parse(response.response) as AddonInfo[];
       const validAddons = addons.filter(addon => {
-        if (!filterZ7) { return true; }
-        const r7 = addon.releases.find(release => release.targetZoteroVersion >= "7");
-        if (!r7) { return false; }
-        if (!r7.xpiDownloadUrl) { return false; }
-        return true;
+        const release = addon.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
+        if (release?.xpiDownloadUrl?.github) { return true; }
+        return false;
       })
       return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
         return (b.star ?? 0) - (a.star ?? 0);

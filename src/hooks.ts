@@ -4,7 +4,7 @@ import { createZToolkit } from "./utils/ztoolkit";
 import { AddonTable } from "./modules/addonTable";
 import { AddonInfoManager } from "./modules/addonInfo";
 import { Sources, setCurrentSource, setCustomSourceApi } from "./utils/configuration";
-import { extractFileNameFromUrl, installAddonFrom } from "./utils/utils";
+import { extractFileNameFromUrl, installAddonWithPopWindowFrom } from "./utils/utils";
 
 async function onStartup() {
   await Promise.all([
@@ -129,34 +129,7 @@ function registerConfigScheme() {
               {}
             );
             if (install === 0) {
-
-              const popWin = new ztoolkit.ProgressWindow(config.addonName, {
-                closeOnClick: true,
-                closeTime: -1,
-              }).createLine({
-                text: `${getString("installing")} ${extractFileNameFromUrl(addonURL)}`,
-                type: "default",
-                progress: 0,
-              }).show(-1);
-              
-              let installSucceed = false;
-              try {
-                const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
-                const addonID = await installAddonFrom(addonURL, true);
-                if (addonID) {
-                  await Zotero.Promise.delay(1000);
-                  installSucceed = await AddonManager.getAddonByID(addonID);
-                }
-              } catch (error) {
-                ztoolkit.log(`install from ${addonURL} failed: ${error}`);
-              }
-
-              popWin.changeLine({
-                text: `${extractFileNameFromUrl(addonURL)} ${installSucceed ? getString("install-succeed") : getString("install-failed")}`,
-                type: installSucceed ? "success" : "fail",
-                progress: 0,
-              });
-              popWin.startCloseTimer(1000);
+              installAddonWithPopWindowFrom(addonURL, extractFileNameFromUrl(addonURL) ?? "", true);
             }
           })();
         }

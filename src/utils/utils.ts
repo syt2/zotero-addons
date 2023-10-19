@@ -1,3 +1,7 @@
+import { config } from "../../package.json";
+import { getString } from "../utils/locale";
+const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+
 export function compareVersion(versionA: string, versionB: string): number {
   const partsA = versionA.toLowerCase().replace('v', '').split('.')
   const partsB = versionB.toLowerCase().replace('v', '').split('.')
@@ -12,10 +16,55 @@ export function compareVersion(versionA: string, versionB: string): number {
   return 0; // 版本号相同
 }
 
-export async function installAddonFrom(url: string, forceInstall = false): Promise<string | undefined> {
-  const xpiName = extractFileNameFromUrl(url) ?? "tmp.xpi";
+export async function installAddonWithPopWindowFrom(url: string | string[], name: string, forceInstall = false) {
+  const popWin = new ztoolkit.ProgressWindow(config.addonName, {
+    closeOnClick: true,
+    closeTime: -1,
+  }).createLine({
+    text: `${getString("installing")} ${name}`,
+    type: "default",
+    progress: 0,
+  }).show(-1);
+
+  const installSucceed = await installAddonFrom(url, name, forceInstall);
+
+  popWin.changeLine({
+    text: `${name} ${installSucceed ? getString("install-succeed") : getString("install-failed")}`,
+    type: installSucceed ? "success" : "fail",
+    progress: 0,
+  });
+  popWin.startCloseTimer(1000);
+}
+
+
+export async function installAddonFrom(url: string | string[], name: string | undefined = undefined, forceInstall = false) {
+  let urls: string[] = [];
+  if (typeof url === 'string') {
+    urls = [url];
+  } else {
+    urls = url;
+  }
+  let installSucceed = false;
+  for (const xpiUrl of urls) {
+    if (!xpiUrl || xpiUrl.length <= 0) { continue; }
+    try {
+      const addonID = await pInstallAddonFrom(xpiUrl, name, forceInstall);
+      if (addonID) {
+        await Zotero.Promise.delay(1000);
+        installSucceed = await AddonManager.getAddonByID(addonID);
+        break;
+      }
+    } catch (error) {
+      ztoolkit.log(`install from ${xpiUrl} failed: ${error}`);
+    }
+  }
+  return installSucceed;
+}
+
+
+async function pInstallAddonFrom(url: string, name?: string, forceInstall = false): Promise<string | undefined> {
+  const xpiName = name ?? extractFileNameFromUrl(url) ?? "tmp.xpi";
   try {
-    const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
     const response = await Zotero.HTTP.request('GET', url, {
       responseType: 'arraybuffer',
     });

@@ -4,7 +4,7 @@ import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { compareVersion, installAddonFrom } from "../utils/utils";
+import { compareVersion, installAddonWithPopWindowFrom } from "../utils/utils";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 type TableMenuItemID = 
@@ -257,36 +257,10 @@ export class AddonTable {
 
   private static async installAddons(addons: AddonInfo[], forceInstall: boolean) {
     await Promise.all(addons.map(async addon => {
-      const popWin = new ztoolkit.ProgressWindow(config.addonName, {
-        closeOnClick: true,
-        closeTime: -1,
-      }).createLine({
-        text: `${getString("installing")} ${addon.name}`,
-        type: "default",
-        progress: 0,
-      }).show(-1);
-      let installSucceed = false;
-      const z7XpiUrls = z7XpiDownloadUrls(addon);
-      for (const xpiUrl of z7XpiUrls) {
-        if (!xpiUrl || xpiUrl.length <= 0) { continue; }
-        ztoolkit.log(`downloading ${addon.name} from ${xpiUrl}`);
-        try {
-          const addonID = await installAddonFrom(xpiUrl, forceInstall);
-          if (addonID) {
-            await Zotero.Promise.delay(1000);
-            installSucceed = await AddonManager.getAddonByID(addonID);
-            break;
-          }
-        } catch (error) {
-          ztoolkit.log(`install from ${xpiUrl} failed: ${error}`);
-        }
-      }
-      popWin.changeLine({
-        text: `${addon.name} ${installSucceed ? getString("install-succeed") : getString("install-failed")}`,
-        type: installSucceed ? "success" : "fail",
-        progress: 0,
-      });
-      popWin.startCloseTimer(1000);
+      const urls = z7XpiDownloadUrls(addon).filter(x => {
+        return (x?.length ?? 0) > 0;
+      }) as string[];
+      await installAddonWithPopWindowFrom(urls, addon.name, forceInstall);
     }));
     await this.refresh(false);
   }
@@ -350,7 +324,7 @@ export class AddonTable {
   private static async outdateAddons() {
     const addons = await this.relatedAddons(this.addonInfos.map(infos => infos[0]));
     return addons.filter(([addonInfo, addon]) => {
-      const release = addonInfo.releases.find(release => compareVersion(release.targetZoteroVersion, "7") >= 0);
+      const release = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
       if (!release || (release.xpiDownloadUrl?.github.length ?? 0) == 0) { return false; }
       const version = release.currentVersion;
       // if (!addon.isCompatible || !addon.isPlatformCompatible) { return true; }
