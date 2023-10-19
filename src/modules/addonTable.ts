@@ -83,6 +83,15 @@ export class AddonTable {
         staticColumns: true,
         disableFontSizeScaling: false,
       })
+      .setProp("onItemContextMenu", (ev, x, y) => {
+        (async () => {
+          await Zotero.Promise.delay(10);
+          // found in Zotero.getActiveZoteroPane().onItemsContextMenuOpen
+          if (Zotero.isWin) { x += 10; }
+          (win.document.querySelector("#listMenu") as any).openPopupAtScreen(x + 1, y + 1, true);
+        })();
+        return false;
+      })
       .setProp("getRowCount", () => this.addonInfos[1].length)
       .setProp("getRowData", (index) => this.addonInfos[1][index])
       .setProp("getRowString", (index) => this.addonInfos[1][index].name || "")
@@ -133,6 +142,29 @@ export class AddonTable {
       ]
     }, win.document.querySelector("#sourceContainerPlaceholder"));
 
+    ztoolkit.UI.replaceElement({
+      tag: "menupopup",
+      id: "listMenu",
+      attributes: {
+        value: currentSource().id,
+        native: "true",
+      },
+      listeners: [{
+        type: "command",
+        listener: async (ev) => {
+          const selectValue = (ev.target as any).getAttribute("value");
+          await this.onSelectMenuItem(selectValue);
+        },
+      }],
+      children: Sources.map(source => ({
+        tag: "menuitem",
+        attributes: {
+          label: getString(source.id),
+          value: source.id,
+        },
+      }))
+    }, win.document.querySelector("#listContainerPlaceholder"));
+
     (win.document.querySelector("#manageAddons") as HTMLButtonElement).addEventListener("click", event => {
       Zotero.openInViewer('chrome://mozapps/content/extensions/aboutaddons.html', doc => ZoteroStandalone.updateAddonsPane);
     });
@@ -171,6 +203,11 @@ export class AddonTable {
       this.refresh(true);
     });
     win.open();
+  }
+
+  private static async onSelectMenuItem(item: string) {
+    // TODO: develop
+    Zotero.log(item);
   }
 
   private static async installAddons(addons: AddonInfo[], forceInstall: boolean) {
