@@ -28,6 +28,7 @@ source-zotero-chinese-gitee = Gitee
 source-zotero-chinese-jsdelivr = jsDelivr
 source-zotero-chinese-ghproxy = gh-proxy
 source-zotero-chinese-github-backup = GitHub(backup)
+source-zotero-chinese-ghproxy-backup = gh-proxy(backup)
 
 menu-install = Install
 menu-uninstall = Uninstall
