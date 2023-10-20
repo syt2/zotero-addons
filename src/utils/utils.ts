@@ -16,6 +16,46 @@ export function compareVersion(versionA: string, versionB: string): number {
   return 0; // 版本号相同
 }
 
+export async function uninstall(addon: any, popConfirmDialog = true) {
+  if (popConfirmDialog) {
+    const confirm = await Services.prompt.confirmEx(
+      null,
+      getString('uninstall-confirm-title'),
+      getString('uninstall-confirm-message') + (addon.name ? '\n' + addon.name : ''),
+      Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING + Services.prompt.BUTTON_POS_1 * Services.prompt.BUTTON_TITLE_CANCEL,
+      getString('uninstall-confirm-confirm'),
+      null,
+      null,
+      "",
+      {}
+    );
+    if (confirm !== 0) {
+      return;
+    }
+  }
+  try {
+    await addon.uninstall(true);
+    new ztoolkit.ProgressWindow(config.addonName, {
+      closeOnClick: true,
+      closeTime: 3000,
+    }).createLine({
+      text: getString('uninstall-succeed'),
+      type: `success`,
+      progress: 0,
+    }).show(3000);
+  } catch (error) {
+    ztoolkit.log(`uninstall ${addon.name} failed: ${error}`);
+    new ztoolkit.ProgressWindow(config.addonName, {
+      closeOnClick: true,
+      closeTime: 3000,
+    }).createLine({
+      text: getString('uninstall-failed') + ' ' + `${error}`,
+      type: `fail`,
+      progress: 0,
+    }).show(3000);
+  }
+}
+
 export async function installAddonWithPopWindowFrom(url: string | string[], name: string, forceInstall = false) {
   const popWin = new ztoolkit.ProgressWindow(config.addonName, {
     closeOnClick: true,

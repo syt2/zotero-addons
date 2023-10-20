@@ -4,11 +4,12 @@ import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { compareVersion, installAddonWithPopWindowFrom } from "../utils/utils";
+import { compareVersion, installAddonWithPopWindowFrom, uninstall } from "../utils/utils";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 type TableMenuItemID = 
 "menu-install" |
+"menu-uninstall" |
 "menu-homepage" | 
 "menu-refresh" | 
 "menu-systemAddon" | 
@@ -71,9 +72,18 @@ export class AddonTable {
   private static async tableMenuItems() {
     const result: TableMenuItemID[] = [];
     const selects = this.tableHelper?.treeInstance.selection.selected;
+
     if (selects) {
       result.push("menu-install");
       if (selects.size == 1) {
+        const idx = [...selects][0];
+        if (idx >= 0 && idx < this.addonInfos.length) {
+          const addonInfo = this.addonInfos[idx];
+          const relatedAddon = await this.relatedAddons([addonInfo[0]]);
+          if (relatedAddon.length > 0) {
+            result.push("menu-uninstall");
+          }
+        }
         result.push("menu-homepage");
       }
       result.push("menu-sep");
@@ -235,6 +245,9 @@ export class AddonTable {
       case "menu-install":
         this.installAddons(selectAddons.map(e => e[0]), true);
         break;
+      case "menu-uninstall":
+        this.uninstallAddons(selectAddons.map(e => e[0]))
+        break;
       case "menu-homepage":
         selectAddons.forEach(addon => {
           if (!addon[0].repo) { return; }
@@ -254,6 +267,13 @@ export class AddonTable {
     }
   }
 
+  
+  private static async uninstallAddons(addons: AddonInfo[]) {
+    const relatedAddon = await this.relatedAddons(addons);
+    relatedAddon.forEach(async ([addonInfo, addon]) => {
+      await uninstall(addon, true);
+    });
+  }
 
   private static async installAddons(addons: AddonInfo[], forceInstall: boolean) {
     await Promise.all(addons.map(async addon => {
