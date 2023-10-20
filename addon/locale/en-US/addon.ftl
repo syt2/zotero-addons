@@ -16,6 +16,7 @@ state-unknown = ⚠️ Unknown
 state-uncompatible = 🚫 Uncompatible
 state-installed = ✅ Installed
 state-notInstalled = 🚧 Not installed 
+state-pendingUninstall = 🚮 Uninstalled
 scheme-config-success = Config source succeed
 scheme-install-confirm-title = Install unknown add-on?
 scheme-install-confirm-message = Are you sure you want to install add-on from unknown source? 

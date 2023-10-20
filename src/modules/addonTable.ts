@@ -6,6 +6,7 @@ import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
 import { compareVersion, installAddonWithPopWindowFrom, uninstall } from "../utils/utils";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 
 type TableMenuItemID = 
 "menu-install" |
@@ -81,7 +82,10 @@ export class AddonTable {
           const addonInfo = this.addonInfos[idx];
           const relatedAddon = await this.relatedAddons([addonInfo[0]]);
           if (relatedAddon.length > 0) {
-            result.push("menu-uninstall");
+            const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relatedAddon[0][1].id);
+            if (dbAddon.length > 0 && !dbAddon[0].pendingUninstall) {
+              result.push("menu-uninstall");
+            }
           }
         }
         result.push("menu-homepage");
@@ -273,6 +277,7 @@ export class AddonTable {
     relatedAddon.forEach(async ([addonInfo, addon]) => {
       await uninstall(addon, true);
     });
+    await this.refresh(false);
   }
 
   private static async installAddons(addons: AddonInfo[], forceInstall: boolean) {
@@ -301,7 +306,12 @@ export class AddonTable {
       const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
       if (relateAddon) {
         if (relateAddon[1] && relateAddon[1].isCompatible && relateAddon[1].isPlatformCompatible) {
-          result["installState"] = getString("state-installed");
+          const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relateAddon[1].id);
+          if (dbAddon.length > 0 && dbAddon[0].pendingUninstall) {
+            result["installState"] = getString("state-pendingUninstall");
+          } else {
+            result["installState"] = getString("state-installed");
+          }
         } else {
           result["installState"] = getString('state-uncompatible');
         }
