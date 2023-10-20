@@ -23,9 +23,8 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   // Create ztoolkit for every window
   addon.data.ztoolkit = createZToolkit();
 
-  AddonInfoManager.shared.fetchAddonInfos(true).then(() => {
-    AddonTable.registerInToolbar();
-  });
+  AddonInfoManager.shared.fetchAddonInfos(true);
+  AddonTable.registerInToolbar();
 }
 
 async function onMainWindowUnload(win: Window): Promise<void> {
