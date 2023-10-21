@@ -174,7 +174,7 @@ export class AddonTable {
         this.refresh(false);
       })
       .setProp("onActivate", ev => {
-        this.onSelectMenuItem("menu-install");
+        this.onSelectMenuItem("menu-homepage");
         return true;
       })
       .render(undefined, (_) => {
