@@ -5,6 +5,7 @@ import { AddonTable } from "./modules/addonTable";
 import { AddonInfoManager } from "./modules/addonInfo";
 import { Sources, setCurrentSource, setCustomSourceApi } from "./utils/configuration";
 import { extractFileNameFromUrl, installAddonWithPopWindowFrom } from "./utils/utils";
+import { addonIDMapManager } from "./utils/addonIDMapManager";
 
 async function onStartup() {
   await Promise.all([
@@ -16,14 +17,16 @@ async function onStartup() {
 
   registerConfigScheme();
 
+  AddonInfoManager.shared.fetchAddonInfos(true);
+
+  addonIDMapManager.shared.fetchAddonIDIfNeed();
+
   await onMainWindowLoad(window);
 }
 
 async function onMainWindowLoad(win: Window): Promise<void> {
   // Create ztoolkit for every window
   addon.data.ztoolkit = createZToolkit();
-
-  AddonInfoManager.shared.fetchAddonInfos(true);
   AddonTable.registerInToolbar();
 }
 
@@ -128,7 +131,7 @@ function registerConfigScheme() {
               {}
             );
             if (install === 0) {
-              installAddonWithPopWindowFrom(addonURL, extractFileNameFromUrl(addonURL) ?? "", true);
+              installAddonWithPopWindowFrom(addonURL, extractFileNameFromUrl(addonURL) ?? "", undefined, true);
             }
           })();
         }

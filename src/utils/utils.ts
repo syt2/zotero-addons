@@ -1,5 +1,6 @@
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
+import { addonIDMapManager } from "./addonIDMapManager";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 export function compareVersion(versionA: string, versionB: string): number {
@@ -7,11 +8,11 @@ export function compareVersion(versionA: string, versionB: string): number {
   const partsB = versionB.toLowerCase().replace('v', '').split('.')
 
   for (let i = 0; i < 3; i++) {
-      if (partsA[i] < partsB[i]) {
-          return -1;
-      } else if (partsA[i] > partsB[i]) {
-          return 1;
-      }
+    if (partsA[i] < partsB[i]) {
+      return -1;
+    } else if (partsA[i] > partsB[i]) {
+      return 1;
+    }
   }
   return 0; // 版本号相同
 }
@@ -56,7 +57,7 @@ export async function uninstall(addon: any, popConfirmDialog = true) {
   }
 }
 
-export async function installAddonWithPopWindowFrom(url: string | string[], name: string, forceInstall = false) {
+export async function installAddonWithPopWindowFrom(url: string | string[], name: string, repo: string | undefined = undefined, forceInstall = false) {
   const popWin = new ztoolkit.ProgressWindow(config.addonName, {
     closeOnClick: true,
     closeTime: -1,
@@ -66,7 +67,7 @@ export async function installAddonWithPopWindowFrom(url: string | string[], name
     progress: 0,
   }).show(-1);
 
-  const installSucceed = await installAddonFrom(url, name, forceInstall);
+  const installSucceed = await installAddonFrom(url, name, repo, forceInstall);
 
   popWin.changeLine({
     text: `${name} ${installSucceed ? getString("install-succeed") : getString("install-failed")}`,
@@ -77,7 +78,7 @@ export async function installAddonWithPopWindowFrom(url: string | string[], name
 }
 
 
-export async function installAddonFrom(url: string | string[], name: string | undefined = undefined, forceInstall = false) {
+export async function installAddonFrom(url: string | string[], name: string | undefined = undefined, repo: string | undefined = undefined, forceInstall = false) {
   let urls: string[] = [];
   if (typeof url === 'string') {
     urls = [url];
@@ -90,6 +91,9 @@ export async function installAddonFrom(url: string | string[], name: string | un
     try {
       const addonID = await pInstallAddonFrom(xpiUrl, name, forceInstall);
       if (addonID) {
+        if (repo && repo.length) {
+          addonIDMapManager.shared.associateRepoWithID(repo, addonID, false);
+        }
         await Zotero.Promise.delay(1000);
         installSucceed = await AddonManager.getAddonByID(addonID);
         break;
@@ -116,18 +120,18 @@ async function pInstallAddonFrom(url: string, name?: string, forceInstall = fals
     const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
     const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
 
-     // url或插件无效
-    if (!xpiInstaller.addon 
-      || !xpiInstaller.addon.isCompatible 
-      || !xpiInstaller.addon.isPlatformCompatible) { 
-      return; 
+    // url或插件无效
+    if (!xpiInstaller.addon
+      || !xpiInstaller.addon.isCompatible
+      || !xpiInstaller.addon.isPlatformCompatible) {
+      return;
     }
 
     // 非强制安装，下载插件后检查版本号，如果已有版本>=现存版本，跳过
-    if (!forceInstall && 
+    if (!forceInstall &&
       xpiInstaller.existingAddon &&
-      xpiInstaller.existingAddon.version && 
-      xpiInstaller.addon.version && 
+      xpiInstaller.existingAddon.version &&
+      xpiInstaller.addon.version &&
       compareVersion(xpiInstaller.existingAddon.version, xpiInstaller.addon.version) >= 0) {
       return xpiInstaller.addon.id;
     }

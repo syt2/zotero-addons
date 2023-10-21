@@ -5,6 +5,7 @@ import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
 import { compareVersion, installAddonWithPopWindowFrom, uninstall } from "../utils/utils";
+import { addonIDMapManager } from "../utils/addonIDMapManager";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 
@@ -291,9 +292,9 @@ export class AddonTable {
 
   private static async uninstallAddons(addons: AddonInfo[]) {
     const relatedAddon = await this.relatedAddons(addons);
-    relatedAddon.forEach(async ([addonInfo, addon]) => {
+    for (const [addonInfo, addon] of relatedAddon) {
       await uninstall(addon, true);
-    });
+    }
     await this.refresh(false);
   }
 
@@ -302,7 +303,7 @@ export class AddonTable {
       const urls = z7XpiDownloadUrls(addon).filter(x => {
         return (x?.length ?? 0) > 0;
       }) as string[];
-      await installAddonWithPopWindowFrom(urls, addon.name, forceInstall);
+      await installAddonWithPopWindowFrom(urls, addon.name, addon.repo, forceInstall);
     }));
     await this.refresh(false);
   }
@@ -333,7 +334,7 @@ export class AddonTable {
           result["installState"] = getString('state-uncompatible');
         }
       } else {
-        result["installState"] = addonInfo.id ? getString('state-notInstalled') : getString('state-unknown');
+        result["installState"] = (addonInfo.id || addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0]) ? getString('state-notInstalled') : getString('state-unknown');
       }
       return [
         addonInfo,
@@ -390,6 +391,7 @@ export class AddonTable {
         if (addonInfo.name.length > 0 && addonInfo.name === addon.name) { return true; }
         if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) { return true; }
         if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) { return true; }
+        if (addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0] === addon.id) { return true; }
         return false;
       });
       if (relateAddon) {
