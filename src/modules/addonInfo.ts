@@ -58,7 +58,7 @@ export interface AddonInfo {
 }
 
 export function z7XpiDownloadUrls(addonInfo: AddonInfo) {
-  const z7DownloadUrls = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"))?.xpiDownloadUrl; 
+  const z7DownloadUrls = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"))?.xpiDownloadUrl;
   if (!z7DownloadUrls) { return []; }
   switch (currentSource().id) {
     case "source-zotero-chinese-github":

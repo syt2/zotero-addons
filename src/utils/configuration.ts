@@ -2,14 +2,14 @@ import { getString } from "./locale";
 import { getPref, setPref } from "./prefs";
 
 
-type SourceID = 
-"source-zotero-chinese-github" |
-"source-zotero-chinese-gitee" |
-"source-zotero-chinese-jsdelivr" |
-"source-zotero-chinese-ghproxy" |
-"source-zotero-chinese-github-backup" |
-"source-zotero-chinese-ghproxy-backup" |
-"source-custom";
+type SourceID =
+  "source-zotero-chinese-github" |
+  "source-zotero-chinese-gitee" |
+  "source-zotero-chinese-jsdelivr" |
+  "source-zotero-chinese-ghproxy" |
+  "source-zotero-chinese-github-backup" |
+  "source-zotero-chinese-ghproxy-backup" |
+  "source-custom";
 
 interface Source {
   id: SourceID;
@@ -48,7 +48,7 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
 
 export function currentSource(): Readonly<Source> {
   const curSource = getPref('source') as string;
-  const match = Sources.find(source => { 
+  const match = Sources.find(source => {
     return source.id === curSource;
   });
   if (match) { return match; }

@@ -8,16 +8,17 @@ import { compareVersion, installAddonWithPopWindowFrom, uninstall } from "../uti
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 
-type TableMenuItemID = 
-"menu-install" |
-"menu-uninstall" |
-"menu-homepage" | 
-"menu-refresh" | 
-"menu-systemAddon" | 
-"menu-updateAllIfNeed" | 
-"menu-sep";
+type TableMenuItemID =
+  "menu-install" |
+  "menu-uninstall" |
+  "menu-homepage" |
+  "menu-refresh" |
+  "menu-systemAddon" |
+  "menu-updateAllIfNeed" |
+  "menu-sep";
 type AssociatedAddonInfo = [AddonInfo, { [key: string]: string }]
 
+// type TableColumnDataKey = "name" | "description" | "star" | "installState"
 export class AddonTable {
   static registerInToolbar() {
     const node = document.querySelector("#zotero-tb-advanced-search")!;
@@ -55,11 +56,11 @@ export class AddonTable {
     );
     await windowArgs._initPromise.promise;
     this.window = win;
-    
+
     await this.createTable();
 
     await this.replaceSourceSelectList(win.document.querySelector("#sourceContainerPlaceholder"));
-    
+
     (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", e => this.refresh(true));
 
     win.open();
@@ -105,6 +106,7 @@ export class AddonTable {
     return result;
   }
 
+  private static sortOrder: ["name" | "star" | "installState", 1 | -1][] = [["star", 1], ["name", -1], ["installState", -1]];
   private static async createTable() {
     const win = this.window;
     if (!win) { return; }
@@ -140,8 +142,9 @@ export class AddonTable {
         columns: columns,
         showHeader: true,
         multiSelect: true,
-        staticColumns: true,
+        staticColumns: false,
         disableFontSizeScaling: false,
+        linesPerRow: 1.6,
       })
       .setProp("onItemContextMenu", (ev, x, y) => {
         const replaceElem = win.document.querySelector("#listContainerPlaceholder") ?? win.document.querySelector("#listMenu");
@@ -158,6 +161,21 @@ export class AddonTable {
       .setProp("getRowCount", () => this.addonInfos.length)
       .setProp("getRowData", (index) => this.addonInfos[index][1])
       .setProp("getRowString", (index) => this.addonInfos[index][1].name || "")
+      .setProp("onColumnSort", ev => {
+        if (typeof ev === 'number') {
+          const column = (this.tableHelper?.treeInstance as any)._getColumns()[ev];
+          if (column.dataKey === "description") { return; }
+          const idx = this.sortOrder.findIndex(v => v[0] === column.dataKey);
+          const element = this.sortOrder.splice(idx, 1)[0]; // Remove the kth element
+          this.sortOrder.unshift(element); // Add the element to the front
+          this.sortOrder[0][1] = -this.sortOrder[0][1] as any;
+        }
+        this.refresh(false);
+      })
+      .setProp("onActivate", ev => {
+        this.onSelectMenuItem("menu-install");
+        return true;
+      })
       .render(undefined, (_) => {
         this.refresh();
       });
@@ -229,7 +247,7 @@ export class AddonTable {
       },
       ]
     }, oldNode);
-    
+
     (this.window?.document.querySelector("#customSource-container") as HTMLElement).hidden = currentSource().id !== "source-custom";
     (this.window?.document.querySelector("#customSourceInput") as HTMLInputElement).value = customSourceApi();
     (this.window?.document.querySelector("#customSourceInput") as HTMLInputElement).addEventListener("change", event => {
@@ -239,7 +257,6 @@ export class AddonTable {
   }
 
   private static async onSelectMenuItem(item: TableMenuItemID) {
-    // TODO: develop
     const selectAddons: AssociatedAddonInfo[] = [];
     for (const select of this.tableHelper?.treeInstance.selection.selected ?? new Set()) {
       if (select < 0 || select >= this.addonInfos.length) { continue; }
@@ -271,7 +288,7 @@ export class AddonTable {
     }
   }
 
-  
+
   private static async uninstallAddons(addons: AddonInfo[]) {
     const relatedAddon = await this.relatedAddons(addons);
     relatedAddon.forEach(async ([addonInfo, addon]) => {
@@ -323,6 +340,37 @@ export class AddonTable {
         result,
       ]
     }));
+    const stateMap: { [key: string]: number } = {};
+    let idx = 0;
+    stateMap[getString('state-unknown')] = idx++;
+    stateMap[getString('state-notInstalled')] = idx++;
+    stateMap[getString('state-uncompatible')] = idx++;
+    stateMap[getString('state-pendingUninstall')] = idx++;
+    stateMap[getString('state-installed')] = idx++;
+
+    this.addonInfos = this.addonInfos.sort((infoA, infoB) => {
+      const [a, b] = [infoA[0], infoB[0]];
+      for (const order of this.sortOrder) {
+        switch (order[0]) {
+          case "name":
+            if (a.name === b.name) { break; }
+            return a.name < b.name ? order[1] : -order[1]
+          case "star":
+            const [sa, sb] = [a.star ?? 0, b.star ?? 0];
+            if (sa === sb) { break; }
+            return sa < sb ? order[1] : -order[1];
+          case "installState":
+            const [isa, isb] = [infoA[1]['installState'], infoB[1]['installState']];
+            const [isav, isbv] = [stateMap[isa] ?? 0, stateMap[isb] ?? 0];
+            if (isav === isbv) { break; }
+            if (isbv === 0) { return -1; }
+            if (isav === 0) { return 1; }
+            return isav < isbv ? order[1] : -order[1];
+        }
+      }
+      return 0;
+
+    })
   }
 
   private static async updateTable() {
