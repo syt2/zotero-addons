@@ -11,6 +11,9 @@ const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDat
 
 type TableMenuItemID =
   "menu-install" |
+  "menu-update" |
+  "menu-reinstall" |
+  "menu-install-and-update" |
   "menu-uninstall" |
   "menu-homepage" |
   "menu-refresh" |
@@ -77,20 +80,28 @@ export class AddonTable {
     const selects = this.tableHelper?.treeInstance.selection.selected;
 
     if (selects) {
-      result.push("menu-install");
       if (selects.size == 1) {
         const idx = [...selects][0];
         if (idx >= 0 && idx < this.addonInfos.length) {
           const addonInfo = this.addonInfos[idx];
           const relatedAddon = await this.relatedAddons([addonInfo[0]]);
           if (relatedAddon.length > 0) {
+            if (this.addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
+              result.push("menu-update");
+            } else {
+              result.push("menu-reinstall");
+            }
             const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relatedAddon[0][1].id);
             if (dbAddon.length > 0 && !dbAddon[0].pendingUninstall) {
               result.push("menu-uninstall");
             }
+          } else {
+            result.push("menu-install");
           }
         }
         result.push("menu-homepage");
+      } else {
+        result.push("menu-install-and-update");
       }
       result.push("menu-sep");
     }
@@ -265,6 +276,9 @@ export class AddonTable {
     }
     switch (item) {
       case "menu-install":
+      case "menu-reinstall":
+      case "menu-update":
+      case "menu-install-and-update":
         this.installAddons(selectAddons.map(e => e[0]), true);
         break;
       case "menu-uninstall":
@@ -322,18 +336,22 @@ export class AddonTable {
       result["description"] = addonInfo.description ?? "";
       result['star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
       const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
-      if (relateAddon) {
+      if (relateAddon) { /// 本地有该插件
         if (relateAddon[1] && relateAddon[1].isCompatible && relateAddon[1].isPlatformCompatible) {
           const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relateAddon[1].id);
-          if (dbAddon.length > 0 && dbAddon[0].pendingUninstall) {
+          if (dbAddon.length > 0 && dbAddon[0].pendingUninstall) { // 插件被删除
             result["installState"] = getString("state-pendingUninstall");
-          } else {
-            result["installState"] = getString("state-installed");
+          } else { // 插件已安装
+            if (this.addonCanUpdate(relateAddon[0], relateAddon[1])) {
+              result["installState"] = getString("state-outdate");
+            } else {
+              result["installState"] = getString("state-installed");
+            }
           }
-        } else {
+        } else { // 插件不兼容当前zotero
           result["installState"] = getString('state-uncompatible');
         }
-      } else {
+      } else { // 本地未找到该插件
         result["installState"] = (addonInfo.id || addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0]) ? getString('state-notInstalled') : getString('state-unknown');
       }
       return [
@@ -348,6 +366,7 @@ export class AddonTable {
     stateMap[getString('state-uncompatible')] = idx++;
     stateMap[getString('state-pendingUninstall')] = idx++;
     stateMap[getString('state-installed')] = idx++;
+    stateMap[getString('state-outdate')] = idx++;
 
     this.addonInfos = this.addonInfos.sort((infoA, infoB) => {
       const [a, b] = [infoA[0], infoB[0]];
@@ -382,6 +401,14 @@ export class AddonTable {
     });
   }
 
+  private static addonCanUpdate(addonInfo: AddonInfo, addon: any) {
+    const release = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
+    if (!release || (release.xpiDownloadUrl?.github?.length ?? 0) == 0) { return false; }
+    const version = release.currentVersion;
+    if (!version || !addon.version) { return false; }
+    return compareVersion(addon.version, version) < 0;
+  }
+
   private static async relatedAddons(addonInfos: AddonInfo[]) {
     const addons: [AddonInfo, any][] = [];
     for (const addon of await AddonManager.getAllAddons()) {
@@ -403,14 +430,7 @@ export class AddonTable {
 
   private static async outdateAddons() {
     const addons = await this.relatedAddons(this.addonInfos.map(infos => infos[0]));
-    return addons.filter(([addonInfo, addon]) => {
-      const release = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
-      if (!release || (release.xpiDownloadUrl?.github.length ?? 0) == 0) { return false; }
-      const version = release.currentVersion;
-      // if (!addon.isCompatible || !addon.isPlatformCompatible) { return true; }
-      if (!version || !addon.version) { return false; }
-      return compareVersion(addon.version, version) < 0;
-    });
+    return addons.filter(([addonInfo, addon]) => this.addonCanUpdate(addonInfo, addon));
   }
 
   private static async updateExistAddons() {
