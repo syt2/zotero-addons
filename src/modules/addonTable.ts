@@ -78,7 +78,7 @@ export class AddonTable {
       this.onSelectMenuItem("menu-uninstall");
     });
     await this.updateButtonsStatus();
-    win.open();
+    // win.open();
   }
 
   static async close() {

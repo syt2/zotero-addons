@@ -8,8 +8,8 @@
     "addonRef": "zoteroaddons",
     "addonInstance": "ZoteroAddons",
     "prefsPrefix": "extensions.zotero.zoteroaddons",
-    "releasepage": "https://github.com/syt2/zotero-addons/releases/download/0.6.0-3/zotero-addons.xpi",
-    "updaterdf": "https://raw.githubusercontent.com/syt2/zotero-addons/z6/update.json"
+    "releasepage": "https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi",
+    "updaterdf": "https://raw.githubusercontent.com/syt2/zotero-addons/main/update.json"
   },
   "main": "src/index.ts",
   "scripts": {
@@ -40,7 +40,7 @@
   },
   "homepage": "https://github.com/syt2/zotero-addons#readme",
   "dependencies": {
-    "zotero-plugin-toolkit": "^2.1.3"
+    "zotero-plugin-toolkit": "2.1.3"
   },
   "devDependencies": {
     "@types/node": "^20.1.1",
