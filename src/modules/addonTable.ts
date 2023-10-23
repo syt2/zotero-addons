@@ -66,19 +66,15 @@ export class AddonTable {
 
     (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", e => this.refresh(true));
     (win.document.querySelector("#updateAllAddons") as HTMLButtonElement).addEventListener("click", event => {
-      !(win.document.querySelector("#updateAllAddons") as HTMLButtonElement).disabled &&
       this.onSelectMenuItem("menu-updateAllIfNeed");
     });
     (win.document.querySelector("#gotoPage") as HTMLButtonElement).addEventListener("click", event => {
-      !(win.document.querySelector("#gotoPage") as HTMLButtonElement).disabled &&
       this.onSelectMenuItem("menu-homepage");
     });
     (win.document.querySelector("#install") as HTMLButtonElement).addEventListener("click", event => {
-      !(win.document.querySelector("#install") as HTMLButtonElement).disabled &&
       this.onSelectMenuItem("menu-install");
     });
     (win.document.querySelector("#uninstall") as HTMLButtonElement).addEventListener("click", event => {
-      !(win.document.querySelector("#uninstall") as HTMLButtonElement).disabled &&
       this.onSelectMenuItem("menu-uninstall");
     });
     await this.updateButtonsStatus();
@@ -156,9 +152,9 @@ export class AddonTable {
   private static async updateButtonsStatus() {
     const menuItems = await this.tableMenuItems();
     (this.window?.document.querySelector("#updateAllAddons") as HTMLButtonElement).hidden = !(menuItems.includes("menu-updateAllIfNeed"));
-    (this.window?.document.querySelector("#gotoPage") as HTMLButtonElement).disabled = !(menuItems.includes("menu-homepage"));
-    (this.window?.document.querySelector("#install") as HTMLButtonElement).disabled = !(menuItems.includes("menu-install") || menuItems.includes("menu-reinstall") || menuItems.includes("menu-update") || menuItems.includes("menu-install-and-update"));
-    (this.window?.document.querySelector("#uninstall") as HTMLButtonElement).disabled = !(menuItems.includes("menu-uninstall"));
+    (this.window?.document.querySelector("#gotoPage") as HTMLButtonElement).hidden = !(menuItems.includes("menu-homepage"));
+    (this.window?.document.querySelector("#install") as HTMLButtonElement).hidden = !(menuItems.includes("menu-install") || menuItems.includes("menu-reinstall") || menuItems.includes("menu-update") || menuItems.includes("menu-install-and-update"));
+    (this.window?.document.querySelector("#uninstall") as HTMLButtonElement).hidden = !(menuItems.includes("menu-uninstall"));
   }
 
   private static async replaceSourceSelectList(oldNode: Element) {
