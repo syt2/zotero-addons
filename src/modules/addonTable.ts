@@ -373,8 +373,9 @@ export class AddonTable {
       for (const order of this.sortOrder) {
         switch (order[0]) {
           case "name":
-            if (a.name === b.name) { break; }
-            return a.name < b.name ? order[1] : -order[1]
+            const [na, nb] = [a.name.toLowerCase(), b.name.toLowerCase()];
+            if (na === nb) { break; }
+            return na < nb ? order[1] : -order[1]
           case "star":
             const [sa, sb] = [a.star ?? 0, b.star ?? 0];
             if (sa === sb) { break; }
