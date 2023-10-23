@@ -4,6 +4,8 @@ import { addonIDMapManager } from "./addonIDMapManager";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
 
+export const currentInstalledXpis: string[] = [];
+
 export function compareVersion(versionA: string, versionB: string): number {
   const partsA = versionA.toLowerCase().replace('v', '').split('.')
   const partsB = versionB.toLowerCase().replace('v', '').split('.')
@@ -69,7 +71,9 @@ export async function installAddonWithPopWindowFrom(url: string | string[], name
   }).show(-1);
 
   const installSucceed = await installAddonFrom(url, name, repo, forceInstall);
-
+  if (installSucceed && repo) {
+    currentInstalledXpis.push(repo);
+  }
   popWin.changeLine({
     text: `${name} ${installSucceed ? getString("install-succeed") : getString("install-failed")}`,
     type: installSucceed ? "success" : "fail",

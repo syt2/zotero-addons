@@ -6,7 +6,7 @@ type addonIDConfig = [string, boolean]; // addonID, canAutoChange
 export class addonIDMapManager {
   static shared = new addonIDMapManager();
 
-  private autoUpdateDate: number = 0;
+  private autoUpdateDate = 0;
   private repoToAddonIDs: { [key: string]: addonIDConfig } = {};
 
   constructor() {

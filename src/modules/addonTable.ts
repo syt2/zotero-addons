@@ -4,7 +4,7 @@ import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { compareVersion, installAddonWithPopWindowFrom, uninstall } from "../utils/utils";
+import { compareVersion, currentInstalledXpis, installAddonWithPopWindowFrom, uninstall } from "../utils/utils";
 import { addonIDMapManager } from "../utils/addonIDMapManager";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
@@ -54,7 +54,7 @@ export class AddonTable {
     const win = (window as any).openDialog(
       `chrome://${config.addonRef}/content/addons.xhtml`,
       `${config.addonRef}-addons`,
-      `chrome,centerscreen,resizable,status,width=960,height=480,dialog=no`,
+      `chrome,centerscreen,resizable,status,width=1080,height=520,dialog=no`,
       windowArgs,
     );
     await windowArgs._initPromise.promise;
@@ -65,22 +65,23 @@ export class AddonTable {
     await this.replaceSourceSelectList(win.document.querySelector("#sourceContainerPlaceholder"));
 
     (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", e => this.refresh(true));
-    (win.document.querySelector("#updateAllAddons") as HTMLButtonElement).hidden = (await this.outdateAddons()).length <= 0;
     (win.document.querySelector("#updateAllAddons") as HTMLButtonElement).addEventListener("click", event => {
+      !(win.document.querySelector("#updateAllAddons") as HTMLButtonElement).disabled &&
       this.onSelectMenuItem("menu-updateAllIfNeed");
     });
     (win.document.querySelector("#gotoPage") as HTMLButtonElement).addEventListener("click", event => {
+      !(win.document.querySelector("#gotoPage") as HTMLButtonElement).disabled &&
       this.onSelectMenuItem("menu-homepage");
     });
     (win.document.querySelector("#install") as HTMLButtonElement).addEventListener("click", event => {
+      !(win.document.querySelector("#install") as HTMLButtonElement).disabled &&
       this.onSelectMenuItem("menu-install");
     });
-    (win.document.querySelector("#customSource-container") as HTMLElement).hidden = currentSource().id !== "source-custom";
-    (win.document.querySelector("#customSourceInput") as HTMLInputElement).value = customSourceApi();
-    (win.document.querySelector("#customSourceInput") as HTMLInputElement).addEventListener("change", event => {
-      setCustomSourceApi((event.target as HTMLInputElement).value);
-      this.refresh(true);
+    (win.document.querySelector("#uninstall") as HTMLButtonElement).addEventListener("click", event => {
+      !(win.document.querySelector("#uninstall") as HTMLButtonElement).disabled &&
+      this.onSelectMenuItem("menu-uninstall");
     });
+    await this.updateButtonsStatus();
     win.open();
   }
 
@@ -146,9 +147,18 @@ export class AddonTable {
         this.onSelectMenuItem("menu-homepage");
         return true;
       })
+      .setProp("onSelectionChange", ev => { this.updateButtonsStatus(); })
       .render(undefined, (_) => {
         this.refresh();
       });
+  }
+
+  private static async updateButtonsStatus() {
+    const menuItems = await this.tableMenuItems();
+    (this.window?.document.querySelector("#updateAllAddons") as HTMLButtonElement).hidden = !(menuItems.includes("menu-updateAllIfNeed"));
+    (this.window?.document.querySelector("#gotoPage") as HTMLButtonElement).disabled = !(menuItems.includes("menu-homepage"));
+    (this.window?.document.querySelector("#install") as HTMLButtonElement).disabled = !(menuItems.includes("menu-install") || menuItems.includes("menu-reinstall") || menuItems.includes("menu-update") || menuItems.includes("menu-install-and-update"));
+    (this.window?.document.querySelector("#uninstall") as HTMLButtonElement).disabled = !(menuItems.includes("menu-uninstall"));
   }
 
   private static async replaceSourceSelectList(oldNode: Element) {
@@ -240,6 +250,7 @@ export class AddonTable {
       }) as string[];
       await installAddonWithPopWindowFrom(urls, addon.name, addon.repo, forceInstall);
     }));
+    await Zotero.Promise.delay(1000);
     await this.refresh(false);
   }
 
@@ -268,7 +279,7 @@ export class AddonTable {
           result["installState"] = getString('state-uncompatible');
         }
       } else { // 本地未找到该插件
-        result["installState"] = (addonInfo.id || addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0]) ? getString('state-notInstalled') : getString('state-unknown');
+        result["installState"] = currentInstalledXpis.includes(addonInfo.repo) ? getString('state-restart') : (addonInfo.id || addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0]) ? getString('state-notInstalled') : getString('state-unknown');
       }
       return [
         addonInfo,
@@ -281,6 +292,7 @@ export class AddonTable {
     stateMap[getString('state-notInstalled')] = idx++;
     stateMap[getString('state-uncompatible')] = idx++;
     stateMap[getString('state-pendingUninstall')] = idx++;
+    stateMap[getString('state-restart')] = idx++;
     stateMap[getString('state-installed')] = idx++;
     stateMap[getString('state-outdate')] = idx++;
 
@@ -374,4 +386,43 @@ export class AddonTable {
     });
     progressWin.startCloseTimer(3000);
   }
+
+  private static async tableMenuItems() {
+    const result: TableMenuItemID[] = [];
+    const selects = this.tableHelper?.treeInstance.selection.selected;
+
+    if (selects) {
+      if (selects.size == 1) {
+        const idx = [...selects][0];
+        if (idx >= 0 && idx < this.addonInfos.length) {
+          const addonInfo = this.addonInfos[idx];
+          const relatedAddon = await this.relatedAddons([addonInfo[0]]);
+          if (relatedAddon.length > 0) {
+            if (this.addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
+              result.push("menu-update");
+            } else {
+              result.push("menu-reinstall");
+            }
+            result.push("menu-uninstall");
+          } else {
+            result.push("menu-install");
+          }
+        }
+        result.push("menu-homepage");
+      } else if (selects.size > 1) {
+        result.push("menu-install-and-update");
+      }
+      result.push("menu-sep");
+    }
+
+    result.push("menu-refresh");
+
+    if ((await this.outdateAddons()).length > 0) {
+      result.push("menu-sep");
+      result.push("menu-updateAllIfNeed");
+    }
+
+    return result;
+  }
+
 }

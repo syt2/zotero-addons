@@ -54,7 +54,7 @@
       .viewport-container {
         padding: 0;
         margin: 0;
-        height: calc(100% - 90px);
+        height: calc(100% - 50px);
         width: 100%;
         display: flex;
         flex-direction: row;
@@ -85,24 +85,19 @@
       class="footer-container"
       style="padding: 5px"
     >
-    <hbox>
-      <html:button id="updateAllAddons">Update exist Add-ons</html:button>
+
+      <html:button id="updateAllAddons">Update upgradable add-ons</html:button>
       <html:button id="refresh">Refresh</html:button>
       <html:button id="gotoPage">Homepage</html:button>
       <html:button id="install">Install</html:button>
-      <groupbox>
-        <hbox>
-          <label id="selectSource">Select Source:</label>
-          <div id="sourceContainerPlaceholder"></div>
-        </hbox>
-      </groupbox>
-      <groupbox id="customSource-container">
-        <hbox>
-          <label id="customSourceInput" style="margin-top: 6px;">Custom Source: </label>
-          <html:input type="text" id="customSourceInput"></html:input>
-        </hbox>
-      </groupbox>
-    </hbox>
+      <html:button id="uninstall">Uninstall</html:button>
+      <label id="selectSource">Select Source: </label>
+      <div id="sourceContainerPlaceholder"></div>
+      <hbox id="customSource-container">
+        <label id="customSourceInput" style="margin-top: 6px;">Custom Source: </label>
+        <html:input type="text" id="customSourceInput"></html:input>
+      </hbox>
+
     </div>
   </body>
 </html>
