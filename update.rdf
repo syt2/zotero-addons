@@ -11,7 +11,7 @@
                 <em:id>zotero@chnm.gmu.edu</em:id>
                 <em:minVersion>5.999</em:minVersion>
                 <em:maxVersion>*</em:maxVersion>
-                <em:updateLink>https://github.com/syt2/zotero-addons/releases/z6</em:updateLink>
+                <em:updateLink>https://github.com/syt2/zotero-addons/releases/download/0.6.0-1/zotero-addons.xpi</em:updateLink>
               </rdf:Description>
             </em:targetApplication>
             <em:targetApplication>
@@ -19,7 +19,7 @@
                 <em:id>juris-m@juris-m.github.io</em:id>
                 <em:minVersion>5.999</em:minVersion>
                 <em:maxVersion>*</em:maxVersion>
-                <em:updateLink>https://github.com/syt2/zotero-addons/releases/z6</em:updateLink>
+                <em:updateLink>https://github.com/syt2/zotero-addons/releases/download/0.6.0-1/zotero-addons.xpi</em:updateLink>
               </rdf:Description>
             </em:targetApplication>
           </rdf:Description>

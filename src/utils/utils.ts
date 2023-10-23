@@ -108,24 +108,17 @@ export async function installAddonFrom(url: string | string[], name: string | un
 
 async function pInstallAddonFrom(url: string, name?: string, forceInstall = false): Promise<string | undefined> {
   const xpiName = name ?? extractFileNameFromUrl(url) ?? "tmp.xpi";
-  Zotero.log(`install ${xpiName} from ${url}`);
   try {
-    Zotero.log('000');
     const response = await Zotero.HTTP.request('GET', url, {
       responseType: 'arraybuffer',
     });
-    Zotero.log('123');
     const xpiDownloadPath = OS.Path.join(
       OS.Constants.Path.tmpDir,
       xpiName,
     );
-    Zotero.log('1234');
     await OS.File.writeAtomic(xpiDownloadPath, response.response);
-    Zotero.log('1235');
     const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
-    Zotero.log('1236');
     const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
-    Zotero.log('1111');
 
     // url或插件无效
     if (!xpiInstaller.addon
@@ -133,7 +126,6 @@ async function pInstallAddonFrom(url: string, name?: string, forceInstall = fals
       || !xpiInstaller.addon.isPlatformCompatible) {
       return;
     }
-    Zotero.log('2222');
 
     // 非强制安装，下载插件后检查版本号，如果已有版本>=现存版本，跳过
     if (!forceInstall &&
@@ -143,10 +135,7 @@ async function pInstallAddonFrom(url: string, name?: string, forceInstall = fals
       compareVersion(xpiInstaller.existingAddon.version, xpiInstaller.addon.version) >= 0) {
       return xpiInstaller.addon.id;
     }
-    Zotero.log('3333');
     xpiInstaller.install();
-    Zotero.log('4444');
-    Zotero.log(xpiInstaller.addon.id);
     return xpiInstaller.addon.id;
   } catch (error) {
     ztoolkit.log(`install addon ${xpiName} from ${url} failed: ${error}`);

@@ -8,7 +8,7 @@
     "addonRef": "zoteroaddons",
     "addonInstance": "ZoteroAddons",
     "prefsPrefix": "extensions.zotero.zoteroaddons",
-    "releasepage": "https://github.com/syt2/zotero-addons/releases/download/0.0.1/zotero-addons.xpi",
+    "releasepage": "https://github.com/syt2/zotero-addons/releases/download/0.6.0-1/zotero-addons.xpi",
     "updaterdf": "https://raw.githubusercontent.com/syt2/zotero-addons/z6/update.json"
   },
   "main": "src/index.ts",
