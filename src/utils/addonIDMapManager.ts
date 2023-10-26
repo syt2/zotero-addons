@@ -1,26 +1,25 @@
+import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 import { AddonInfo } from "../modules/addonInfo";
 import { Sources } from "./configuration";
-import { getPref, setPref } from "./prefs";
+import { config } from "../../package.json";
 
 type addonIDConfig = [string, boolean]; // addonID, canAutoChange
 export class addonIDMapManager {
+
   static shared = new addonIDMapManager();
 
   private autoUpdateDate: number = 0;
   private repoToAddonIDs: { [key: string]: addonIDConfig } = {};
+  private largePrefHelper: LargePrefHelper = new LargePrefHelper("zotero.addons.idmap", config.prefsPrefix, "parser");
 
   constructor() {
     try {
-      const addonIDMapString = getPref('addonIDMap');
-      if (typeof addonIDMapString === 'string') {
-        const obj = JSON.parse(addonIDMapString);
-        this.autoUpdateDate = obj.updateDate ?? 0;
-        this.repoToAddonIDs = obj.repoToAddonIDs ?? {};
-      }
+      const addonIDMap = this.largePrefHelper.getValue('addonIDMap');
+      this.autoUpdateDate = addonIDMap.updateDate ?? 0;
+      this.repoToAddonIDs = addonIDMap.repoToAddonIDs ?? {};
     } catch (error) {
       this.autoUpdateDate = 0;
       this.repoToAddonIDs = {};
-      ztoolkit.log(`read from addonIDMap failed: ${error}`);
     }
   }
 
@@ -30,10 +29,10 @@ export class addonIDMapManager {
 
   associateRepoWithID(repo: string, addonID: string, canAutoChange: boolean) {
     this.repoToAddonIDs[repo] = [addonID, canAutoChange];
-    setPref('addonIDMap', JSON.stringify({
+    this.largePrefHelper.setValue('addonIDMap', {
       updateDate: this.autoUpdateDate,
       repoToAddonIDs: this.repoToAddonIDs,
-    }));
+    });
   }
 
   async fetchAddonIDIfNeed() {
@@ -58,10 +57,10 @@ export class addonIDMapManager {
           this.repoToAddonIDs[addon.repo] = [addon.id!, true];
         }
         this.autoUpdateDate = new Date().getTime();
-        setPref('addonIDMap', JSON.stringify({
+        this.largePrefHelper.setValue('addonIDMap', {
           updateDate: this.autoUpdateDate,
           repoToAddonIDs: this.repoToAddonIDs,
-        }));
+        });
         break;
       } catch (error) {
         ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);

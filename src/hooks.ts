@@ -6,6 +6,7 @@ import { AddonInfoManager } from "./modules/addonInfo";
 import { Sources, setCurrentSource, setCustomSourceApi } from "./utils/configuration";
 import { extractFileNameFromUrl, installAddonWithPopWindowFrom } from "./utils/utils";
 import { addonIDMapManager } from "./utils/addonIDMapManager";
+import { getPref, clearPref } from "./utils/prefs";
 
 async function onStartup() {
   await Promise.all([
@@ -22,6 +23,14 @@ async function onStartup() {
   addonIDMapManager.shared.fetchAddonIDIfNeed();
 
   await onMainWindowLoad(window);
+
+  // 1.2.6 使用LargePrefHelper保存，删除1.2.5旧数据
+  if (getPref('addonIDMap')) {
+    clearPref('addonIDMap');
+  }
+  if (getPref('columnSortOrder')) {
+    clearPref('columnSortOrder')
+  }
 }
 
 async function onMainWindowLoad(win: Window): Promise<void> {

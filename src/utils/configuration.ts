@@ -27,7 +27,7 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
   },
   {
     id: "source-zotero-chinese-jsdelivr",
-    api: "https://cdn.jsdelivr.net/gh/northword/zotero-plugins@gh-pages/dist/plugins.json",
+    api: "https://cdn.jsdelivr.net/gh/zotero-chinese/zotero-plugins@gh-pages/dist/plugins.json",
   },
   {
     id: "source-zotero-chinese-ghproxy",

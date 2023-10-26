@@ -1,4 +1,4 @@
-import { VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
+import { ColumnOptions, VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
@@ -6,6 +6,7 @@ import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
 import { compareVersion, installAddonWithPopWindowFrom, uninstall } from "../utils/utils";
 import { addonIDMapManager } from "../utils/addonIDMapManager";
+import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 
@@ -14,6 +15,8 @@ type TableMenuItemID =
   "menu-update" |
   "menu-reinstall" |
   "menu-install-and-update" |
+  "menu-enable" |
+  "menu-disable" |
   "menu-uninstall" |
   "menu-homepage" |
   "menu-refresh" |
@@ -21,8 +24,15 @@ type TableMenuItemID =
   "menu-updateAllIfNeed" |
   "menu-sep";
 type AssociatedAddonInfo = [AddonInfo, { [key: string]: string }]
+type ColumnSelectMenu = 
+  "menu-name" | 
+  "menu-desc" | 
+  "menu-star" | 
+  "menu-remote-update-time" |
+  "menu-remote-version" |
+  "menu-local-version" |
+  "menu-install-state";
 
-// type TableColumnDataKey = "name" | "description" | "star" | "installState"
 export class AddonTable {
   static registerInToolbar() {
     const node = document.querySelector("#zotero-tb-advanced-search")!;
@@ -86,10 +96,19 @@ export class AddonTable {
           const addonInfo = this.addonInfos[idx];
           const relatedAddon = await this.relatedAddons([addonInfo[0]]);
           if (relatedAddon.length > 0) {
-            if (this.addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
+            if (relatedAddon[0][1].appDisabled) {
+              result.push("menu-reinstall");
+            } else if (this.addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
               result.push("menu-update");
             } else {
               result.push("menu-reinstall");
+            }
+            if (!relatedAddon[0][1].appDisabled) {
+              if (relatedAddon[0][1].userDisabled) {
+                result.push("menu-enable");
+              } else {
+                result.push("menu-disable");
+              }
             }
             const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relatedAddon[0][1].id);
             if (dbAddon.length > 0 && !dbAddon[0].pendingUninstall) {
@@ -118,35 +137,16 @@ export class AddonTable {
     return result;
   }
 
-  private static sortOrder: ["name" | "star" | "installState", 1 | -1][] = [["star", 1], ["name", -1], ["installState", -1]];
   private static async createTable() {
     const win = this.window;
     if (!win) { return; }
-    const columns = [
-      {
-        dataKey: "name",
-        label: "name",
-        staticWidth: true,
-      },
-      {
-        dataKey: "description",
-        label: "description",
-        fixedWidth: false,
-      },
-      {
-        dataKey: "star",
-        label: "stars",
-        staticWidth: true,
-        width: 50,
-      },
-      {
-        dataKey: "installState",
-        label: "state",
-        staticWidth: true,
-        width: 95,
-      },
-    ].map(column => Object.assign(column, { label: getString(column.label) }));
-
+    const columns = this.columns.slice().sort((a, b) => ((a as any).ordinal ?? 0) - ((b as any).ordinal ?? 0));
+    let canStoreColumnPrefs = false;
+    (async () => {
+      // storeColumnPrefs 会在加载table时就运行，此时并不想保存起状态，因此先做个延迟解决下这个case
+      await Zotero.Promise.delay(666);
+      canStoreColumnPrefs = true;
+    })();
     this.tableHelper = new ztoolkit.VirtualizedTable(win)
       .setContainerId(`table-container`)
       .setProp({
@@ -158,31 +158,46 @@ export class AddonTable {
         disableFontSizeScaling: false,
         linesPerRow: 1.6,
       })
+      .setProp("getRowCount", () => this.addonInfos.length)
+      .setProp("getRowData", (index) => this.addonInfos[index][1])
+      .setProp("getRowString", (index) => this.addonInfos[index][1].name || "")
       .setProp("onItemContextMenu", (ev, x, y) => {
         const replaceElem = win.document.querySelector("#listContainerPlaceholder") ?? win.document.querySelector("#listMenu");
         if (!replaceElem) { return false; }
         (async () => {
           await this.replaceRightClickMenu(replaceElem);
           await Zotero.Promise.delay(10);
-          // found in Zotero.getActiveZoteroPane().onItemsContextMenuOpen
+          // found in ZoteroPane.onItemsContextMenuOpen
           if (Zotero.isWin) { x += 10; }
           (win.document.querySelector("#listMenu") as any).openPopupAtScreen(x + 1, y + 1, true);
         })();
         return true;
       })
-      .setProp("getRowCount", () => this.addonInfos.length)
-      .setProp("getRowData", (index) => this.addonInfos[index][1])
-      .setProp("getRowString", (index) => this.addonInfos[index][1].name || "")
       .setProp("onColumnSort", ev => {
-        if (typeof ev === 'number') {
-          const column = (this.tableHelper?.treeInstance as any)._getColumns()[ev];
-          if (column.dataKey === "description") { return; }
-          const idx = this.sortOrder.findIndex(v => v[0] === column.dataKey);
-          const element = this.sortOrder.splice(idx, 1)[0]; // Remove the kth element
-          this.sortOrder.unshift(element); // Add the element to the front
-          this.sortOrder[0][1] = -this.sortOrder[0][1] as any;
+        if (typeof ev !== 'number') { return; }
+        const treeInstance = this.tableHelper?.treeInstance as any;
+        if (ev < 0 || (ev >= treeInstance._getColumns()?.length ?? 0)) { return; }
+        const column = treeInstance?._getColumns()[ev];
+        // 不接受排序的column
+        if (["menu-desc", "menu-remote-version", "menu-local-version"].includes(column.dataKey)) {
+          delete treeInstance?._columns?._columns[ev]?.sortDirection;
         }
+        this.updateColumns();
         this.refresh(false);
+      })
+      .setProp("onColumnPickerMenu", ev => {
+        const replaceElem = win.document.querySelector("#listContainerColumnMenuPlaceholder") ?? win.document.querySelector("#listColumnMenu");
+        if (!replaceElem) { return false; }
+        (async () => {
+          await this.replaceColumnSelectMenu(replaceElem);
+          await Zotero.Promise.delay(10);
+          (win.document.querySelector("#listColumnMenu") as any).openPopupAtScreen(win.screenX + (ev as any).clientX + 2, win.screenY + (ev as any).clientY + 2, true);
+        })();
+        return true;
+      })
+      .setProp("storeColumnPrefs", ev => {
+        if (!canStoreColumnPrefs) { return; }
+        this.updateColumns();
       })
       .setProp("onActivate", ev => {
         this.onSelectMenuItem("menu-homepage");
@@ -197,10 +212,6 @@ export class AddonTable {
     ztoolkit.UI.replaceElement({
       tag: "menupopup",
       id: "listMenu",
-      attributes: {
-        value: currentSource().id,
-        native: "true",
-      },
       listeners: [{
         type: "command",
         listener: async (ev) => {
@@ -268,6 +279,34 @@ export class AddonTable {
     });
   }
 
+  private static async replaceColumnSelectMenu(oldNode: Element) {
+    const columns = this.columns.slice().sort((a, b) => ((a as any).ordinal ?? 0) - ((b as any).ordinal ?? 0));
+    const allColumnSelectMenus = columns.filter(c => c.dataKey !== "menu-name").map(c => c.dataKey);
+    ztoolkit.UI.replaceElement({
+      tag: "menupopup",
+      id: "listColumnMenu",
+      listeners: [{
+        type: "command",
+        listener: async (ev) => {
+          const selectValue = (ev.target as any).getAttribute("value");
+          const idx = ((this.tableHelper?.treeInstance as any)._getColumns()).findIndex((c: any) => c.dataKey === selectValue);
+          if (idx >= 0) {
+            (this.tableHelper?.treeInstance as any)._columns.toggleHidden(idx);
+          }
+        },
+      }],
+      children: allColumnSelectMenus.map(menuItem => ({
+        tag: "menuitem",
+        attributes: {
+          label: getString(menuItem),
+          value: menuItem,
+          checked: !((this.columns.find(column => column.dataKey === menuItem) as any)?.hidden),
+          // disabled: this.columnSelectMenus.length <= 1 && this.columnSelectMenus.includes(menuItem),
+        }
+      }))
+    }, oldNode);
+  }
+
   private static async onSelectMenuItem(item: TableMenuItemID) {
     const selectAddons: AssociatedAddonInfo[] = [];
     for (const select of this.tableHelper?.treeInstance.selection.selected ?? new Set()) {
@@ -282,7 +321,13 @@ export class AddonTable {
         this.installAddons(selectAddons.map(e => e[0]), true);
         break;
       case "menu-uninstall":
-        this.uninstallAddons(selectAddons.map(e => e[0]))
+        this.uninstallAddons(selectAddons.map(e => e[0]));
+        break;
+      case "menu-enable":
+        this.enableAddons(selectAddons.map(e => e[0]), true);
+        break;
+      case "menu-disable":
+        this.enableAddons(selectAddons.map(e => e[0]), false);
         break;
       case "menu-homepage":
         selectAddons.forEach(addon => {
@@ -303,6 +348,13 @@ export class AddonTable {
     }
   }
 
+  private static async enableAddons(addons: AddonInfo[], enable: boolean) {
+    const relatedAddon = await this.relatedAddons(addons);
+    for (const [addonInfo, addon] of relatedAddon) {
+      enable ? await addon.enable() : await addon.disable();
+    }
+    await this.refresh(false);
+  }
 
   private static async uninstallAddons(addons: AddonInfo[]) {
     const relatedAddon = await this.relatedAddons(addons);
@@ -332,66 +384,92 @@ export class AddonTable {
     const relateAddons = await this.relatedAddons(addonInfos);
     this.addonInfos = await Promise.all(addonInfos.map(async addonInfo => {
       const result: { [key: string]: string } = {};
-      result["name"] = addonInfo.name;
-      result["description"] = addonInfo.description ?? "";
-      result['star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
+      result["menu-name"] = addonInfo.name;
+      result["menu-desc"] = addonInfo.description ?? "";
+      result['menu-star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
+      result["menu-remote-version"] = this.addonReleaseInfo(addonInfo)?.currentVersion?.toLowerCase().replace('v', '')  ?? "";
+      result["menu-local-version"] = "";
+      result["menu-remote-update-time"] = this.addonReleaseInfo(addonInfo)?.releaseData ?? "";
+      const inputDate = new Date(this.addonReleaseInfo(addonInfo)?.releaseData ?? "");
+      if (inputDate) {
+        const year = inputDate.getFullYear();
+        const month = String(inputDate.getMonth() + 1).padStart(2, '0');
+        const day = String(inputDate.getDate()).padStart(2, '0');
+        const hours = String(inputDate.getHours()).padStart(2, '0');
+        const minutes = String(inputDate.getMinutes()).padStart(2, '0');
+        const seconds = String(inputDate.getSeconds()).padStart(2, '0');
+        const formattedDate = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+        result["menu-remote-update-time"] = formattedDate;
+      }
       const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
       if (relateAddon) { /// 本地有该插件
+        result["menu-local-version"] = relateAddon[1]?.version ?? "";
         if (relateAddon[1] && relateAddon[1].isCompatible && relateAddon[1].isPlatformCompatible) {
           const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relateAddon[1].id);
           if (dbAddon.length > 0 && dbAddon[0].pendingUninstall) { // 插件被删除
-            result["installState"] = getString("state-pendingUninstall");
+            result["menu-install-state"] = getString("state-pendingUninstall");
           } else { // 插件已安装
-            if (this.addonCanUpdate(relateAddon[0], relateAddon[1])) {
-              result["installState"] = getString("state-outdate");
+            if (relateAddon[1].appDisabled) { // 可能因为不兼容被系统禁用了
+              result["menu-install-state"] = getString('state-uncompatible');
+            } else if (relateAddon[1].userDisabled) {
+              result["menu-install-state"] = getString('state-disabled')
+            } else if (this.addonCanUpdate(relateAddon[0], relateAddon[1])) {
+              result["menu-install-state"] = getString("state-outdate");
             } else {
-              result["installState"] = getString("state-installed");
+              result["menu-install-state"] = getString("state-installed");
             }
           }
         } else { // 插件不兼容当前zotero
-          result["installState"] = getString('state-uncompatible');
+          result["menu-install-state"] = getString('state-uncompatible');
         }
       } else { // 本地未找到该插件
-        result["installState"] = (addonInfo.id || addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0]) ? getString('state-notInstalled') : getString('state-unknown');
+        result["menu-install-state"] = (addonInfo.id || addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0]) ? getString('state-notInstalled') : getString('state-unknown');
       }
       return [
         addonInfo,
         result,
       ]
     }));
+
     const stateMap: { [key: string]: number } = {};
     let idx = 0;
     stateMap[getString('state-unknown')] = idx++;
     stateMap[getString('state-notInstalled')] = idx++;
     stateMap[getString('state-uncompatible')] = idx++;
+    stateMap[getString('state-disabled')] = idx++;
     stateMap[getString('state-pendingUninstall')] = idx++;
     stateMap[getString('state-installed')] = idx++;
     stateMap[getString('state-outdate')] = idx++;
 
-    this.addonInfos = this.addonInfos.sort((infoA, infoB) => {
-      const [a, b] = [infoA[0], infoB[0]];
-      for (const order of this.sortOrder) {
-        switch (order[0]) {
-          case "name":
-            const [na, nb] = [a.name.toLowerCase(), b.name.toLowerCase()];
-            if (na === nb) { break; }
-            return na < nb ? order[1] : -order[1]
-          case "star":
-            const [sa, sb] = [a.star ?? 0, b.star ?? 0];
-            if (sa === sb) { break; }
-            return sa < sb ? order[1] : -order[1];
-          case "installState":
-            const [isa, isb] = [infoA[1]['installState'], infoB[1]['installState']];
-            const [isav, isbv] = [stateMap[isa] ?? 0, stateMap[isb] ?? 0];
-            if (isav === isbv) { break; }
-            if (isbv === 0) { return -1; }
-            if (isav === 0) { return 1; }
-            return isav < isbv ? order[1] : -order[1];
+    const sortColumn = this.columns.find(column => 'sortDirection' in column);
+    if (sortColumn) {
+      const sortOrder = (sortColumn as any).sortDirection;
+      this.addonInfos = this.addonInfos.sort((infoA, infoB) => {
+        const [a, b] = [infoA[0], infoB[0]];
+        let l, r;
+        switch (sortColumn.dataKey) {
+          case "menu-name":
+            [l, r] = [a.name.toLowerCase(), b.name.toLowerCase()];
+            if (l == r) { break; }
+            return l > r ? sortOrder : -sortOrder;
+          case "menu-star":
+            [l, r] = [a.star ?? 0, b.star ?? 0];
+            if (l == r) { break; }
+            return l > r ? sortOrder : -sortOrder;
+          case "menu-install-state":
+            [l, r] = [stateMap[infoA[1]['menu-install-state']] ?? 0, stateMap[infoB[1]['menu-install-state']] ?? 0];
+            if (l === r) { break; }
+            if (l === 0) { return -1; }
+            if (r === 0) { return 1; }
+            return l > r ? sortOrder : -sortOrder;
+          case "menu-remote-update-time":
+            [l, r] = [this.addonReleaseInfo(a)?.releaseData ?? "", this.addonReleaseInfo(b)?.releaseData ?? ""];
+            if (l == r) { break; }
+            return l > r ? sortOrder : -sortOrder;
         }
-      }
-      return 0;
-
-    })
+        return 0;
+      });
+    }
   }
 
   private static async updateTable() {
@@ -402,10 +480,14 @@ export class AddonTable {
     });
   }
 
-  private static addonCanUpdate(addonInfo: AddonInfo, addon: any) {
+  private static addonReleaseInfo(addonInfo: AddonInfo) {
     const release = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
-    if (!release || (release.xpiDownloadUrl?.github?.length ?? 0) == 0) { return false; }
-    const version = release.currentVersion;
+    if (!release || (release.xpiDownloadUrl?.github?.length ?? 0) == 0) { return; }
+    return release
+  }
+
+  private static addonCanUpdate(addonInfo: AddonInfo, addon: any) {
+    const version = this.addonReleaseInfo(addonInfo)?.currentVersion;
     if (!version || !addon.version) { return false; }
     return compareVersion(addon.version, version) < 0;
   }
@@ -458,5 +540,86 @@ export class AddonTable {
       type: "success",
     });
     progressWin.startCloseTimer(3000);
+  }
+
+
+  private static largePrefHelper = new LargePrefHelper("zotero.addons.ui", config.prefsPrefix, "parser");
+  private static _columns: ColumnOptions[] = [];
+  private static get columns(): ColumnOptions[] {
+    if (this._columns.length > 0) { return this._columns; }
+    const oriCol = [
+      {
+        dataKey: "menu-name",
+        label: "menu-name",
+        staticWidth: true,
+        hidden: false,
+      },
+      {
+        dataKey: "menu-desc",
+        label: "menu-desc",
+        fixedWidth: false,
+        hidden: false,
+      },
+      {
+        dataKey: "menu-star",
+        label: "menu-star",
+        staticWidth: true,
+        width: 50,
+        hidden: false,
+      },
+      {
+        dataKey: "menu-remote-update-time",
+        label: "menu-remote-update-time",
+        staticWidth: true,
+        width: 150,
+        hidden: true,
+      },
+      {
+        dataKey: "menu-remote-version",
+        label: "menu-remote-version",
+        staticWidth: true,
+        width: 100,
+        hidden: true,
+      },
+      {
+        dataKey: "menu-local-version",
+        label: "menu-local-version",
+        staticWidth: true,
+        width: 85,
+        hidden: true,
+      },
+      {
+        dataKey: "menu-install-state",
+        label: "menu-install-state",
+        staticWidth: true,
+        width: 95,
+        hidden: false,
+      },
+    ];
+    this._columns = oriCol;
+    try {
+      const result = this.largePrefHelper.getValue("columns") as ColumnOptions[];
+      if (result.length === this._columns.length) { 
+        this._columns = result;
+      }
+    } catch (error) {
+      //
+    }
+    this._columns.map(column => Object.assign(column, { label: getString(column.dataKey) }));
+    return this._columns;
+  }
+  private static updateColumns() {
+    try {
+      this._columns = (this.tableHelper?.treeInstance as any)?._getColumns() as ColumnOptions[];
+      if (this._columns.length > 0) {
+        this._columns = this._columns.map((column: any) => {
+          const { ["className"]: removedClassNameAttr, ...newObjWithourClassName } = column;
+          return newObjWithourClassName;
+        });
+        this.largePrefHelper.setValue("columns", this._columns);
+      }
+    } catch (error) {
+      ztoolkit.log(`updateColumns failed: ${error}`);
+    }
   }
 }
