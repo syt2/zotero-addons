@@ -24,6 +24,9 @@ async function onStartup() {
 
   await onMainWindowLoad(window);
 
+  // 首次在新版本上启动时检查不兼容插件
+  AddonTable.checkUncompatibleAtFirstTime();
+
   // 1.2.6 使用LargePrefHelper保存，删除1.2.5旧数据
   if (getPref('addonIDMap')) {
     clearPref('addonIDMap');

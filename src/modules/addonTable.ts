@@ -4,9 +4,10 @@ import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { compareVersion, installAddonWithPopWindowFrom, uninstall } from "../utils/utils";
+import { compareVersion, installAddonWithPopWindowFrom, undoUninstall, uninstall } from "../utils/utils";
 import { addonIDMapManager } from "../utils/addonIDMapManager";
 import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
+import { getPref, setPref } from "../utils/prefs";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 
@@ -18,6 +19,7 @@ type TableMenuItemID =
   "menu-enable" |
   "menu-disable" |
   "menu-uninstall" |
+  "menu-uninstall-undo" |
   "menu-homepage" |
   "menu-refresh" |
   "menu-systemAddon" |
@@ -47,6 +49,33 @@ export class AddonTable {
     });
     newNode.style.listStyleImage = `url(chrome://${config.addonRef}/content/icons/favicon@32.png)`;
     document.querySelector("#zotero-items-toolbar")?.insertBefore(newNode, node?.nextElementSibling);
+  }
+
+  static async checkUncompatibleAtFirstTime() {
+    const key = 'checkUncompatibleAddonsIn' + (ztoolkit.isZotero7() ? "7" : "6");
+    if (getPref(key)) { return; }
+    await this.updateAddonInfos(true);
+    const relateAddon = await this.relatedAddons(this.addonInfos.map(infos => infos[0]));
+    setPref(key, true);
+    const uncompatibleAddons = relateAddon.filter(e => e[1].appDisabled || !e[1].isCompatible || !e[1].isPlatformCompatible);
+    if (uncompatibleAddons.length <= 0) {
+      return;
+    }
+    const confirm = await Services.prompt.confirmEx(
+      null,
+      getString('update-all-uncompatible-title'),
+      getString('update-all-uncompatible-message'),
+      Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING + Services.prompt.BUTTON_POS_1 * Services.prompt.BUTTON_TITLE_CANCEL,
+      getString('update-all-uncompatible-confirm'),
+      null,
+      null,
+      "",
+      {}
+    );
+    if (confirm !== 0) {
+      return;
+    }
+    await this.installAddons(uncompatibleAddons.map(e => e[0]), true);
   }
 
   private static addonInfos: AssociatedAddonInfo[] = [];
@@ -103,16 +132,16 @@ export class AddonTable {
             } else {
               result.push("menu-reinstall");
             }
-            if (!relatedAddon[0][1].appDisabled) {
+            const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relatedAddon[0][1].id);
+            if (dbAddon.length > 0) {
+              result.push(dbAddon[0].pendingUninstall ? "menu-uninstall-undo" : "menu-uninstall");
+            }
+            if (!relatedAddon[0][1].appDisabled && (dbAddon.length <= 0 || !dbAddon[0].pendingUninstall)) {
               if (relatedAddon[0][1].userDisabled) {
                 result.push("menu-enable");
               } else {
                 result.push("menu-disable");
               }
-            }
-            const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relatedAddon[0][1].id);
-            if (dbAddon.length > 0 && !dbAddon[0].pendingUninstall) {
-              result.push("menu-uninstall");
             }
           } else {
             result.push("menu-install");
@@ -323,6 +352,9 @@ export class AddonTable {
       case "menu-uninstall":
         this.uninstallAddons(selectAddons.map(e => e[0]));
         break;
+      case "menu-uninstall-undo":
+        this.undoUninstallAddons(selectAddons.map(e => e[0]));
+        break;
       case "menu-enable":
         this.enableAddons(selectAddons.map(e => e[0]), true);
         break;
@@ -360,6 +392,14 @@ export class AddonTable {
     const relatedAddon = await this.relatedAddons(addons);
     for (const [addonInfo, addon] of relatedAddon) {
       await uninstall(addon, true);
+    }
+    await this.refresh(false);
+  }
+
+  private static async undoUninstallAddons(addons: AddonInfo[]) {
+    const relatedAddon = await this.relatedAddons(addons);
+    for (const [addonInfo, addon] of relatedAddon) {
+      await undoUninstall(addon);
     }
     await this.refresh(false);
   }
@@ -404,12 +444,12 @@ export class AddonTable {
       const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
       if (relateAddon) { /// 本地有该插件
         result["menu-local-version"] = relateAddon[1]?.version ?? "";
-        if (relateAddon[1] && relateAddon[1].isCompatible && relateAddon[1].isPlatformCompatible) {
+        if (relateAddon[1]) {
           const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relateAddon[1].id);
           if (dbAddon.length > 0 && dbAddon[0].pendingUninstall) { // 插件被删除
             result["menu-install-state"] = getString("state-pendingUninstall");
           } else { // 插件已安装
-            if (relateAddon[1].appDisabled) { // 可能因为不兼容被系统禁用了
+            if (relateAddon[1].appDisabled || !relateAddon[1].isCompatible || !relateAddon[1].isPlatformCompatible) {
               result["menu-install-state"] = getString('state-uncompatible');
             } else if (relateAddon[1].userDisabled) {
               result["menu-install-state"] = getString('state-disabled')

@@ -17,6 +17,14 @@ export function compareVersion(versionA: string, versionB: string): number {
   return 0; // 版本号相同
 }
 
+export async function undoUninstall(addon: any) {
+  try {
+    addon.cancelUninstall();
+  } catch (error) {
+    ztoolkit.log(`undo ${addon.name} failed: ${error}`);
+  }
+}
+
 export async function uninstall(addon: any, popConfirmDialog = true) {
   if (popConfirmDialog) {
     const confirm = await Services.prompt.confirmEx(
