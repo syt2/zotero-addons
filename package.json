@@ -1,6 +1,6 @@
 {
   "name": "zotero-addons",
-  "version": "0.6.0-3",
+  "version": "0.6.0-4",
   "description": "Zotero Addon Collection",
   "config": {
     "addonName": "Zotero Addons",
@@ -8,8 +8,8 @@
     "addonRef": "zoteroaddons",
     "addonInstance": "ZoteroAddons",
     "prefsPrefix": "extensions.zotero.zoteroaddons",
-    "releasepage": "https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi",
-    "updaterdf": "https://raw.githubusercontent.com/syt2/zotero-addons/main/update.json"
+    "releasepage": "https://github.com/syt2/zotero-addons/releases/download/0.6.0-4/zotero-addons.xpi",
+    "updaterdf": "https://raw.githubusercontent.com/syt2/zotero-addons/z6/update.json"
   },
   "main": "src/index.ts",
   "scripts": {
