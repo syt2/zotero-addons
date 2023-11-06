@@ -166,14 +166,14 @@ Replace the steps above and build you first plugin in 30 seconds!
       releasepage, // URL to releases(`.xpi`)
       updaterdf, // URL to update.json
       addonName, // name to be displayed in the plugin manager
-      addonID, // ID to avoid confliction. IMPORTANT!
+      addonID, // ID to avoid conflict. IMPORTANT!
       addonRef, // e.g. Element ID prefix
       addonInstance // the plugin's root instance: Zotero.${addonInstance}
     }
   }
   ```
 
-  > Be careful to set the addonID and addonRef to avoid confliction.
+  > Be careful to set the addonID and addonRef to avoid conflict.
 
 - Run `npm install` to set up the plugin and install dependencies. If you don't have NodeJS installed, please download it [here](https://nodejs.org/en/);
 - Run `npm run build` to build the plugin in production mode. Run `npm run build-dev` to build the plugin in development mode. The xpi for installation and the built code is under `build` folder.
