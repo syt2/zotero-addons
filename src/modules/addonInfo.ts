@@ -96,11 +96,16 @@ export class AddonInfoManager {
       while (this._fetching) {
         await new Promise((reslove) => setTimeout(reslove, 500));
       }
-      return this.addonInfos;
+      if (!forceRefresh) {
+        return this.addonInfos;
+      }
     }
     // 不在刷新，则置为刷新态并刷新
     this._fetching = true;
-    this._addonInfos = await AddonInfoAPI.fetchAddonInfos();
+    const infos = await AddonInfoAPI.fetchAddonInfos();
+    if (infos.length > 0) {
+      this._addonInfos = infos;
+    }
     this._fetching = false;
     return this.addonInfos;
   }

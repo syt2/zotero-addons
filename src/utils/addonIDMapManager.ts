@@ -41,8 +41,9 @@ export class addonIDMapManager {
 
     const urls = Sources.filter(source => {
       if (source.api) {
-        return source.id === "source-zotero-chinese-github-backup" ||
-          source.id === "source-zotero-chinese-ghproxy-backup";
+        return source.id === "source-zotero-scraper-github-backup" ||
+          source.id === "source-zotero-scraper-ghproxy-backup" ||
+          source.id === "source-zotero-scraper-jsdelivr-backup";
       }
     }).map(source => source.api!);
 

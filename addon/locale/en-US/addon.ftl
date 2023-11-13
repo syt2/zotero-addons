@@ -35,12 +35,13 @@ scheme-install-confirm-message = Are you sure you want to install add-on from un
 scheme-install-confirm-confirm = Install
 
 source-custom = custom
-source-zotero-chinese-github = GitHub
-source-zotero-chinese-gitee = Gitee
-source-zotero-chinese-jsdelivr = jsDelivr
-source-zotero-chinese-ghproxy = gh-proxy
-source-zotero-chinese-github-backup = GitHub(backup)
-source-zotero-chinese-ghproxy-backup = gh-proxy(backup)
+source-zotero-chinese-github = GitHub (zotero-chinese)
+source-zotero-chinese-gitee = Gitee (zotero-chinese)
+source-zotero-chinese-jsdelivr = jsDelivr (zotero-chinese)
+source-zotero-chinese-ghproxy = gh-proxy (zotero-chinese)
+source-zotero-scraper-github-backup = GitHub (addon-scraper)
+source-zotero-scraper-ghproxy-backup = gh-proxy (addon-scraper)
+source-zotero-scraper-jsdelivr-backup = jsDelivr (addon-scraper)
 
 menu-install = Install
 menu-update = Update

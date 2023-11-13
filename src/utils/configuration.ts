@@ -7,8 +7,9 @@ type SourceID =
   "source-zotero-chinese-gitee" |
   "source-zotero-chinese-jsdelivr" |
   "source-zotero-chinese-ghproxy" |
-  "source-zotero-chinese-github-backup" |
-  "source-zotero-chinese-ghproxy-backup" |
+  "source-zotero-scraper-github-backup" |
+  "source-zotero-scraper-ghproxy-backup" |
+  "source-zotero-scraper-jsdelivr-backup" |
   "source-custom";
 
 interface Source {
@@ -34,11 +35,15 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
     api: "https://ghproxy.com/?q=https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json",
   },
   {
-    id: "source-zotero-chinese-github-backup",
+    id: "source-zotero-scraper-github-backup",
     api: "https://github.com/syt2/zotero-addons-scraper/releases/latest/download/addon_infos.json",
   },
   {
-    id: "source-zotero-chinese-ghproxy-backup",
+    id: "source-zotero-scraper-jsdelivr-backup",
+    api: "https://cdn.jsdelivr.net/gh/syt2/zotero-addons-scraper@publish/addon_infos.json",
+  },
+  {
+    id: "source-zotero-scraper-ghproxy-backup",
     api: "https://ghproxy.com/?q=https://github.com/syt2/zotero-addons-scraper/releases/latest/download/addon_infos.json",
   },
   {

@@ -35,12 +35,13 @@ scheme-install-confirm-message = 确定安装未知来源的插件？
 scheme-install-confirm-confirm = 安装
 
 source-custom = 自定义
-source-zotero-chinese-github = GitHub
-source-zotero-chinese-gitee = Gitee
-source-zotero-chinese-jsdelivr = jsDelivr
-source-zotero-chinese-ghproxy = gh-proxy
-source-zotero-chinese-github-backup = GitHub(备份)
-source-zotero-chinese-ghproxy-backup = gh-proxy(备份)
+source-zotero-chinese-github = GitHub (zotero中文社区)
+source-zotero-chinese-gitee = Gitee (zotero中文社区)
+source-zotero-chinese-jsdelivr = jsDelivr (zotero中文社区)
+source-zotero-chinese-ghproxy = gh-proxy (zotero中文社区)
+source-zotero-scraper-github-backup = GitHub (插件爬虫)
+source-zotero-scraper-ghproxy-backup = gh-proxy (插件爬虫)
+source-zotero-scraper-jsdelivr-backup = jsDelivr (插件爬虫)
 
 menu-install = 安装
 menu-update = 更新
