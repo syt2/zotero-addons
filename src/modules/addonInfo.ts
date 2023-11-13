@@ -76,45 +76,36 @@ export function z7XpiDownloadUrls(addonInfo: AddonInfo) {
 
 export class AddonInfoManager {
   static shared = new AddonInfoManager();
-  private _fetching = false;
-  private _addonInfos: AddonInfo[] = [];
   private constructor() {
     this.fetchAddonInfos();
   }
 
   get addonInfos() {
-    return this._addonInfos;
+    const url = currentSource().api ?? customSourceApi();
+    if (url in this.sourceInfos) {
+      return this.sourceInfos[url];
+    }
+    return [];
   }
 
+  private sourceInfos: { [key: string]: AddonInfo[] } = {};
   async fetchAddonInfos(forceRefresh = false) {
+    const url = currentSource().api ?? customSourceApi();
     // 不在刷新，且不需要强制刷新
-    if (!forceRefresh && !this._fetching) {
+    if (!forceRefresh && this.addonInfos) {
       return this.addonInfos;
     }
-    // 正在刷新，直到刷新成功后返回
-    if (this._fetching) {
-      while (this._fetching) {
-        await new Promise((reslove) => setTimeout(reslove, 500));
-      }
-      if (!forceRefresh) {
-        return this.addonInfos;
-      }
-    }
-    // 不在刷新，则置为刷新态并刷新
-    this._fetching = true;
-    const infos = await AddonInfoAPI.fetchAddonInfos();
+    const infos = await AddonInfoAPI.fetchAddonInfos(url);
     if (infos.length > 0) {
-      this._addonInfos = infos;
+      this.sourceInfos[url] = infos;
     }
-    this._fetching = false;
     return this.addonInfos;
   }
 }
 
 class AddonInfoAPI {
   // fetch addon infos from source
-  static async fetchAddonInfos(): Promise<AddonInfo[]> {
-    const url = currentSource().api ?? customSourceApi();
+  static async fetchAddonInfos(url: string): Promise<AddonInfo[]> {
     ztoolkit.log(`fetch addon infos from ${url}`);
     try {
       const response = await Zotero.HTTP.request("GET", url);

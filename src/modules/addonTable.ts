@@ -26,14 +26,6 @@ type TableMenuItemID =
   "menu-updateAllIfNeed" |
   "menu-sep";
 type AssociatedAddonInfo = [AddonInfo, { [key: string]: string }]
-type ColumnSelectMenu = 
-  "menu-name" | 
-  "menu-desc" | 
-  "menu-star" | 
-  "menu-remote-update-time" |
-  "menu-remote-version" |
-  "menu-local-version" |
-  "menu-install-state";
 
 export class AddonTable {
   static registerInToolbar() {
@@ -104,7 +96,13 @@ export class AddonTable {
 
     await this.replaceSourceSelectList(win.document.querySelector("#sourceContainerPlaceholder"));
 
-    (win.document.querySelector("#refresh") as HTMLButtonElement).addEventListener("click", e => this.refresh(true));
+    const refreshButton = win.document.querySelector("#refresh") as HTMLButtonElement;
+    refreshButton.addEventListener("click", async e => {
+      if (refreshButton.disabled) { return; }
+      refreshButton.disabled = true;
+      await this.refresh(true);
+      refreshButton.disabled = false;
+    });
 
     win.open();
   }
@@ -427,7 +425,7 @@ export class AddonTable {
       result["menu-name"] = addonInfo.name;
       result["menu-desc"] = addonInfo.description ?? "";
       result['menu-star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
-      result["menu-remote-version"] = this.addonReleaseInfo(addonInfo)?.currentVersion?.toLowerCase().replace('v', '')  ?? "";
+      result["menu-remote-version"] = this.addonReleaseInfo(addonInfo)?.currentVersion?.toLowerCase().replace('v', '') ?? "";
       result["menu-local-version"] = "";
       result["menu-remote-update-time"] = this.addonReleaseInfo(addonInfo)?.releaseData ?? "";
       const inputDate = new Date(this.addonReleaseInfo(addonInfo)?.releaseData ?? "");
@@ -639,7 +637,7 @@ export class AddonTable {
     this._columns = oriCol;
     try {
       const result = this.largePrefHelper.getValue("columns") as ColumnOptions[];
-      if (result.length === this._columns.length) { 
+      if (result.length === this._columns.length) {
         this._columns = result;
       }
     } catch (error) {
