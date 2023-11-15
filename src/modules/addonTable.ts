@@ -103,8 +103,7 @@ export class AddonTable {
       await this.refresh(true);
       refreshButton.disabled = false;
     });
-
-    win.open();
+    // win.open(); 
   }
 
   static async close() {
