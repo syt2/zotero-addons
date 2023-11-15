@@ -3,7 +3,7 @@
     "zoteroAddons@ytshen.com": {
       "updates": [
         {
-          "version": "1.3.2",
+          "version": "1.3.3",
           "update_link": "https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi",
           "applications": {
             "zotero": {
