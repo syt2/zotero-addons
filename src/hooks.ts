@@ -3,10 +3,9 @@ import { getString, initLocale } from "./utils/locale";
 import { createZToolkit } from "./utils/ztoolkit";
 import { AddonTable } from "./modules/addonTable";
 import { AddonInfoManager } from "./modules/addonInfo";
-import { Sources, setCurrentSource, setCustomSourceApi } from "./utils/configuration";
+import { Sources, currentSource, setCurrentSource, setCustomSourceApi } from "./utils/configuration";
 import { extractFileNameFromUrl, installAddonWithPopWindowFrom } from "./utils/utils";
 import { addonIDMapManager } from "./utils/addonIDMapManager";
-import { getPref, clearPref } from "./utils/prefs";
 
 async function onStartup() {
   await Promise.all([
@@ -18,22 +17,25 @@ async function onStartup() {
 
   registerConfigScheme();
 
-  AddonInfoManager.shared.fetchAddonInfos(true);
-
-  addonIDMapManager.shared.fetchAddonIDIfNeed();
-
   await onMainWindowLoad(window);
 
-  // 首次在新版本上启动时检查不兼容插件
-  AddonTable.checkUncompatibleAtFirstTime();
-
-  // 1.2.6 使用LargePrefHelper保存，删除1.2.5旧数据
-  if (getPref('addonIDMap')) {
-    clearPref('addonIDMap');
-  }
-  if (getPref('columnSortOrder')) {
-    clearPref('columnSortOrder')
-  }
+  (async () => {
+    if (currentSource().id === "source-auto") {
+      // 自动切换到可连接的源地址
+      await AddonInfoManager.autoSwitchAvaliableApi();
+      // 若在自动切换过程中已经展示，则刷新
+      if (AddonTable.isShown()) {
+        AddonTable.refresh(false);
+      }
+    } else {
+      AddonInfoManager.shared.fetchAddonInfos(true);
+    }
+  
+    addonIDMapManager.shared.fetchAddonIDIfNeed();
+  
+    // 首次在新版本上启动时检查不兼容插件
+    AddonTable.checkUncompatibleAtFirstTime();
+  })();
 }
 
 async function onMainWindowLoad(win: Window): Promise<void> {
@@ -113,6 +115,14 @@ function registerConfigScheme() {
             }
           } else {
             setCurrentSource(params.source);
+            if (params.source === "source-auto" && currentSource().id !== "source-auto") {
+              (async () => {
+                await AddonInfoManager.autoSwitchAvaliableApi();
+                if (AddonTable.isShown()) {
+                  AddonTable.refresh(false);
+                }
+              })();
+            }
             success = true;
           }
         }

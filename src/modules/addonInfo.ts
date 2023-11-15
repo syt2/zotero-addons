@@ -1,4 +1,4 @@
-import { currentSource, customSourceApi } from "../utils/configuration";
+import { Sources, autoSource, currentSource, customSourceApi, setAutoSource } from "../utils/configuration";
 
 
 // cpoy from https://github.com/zotero-chinese/zotero-plugins/blob/3fe315d38e740bf8742186cd59e08903317493c9/src/plugins.ts#L1C1-L52C2
@@ -61,7 +61,8 @@ export interface AddonInfo {
 export function z7XpiDownloadUrls(addonInfo: AddonInfo) {
   const z7DownloadUrls = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"))?.xpiDownloadUrl;
   if (!z7DownloadUrls) { return []; }
-  switch (currentSource().id) {
+  const sourceID = currentSource().id === "source-auto" ? autoSource()?.id : currentSource().id;
+  switch (sourceID) {
     case "source-zotero-chinese-github":
       return [z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub];
     case "source-zotero-chinese-ghproxy":
@@ -82,7 +83,8 @@ export class AddonInfoManager {
   }
 
   get addonInfos() {
-    const url = currentSource().api ?? customSourceApi();
+    const url = currentSource().api;
+    if (!url) { return []; }
     if (url in this.sourceInfos) {
       return this.sourceInfos[url];
     }
@@ -91,25 +93,49 @@ export class AddonInfoManager {
 
   private sourceInfos: { [key: string]: AddonInfo[] } = {};
   async fetchAddonInfos(forceRefresh = false) {
-    const url = currentSource().api ?? customSourceApi();
+    const source = currentSource();
+    if (source.id === "source-auto" && !source.api) {
+      return await AddonInfoManager.autoSwitchAvaliableApi();
+    }
+    const url = source.api;
+    if (!url) { return []; }
     // 不在刷新，且不需要强制刷新
     if (!forceRefresh && this.addonInfos) {
       return this.addonInfos;
     }
-    const infos = await AddonInfoAPI.fetchAddonInfos(url);
+    const infos = await AddonInfoAPI.fetchAddonInfos(url, 5000);
     if (infos.length > 0) {
       this.sourceInfos[url] = infos;
     }
     return this.addonInfos;
   }
+
+  static async autoSwitchAvaliableApi(timeout: number = 3000) {
+    for (const source of Sources) {
+      if (!source.api) { continue; }
+      const infos = await AddonInfoAPI.fetchAddonInfos(source.api, timeout, () => {
+        ztoolkit.log(`check source from ${source.api} timeout!`);
+      });
+      if (infos.length > 0) {
+        this.shared.sourceInfos[source.api] = infos;
+        setAutoSource(source);
+        ztoolkit.log(`switch to ${source.id} automatically`);
+        return infos;
+      }
+    }
+    return [];
+  }
 }
 
 class AddonInfoAPI {
-  // fetch addon infos from source
-  static async fetchAddonInfos(url: string): Promise<AddonInfo[]> {
+  static async fetchAddonInfos(url: string, timeout?: number, onTimeoutCallback?: VoidFunction): Promise<AddonInfo[]> {
     ztoolkit.log(`fetch addon infos from ${url}`);
     try {
-      const response = await Zotero.HTTP.request("GET", url);
+      const options: { timeout?: number } = {};
+      if (timeout) {
+        options.timeout = timeout;
+      }
+      const response = await Zotero.HTTP.request("GET", url, options);
       const addons = JSON.parse(response.response) as AddonInfo[];
       const validAddons = addons.filter(addon => {
         const release = addon.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
@@ -121,6 +147,9 @@ class AddonInfoAPI {
       });
     } catch (error) {
       ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);
+      if (error instanceof Zotero.HTTP.TimeoutException) {
+        onTimeoutCallback?.();
+      }
     }
     return [];
   }

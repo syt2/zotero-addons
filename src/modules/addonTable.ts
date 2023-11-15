@@ -111,6 +111,14 @@ export class AddonTable {
     this.window?.close();
   }
 
+  static isShown() {
+    return isWindowAlive(this.window);
+  }
+
+  static async refresh(force = false) {
+    await this.updateAddonInfos(force);
+    this.updateTable(); // 不要在这里用await！
+  }
 
   private static async tableMenuItems() {
     const result: TableMenuItemID[] = [];
@@ -412,13 +420,12 @@ export class AddonTable {
     await this.refresh(false);
   }
 
-  private static async refresh(force = false) {
-    await this.updateAddonInfos(force);
-    this.updateTable();
-  }
-
+  private static refreshTag: number = 0;
   private static async updateAddonInfos(force = false) {
+    this.refreshTag += 1;
+    const curRefreshTag = this.refreshTag;
     const addonInfos = await AddonInfoManager.shared.fetchAddonInfos(force);
+    if (curRefreshTag !== this.refreshTag) { return; } // 不是本次刷新
     const relateAddons = await this.relatedAddons(addonInfos);
     this.addonInfos = await Promise.all(addonInfos.map(async addonInfo => {
       const result: { [key: string]: string } = {};

@@ -16,11 +16,9 @@ This is a Zotero Add-on for collecting and installing add-ons in [Zotero7](https
 1. Download the [latest release xpi file](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi)
 2. Install in Zotero `(Tools) -> (Add-ons)`
 
-
 ## Usage
 
 After install this add-on in Zotero, click <img align="center" src="addon/chrome/content/icons/favicon.png" width=24/> in Toolbar
-
 
 ## Add-on Data Source
 
@@ -28,22 +26,17 @@ After install this add-on in Zotero, click <img align="center" src="addon/chrome
 
 The main data source for add-ons comes from **[zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)**.
 
-Switch the source to `GitHub`, `Gitee`, `jsDelivr` or `gh-proxy` in Zotero to use this source.
+Switch the source to `(zotero-chinese)` in Zotero to use this source.
 
 > If you have new add-ons to add, submit it to [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
 
-
 ### [syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper)
 
-Switch the source to `GitHub(backup)` or `gh-proxy(backup)` in Zotero to use this source.
-
+Switch the source to `(addon-scraper)` in Zotero to use this source.
 
 ### Custom Source
 
 You can also use other custom data sources, as long as the data source format is consistent with the format in the [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
-
-
-
 
 ## Develop
 
@@ -51,10 +44,10 @@ You can also use other custom data sources, as long as the data source format is
 
 - Custom Data Source
 
-  `zotero://zoteroaddoncollection/configSource?source=source-custom&customURL={encodeURIComponent(SOME URL)}` 
+  `zotero://zoteroaddoncollection/configSource?source=source-custom&customURL={encodeURIComponent(SOME URL)}`
   can change add-on data source automatically to a custom url.
 
-- Install Add-on from URL 
+- Install Add-on from URL
 
   `zotero://zoteroaddoncollection/install?source={encodeURIComponent(SOME URL)}`
   can install add-on from the custom url.

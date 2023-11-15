@@ -35,6 +35,7 @@ scheme-install-confirm-message = 确定安装未知来源的插件？
 scheme-install-confirm-confirm = 安装
 
 source-custom = 自定义
+source-auto = 自动
 source-zotero-chinese-github = GitHub (zotero中文社区)
 source-zotero-chinese-gitee = Gitee (zotero中文社区)
 source-zotero-chinese-jsdelivr = jsDelivr (zotero中文社区)

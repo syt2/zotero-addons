@@ -34,7 +34,8 @@ scheme-install-confirm-title = Install unknown add-on?
 scheme-install-confirm-message = Are you sure you want to install add-on from unknown source? 
 scheme-install-confirm-confirm = Install
 
-source-custom = custom
+source-custom = Custom
+source-auto = Auto
 source-zotero-chinese-github = GitHub (zotero-chinese)
 source-zotero-chinese-gitee = Gitee (zotero-chinese)
 source-zotero-chinese-jsdelivr = jsDelivr (zotero-chinese)
