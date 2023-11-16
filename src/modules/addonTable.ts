@@ -39,7 +39,7 @@ export class AddonTable {
     newNode.addEventListener("click", async (event: any) => {
       this.showAddonsWindow();
     });
-    newNode.style.listStyleImage = `url(chrome://${config.addonRef}/content/icons/favicon@32.png)`;
+    newNode.style.listStyleImage = `url(chrome://${config.addonRef}/content/icons/favicon@${Zotero.isWin ? '0.25x' : '0.5x'}.png)`;
     document.querySelector("#zotero-items-toolbar")?.insertBefore(newNode, node?.nextElementSibling);
   }
 
