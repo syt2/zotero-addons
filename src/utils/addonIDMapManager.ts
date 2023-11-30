@@ -1,8 +1,7 @@
 import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
-import { AddonInfo } from "../modules/addonInfo";
-import { Sources } from "./configuration";
 import { config } from "../../package.json";
 
+// 为避免存在无id的插件信息，在每次安装插件后，都会保存下对应插件的id
 type addonIDConfig = [string, boolean]; // addonID, canAutoChange
 export class addonIDMapManager {
 
@@ -33,40 +32,5 @@ export class addonIDMapManager {
       updateDate: this.autoUpdateDate,
       repoToAddonIDs: this.repoToAddonIDs,
     });
-  }
-
-  async fetchAddonIDIfNeed() {
-    // 7天内不更新
-    if (new Date().getTime() - this.autoUpdateDate < 1000 * 60 * 60 * 24 * 7) { return; }
-
-    const urls = Sources.filter(source => {
-      if (source.api) {
-        return source.id === "source-zotero-scraper-github-backup" ||
-          source.id === "source-zotero-scraper-ghproxy-backup" ||
-          source.id === "source-zotero-scraper-jsdelivr-backup";
-      }
-    }).map(source => source.api!);
-
-    for (const url of urls) {
-      try {
-        const response = await Zotero.HTTP.request("GET", url);
-        const addons = JSON.parse(response.response) as AddonInfo[];
-        for (const addon of addons.filter(addon => (addon.id?.length ?? 0) > 0)) {
-          if (addon.repo in this.repoToAddonIDs && !this.repoToAddonIDs[addon.repo][1]) {
-            continue;
-          }
-          this.repoToAddonIDs[addon.repo] = [addon.id!, true];
-        }
-        this.autoUpdateDate = new Date().getTime();
-        this.largePrefHelper.setValue('addonIDMap', {
-          updateDate: this.autoUpdateDate,
-          repoToAddonIDs: this.repoToAddonIDs,
-        });
-        break;
-      } catch (error) {
-        ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);
-      }
-    }
-
   }
 }

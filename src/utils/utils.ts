@@ -86,6 +86,7 @@ export async function installAddonWithPopWindowFrom(url: string | string[], name
 }
 
 
+// 从url内安装插件，返回安装是否成功
 export async function installAddonFrom(url: string | string[], name: string | undefined = undefined, repo: string | undefined = undefined, forceInstall = false) {
   let urls: string[] = [];
   if (typeof url === 'string') {
@@ -114,22 +115,37 @@ export async function installAddonFrom(url: string | string[], name: string | un
 }
 
 
-async function pInstallAddonFrom(url: string, name?: string, forceInstall = false): Promise<string | undefined> {
-  const xpiName = name ?? extractFileNameFromUrl(url) ?? "tmp.xpi";
+// 从url下载xpi并获取可安装对象
+async function requestXpiInstaller(url: string, xpiName: string) {
   try {
-    const response = await Zotero.HTTP.request('GET', url, {
-      responseType: 'arraybuffer',
-    });
     const xpiDownloadPath = PathUtils.join(
       PathUtils.tempDir,
       xpiName,
     );
-    await IOUtils.write(xpiDownloadPath, new Uint8Array(response.response));
+    if (!(await IOUtils.exists(xpiDownloadPath))) {
+      const response = await Zotero.HTTP.request('GET', url, {
+        responseType: 'arraybuffer',
+      });
+      await IOUtils.write(xpiDownloadPath, new Uint8Array(response.response));
+    }
     const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
     const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
+    return xpiInstaller;
+  } catch (error) {
+    ztoolkit.log(`download addon ${xpiName} from ${url} failed: ${error}`);
+  }
+}
+
+
+// 从url安装插件，返回插件id
+async function pInstallAddonFrom(url: string, name?: string, forceInstall = false): Promise<string | undefined> {
+  const xpiName = name ?? extractFileNameFromUrl(url) ?? "tmp.xpi";
+  try {
+    const xpiInstaller = await requestXpiInstaller(url, xpiName);
 
     // url或插件无效
-    if (!xpiInstaller.addon
+    if (!xpiInstaller 
+      || !xpiInstaller.addon
       || !xpiInstaller.addon.isCompatible
       || !xpiInstaller.addon.isPlatformCompatible) {
       return;
@@ -151,14 +167,11 @@ async function pInstallAddonFrom(url: string, name?: string, forceInstall = fals
   }
 }
 
+// 从url中提取文件名
 export function extractFileNameFromUrl(url: string) {
   try {
-    const parsedUrl = new URL(url);
-    const path = parsedUrl.pathname;
-    const pathParts = path.split('/');
-    const fileName = pathParts[pathParts.length - 1];
-    return fileName || undefined;
-  } catch (error) {
-    return;
+    return new URL(url).pathname.split('/').pop();
+  } catch {
+    //
   }
 }

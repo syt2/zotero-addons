@@ -3,3 +3,5 @@ refresh =
     .label = 刷新
 selectSource = 选择源：
 customSource = 自定义源：
+install =
+    .label = Install

@@ -1,4 +1,3 @@
-import { getString } from "./locale";
 import { getPref, setPref } from "./prefs";
 
 

@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://__addonRef__/content/virtualizedTable.css" type="text/css"?>
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:html="http://www.w3.org/1999/xhtml"
+  windowtype="__addonRef__-addon_detail" sizemode="normal" scrolling="false"
+  persist="screenX screenY width height sizemode">
+
+<head>
+  <title id="win-title"></title>
+  <meta charset="utf-8" />
+  <script>
+    document.addEventListener("DOMContentLoaded", (ev) => {
+      const { Services } = ChromeUtils.import(
+        "resource://gre/modules/Services.jsm",
+      );
+
+      Services.scriptloader.loadSubScript(
+        "chrome://zotero/content/include.js",
+        this,
+      );
+
+      Services.scriptloader.loadSubScript(
+        "resource://zotero/require.js",
+        this,
+      );
+      window.arguments[0]._initPromise.resolve();
+    });
+  </script>
+  <style>
+    html,
+    body,
+    .viewport {
+      padding: 0;
+      margin: 0;
+      /* height: 100%; */
+      overflow-x: hidden;
+      overflow-y: auto;
+      word-wrap: break-word;
+      /* background-color: #f0f0f0; */
+      font-family: initial;
+    }
+
+    .viewport {
+      margin: 0 5px 0 5px;
+    }
+
+    .viewport-container {
+      padding: 0;
+      margin: 16px;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      /* background-color: #f0f0f0; */
+    }
+  </style>
+  <link rel="localization" href="__addonRef__-addonDetail.ftl" />
+</head>
+
+<body>
+  <div class="viewport-container">
+    <div style="display: flex; align-items: center;">
+      <a id="addon-name"
+        style="font-weight: bold; font-size: large; text-decoration: underline; color: cornflowerblue; cursor: pointer;"></a>
+    </div>
+    <div style="display: flex; align-items: center; margin-top: 2px;">
+      <img id="avatar-icon"
+        style="vertical-align: middle; width: 24px; height: 100%; object-fit: contain; object-position: left; border-radius: 50%; cursor: pointer;" />
+      <a id="author-name" style="padding-left: 8px; text-decoration: underline; cursor: pointer; font-size: small; color: cornflowerblue;"></a>
+    </div>
+    <div style="display: flex; align-items: center; margin-top: 4px;">
+      <img id="stars-icon"
+        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; padding-left: 2px;" />
+      <img id="download-count-icon"
+        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; padding-left: 2px;" />
+      <img id="remote-version-icon"
+        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; padding-left: 2px;" />
+      <img id="local-version-icon"
+        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; padding-left: 2px;" />
+    </div>
+    <label id="description" style="font-size: medium; margin-top: 12px; text-align: left;"></label>
+  </div>
+
+  <div class="footer-container" style="padding: 10px; flex-direction: column;"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <button id="install" data-l10n-id="install" style="cursor: pointer;"></button>
+    <button id="update" data-l10n-id="update" style="cursor: pointer;"></button>
+    <button id="reinstall" data-l10n-id="reinstall" style="cursor: pointer;"></button>
+    <button id="uninstall" data-l10n-id="uninstall" style="cursor: pointer;"></button>
+    <button id="uninstallUndo" data-l10n-id="uninstallUndo" style="cursor: pointer;"></button>
+    <button id="enable" data-l10n-id="enable" style="cursor: pointer;"></button>
+    <button id="disable" data-l10n-id="disable" style="cursor: pointer;"></button>
+  </div>
+</body>
+
+</html>

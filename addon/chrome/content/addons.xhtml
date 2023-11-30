@@ -46,7 +46,6 @@
         overflow-x: hidden;
         overflow-y: auto;
         word-wrap: break-word;
-        background-color: #f0f0f0;
         font-family: initial;
       }
       .viewport {
@@ -60,11 +59,9 @@
         display: flex;
         flex-direction: row;
         overflow: hidden;
-        background-color: #f0f0f0;
       }
       .list-viewport {
         width: 100%;
-        background-color: #ffffff;
         overflow: hidden;
       }
       #table-container {
@@ -89,7 +86,7 @@
       style="justify-content: flex-start; padding: 10px"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     >
-      <button id="refresh" data-l10n-id="refresh"></button>
+      <button id="refresh" data-l10n-id="refresh" style="cursor: pointer;"></button>
       <groupbox>
         <hbox>
           <label data-l10n-id="selectSource" style="margin-top: 5px;"></label>

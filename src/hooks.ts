@@ -5,7 +5,8 @@ import { AddonTable } from "./modules/addonTable";
 import { AddonInfoManager } from "./modules/addonInfo";
 import { Sources, currentSource, setCurrentSource, setCustomSourceApi } from "./utils/configuration";
 import { extractFileNameFromUrl, installAddonWithPopWindowFrom } from "./utils/utils";
-import { addonIDMapManager } from "./utils/addonIDMapManager";
+import { AddonInfoDetail } from "./modules/addonDetail";
+import { AddonListenerManager } from "./modules/addonListenerManager";
 
 async function onStartup() {
   await Promise.all([
@@ -19,23 +20,24 @@ async function onStartup() {
 
   await onMainWindowLoad(window);
 
+  // 首次在新版本上启动时检查不兼容插件
+  AddonTable.checkUncompatibleAtFirstTime();
+
   (async () => {
     if (currentSource().id === "source-auto") {
       // 自动切换到可连接的源地址
       await AddonInfoManager.autoSwitchAvaliableApi();
       // 若在自动切换过程中已经展示，则刷新
-      if (AddonTable.isShown()) {
-        AddonTable.refresh(false);
-      }
+      AddonTable.refresh(false);
     } else {
       AddonInfoManager.shared.fetchAddonInfos(true);
     }
-  
-    addonIDMapManager.shared.fetchAddonIDIfNeed();
-  
+
     // 首次在新版本上启动时检查不兼容插件
     AddonTable.checkUncompatibleAtFirstTime();
   })();
+
+  AddonListenerManager.addListener();
 }
 
 async function onMainWindowLoad(win: Window): Promise<void> {
@@ -46,13 +48,13 @@ async function onMainWindowLoad(win: Window): Promise<void> {
 
 async function onMainWindowUnload(win: Window): Promise<void> {
   ztoolkit.unregisterAll();
-  addon.data.dialog?.window?.close();
 }
 
 function onShutdown(): void {
   ztoolkit.unregisterAll();
-  addon.data.dialog?.window?.close();
   AddonTable.close();
+  AddonInfoDetail.close();
+  AddonListenerManager.removeListener();
   document.querySelector("#zotero-toolbaritem-addons")?.remove();
   // Remove addon object
   addon.data.alive = false;
@@ -118,9 +120,7 @@ function registerConfigScheme() {
             if (params.source === "source-auto" && currentSource().id !== "source-auto") {
               (async () => {
                 await AddonInfoManager.autoSwitchAvaliableApi();
-                if (AddonTable.isShown()) {
-                  AddonTable.refresh(false);
-                }
+                AddonTable.refresh(false);
               })();
             }
             success = true;

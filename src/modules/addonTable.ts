@@ -1,14 +1,14 @@
 import { ColumnOptions, VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
-import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
+import { AddonInfo, AddonInfoManager, addonReleaseInfo, relatedAddons, xpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
 import { compareVersion, installAddonWithPopWindowFrom, undoUninstall, uninstall } from "../utils/utils";
 import { addonIDMapManager } from "../utils/addonIDMapManager";
 import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 import { getPref, setPref } from "../utils/prefs";
-const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+import { AddonInfoDetail } from "./addonDetail";
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 
 type TableMenuItemID =
@@ -47,7 +47,7 @@ export class AddonTable {
     const key = 'checkUncompatibleAddonsIn' + (ztoolkit.isZotero7() ? "7" : "6");
     if (getPref(key)) { return; }
     await this.updateAddonInfos(true);
-    const relateAddon = await this.relatedAddons(this.addonInfos.map(infos => infos[0]));
+    const relateAddon = await relatedAddons(this.addonInfos.map(infos => infos[0]));
     setPref(key, true);
     const uncompatibleAddons = relateAddon.filter(e => e[1].appDisabled || !e[1].isCompatible || !e[1].isPlatformCompatible);
     if (uncompatibleAddons.length <= 0) {
@@ -81,7 +81,6 @@ export class AddonTable {
       this.refresh();
       return;
     }
-
     const windowArgs = { _initPromise: Zotero.Promise.defer() };
     const win = (window as any).openDialog(
       `chrome://${config.addonRef}/content/addons.xhtml`,
@@ -89,6 +88,9 @@ export class AddonTable {
       `chrome,centerscreen,resizable,status,width=960,height=480,dialog=no`,
       windowArgs,
     );
+    win.onclose = () => {
+      AddonInfoDetail.close();
+    }
     await windowArgs._initPromise.promise;
     this.window = win;
 
@@ -115,8 +117,17 @@ export class AddonTable {
   }
 
   static async refresh(force = false) {
+    if (!this.isShown) { return; }
+    const selectIndics = this.tableHelper?.treeInstance.selection.selected;
+    const selectAddons = this.addonInfos.filter((e, idx) => selectIndics?.has(idx));
     await this.updateAddonInfos(force);
-    this.updateTable(); // 不要在这里用await！
+    this.updateTable();
+    selectAddons.forEach(oldAddon => {
+      const newIdx = this.addonInfos.findIndex((newAddon) => oldAddon[0].id === newAddon[0].id || oldAddon[0].repo === newAddon[0].repo);
+      if (newIdx >= 0) {
+        this.tableHelper?.treeInstance.selection.rangedSelect(newIdx, newIdx, true, false);
+      }
+    });
   }
 
   private static async tableMenuItems() {
@@ -128,7 +139,7 @@ export class AddonTable {
         const idx = [...selects][0];
         if (idx >= 0 && idx < this.addonInfos.length) {
           const addonInfo = this.addonInfos[idx];
-          const relatedAddon = await this.relatedAddons([addonInfo[0]]);
+          const relatedAddon = await relatedAddons([addonInfo[0]]);
           if (relatedAddon.length > 0) {
             if (relatedAddon[0][1].appDisabled) {
               result.push("menu-reinstall");
@@ -234,7 +245,14 @@ export class AddonTable {
         this.updateColumns();
       })
       .setProp("onActivate", ev => {
-        this.onSelectMenuItem("menu-homepage");
+        const selectAddons: AddonInfo[] = [];
+        for (const select of this.tableHelper?.treeInstance.selection.selected ?? new Set()) {
+          if (select < 0 || select >= this.addonInfos.length) { continue; }
+          selectAddons.push(this.addonInfos[select][0]);
+        }
+        selectAddons.forEach(addon => {
+          AddonInfoDetail.showDetailWindow(addon);
+        });
         return true;
       })
       .render(undefined, (_) => {
@@ -278,6 +296,9 @@ export class AddonTable {
       attributes: {
         value: currentSource().id,
         native: "true",
+      },
+      styles: {
+        cursor: "pointer",
       },
       listeners: [{
         type: "command",
@@ -386,37 +407,33 @@ export class AddonTable {
   }
 
   private static async enableAddons(addons: AddonInfo[], enable: boolean) {
-    const relatedAddon = await this.relatedAddons(addons);
+    const relatedAddon = await relatedAddons(addons);
     for (const [addonInfo, addon] of relatedAddon) {
       enable ? await addon.enable() : await addon.disable();
     }
-    await this.refresh(false);
   }
 
   private static async uninstallAddons(addons: AddonInfo[]) {
-    const relatedAddon = await this.relatedAddons(addons);
+    const relatedAddon = await relatedAddons(addons);
     for (const [addonInfo, addon] of relatedAddon) {
       await uninstall(addon, true);
     }
-    await this.refresh(false);
   }
 
   private static async undoUninstallAddons(addons: AddonInfo[]) {
-    const relatedAddon = await this.relatedAddons(addons);
+    const relatedAddon = await relatedAddons(addons);
     for (const [addonInfo, addon] of relatedAddon) {
       await undoUninstall(addon);
     }
-    await this.refresh(false);
   }
 
   private static async installAddons(addons: AddonInfo[], forceInstall: boolean) {
     await Promise.all(addons.map(async addon => {
-      const urls = z7XpiDownloadUrls(addon).filter(x => {
+      const urls = xpiDownloadUrls(addon).filter(x => {
         return (x?.length ?? 0) > 0;
       }) as string[];
       await installAddonWithPopWindowFrom(urls, addon.name, addon.repo, forceInstall);
     }));
-    await this.refresh(false);
   }
 
   private static refreshTag: number = 0;
@@ -425,16 +442,16 @@ export class AddonTable {
     const curRefreshTag = this.refreshTag;
     const addonInfos = await AddonInfoManager.shared.fetchAddonInfos(force);
     if (curRefreshTag !== this.refreshTag) { return; } // 不是本次刷新
-    const relateAddons = await this.relatedAddons(addonInfos);
+    const relateAddons = await relatedAddons(addonInfos);
     this.addonInfos = await Promise.all(addonInfos.map(async addonInfo => {
       const result: { [key: string]: string } = {};
       result["menu-name"] = addonInfo.name;
       result["menu-desc"] = addonInfo.description ?? "";
       result['menu-star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
-      result["menu-remote-version"] = this.addonReleaseInfo(addonInfo)?.currentVersion?.toLowerCase().replace('v', '') ?? "";
+      result["menu-remote-version"] = addonReleaseInfo(addonInfo)?.currentVersion?.toLowerCase().replace('v', '') ?? "";
       result["menu-local-version"] = "";
-      result["menu-remote-update-time"] = this.addonReleaseInfo(addonInfo)?.releaseData ?? "";
-      const inputDate = new Date(this.addonReleaseInfo(addonInfo)?.releaseData ?? "");
+      result["menu-remote-update-time"] = addonReleaseInfo(addonInfo)?.releaseData ?? "";
+      const inputDate = new Date(addonReleaseInfo(addonInfo)?.releaseData ?? "");
       if (inputDate) {
         const year = inputDate.getFullYear();
         const month = String(inputDate.getMonth() + 1).padStart(2, '0');
@@ -507,7 +524,7 @@ export class AddonTable {
             if (r === 0) { return 1; }
             return l > r ? sortOrder : -sortOrder;
           case "menu-remote-update-time":
-            [l, r] = [this.addonReleaseInfo(a)?.releaseData ?? "", this.addonReleaseInfo(b)?.releaseData ?? ""];
+            [l, r] = [addonReleaseInfo(a)?.releaseData ?? "", addonReleaseInfo(b)?.releaseData ?? ""];
             if (l == r) { break; }
             return l > r ? sortOrder : -sortOrder;
         }
@@ -524,39 +541,14 @@ export class AddonTable {
     });
   }
 
-  private static addonReleaseInfo(addonInfo: AddonInfo) {
-    const release = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
-    if (!release || (release.xpiDownloadUrl?.github?.length ?? 0) == 0) { return; }
-    return release
-  }
-
   private static addonCanUpdate(addonInfo: AddonInfo, addon: any) {
-    const version = this.addonReleaseInfo(addonInfo)?.currentVersion;
+    const version = addonReleaseInfo(addonInfo)?.currentVersion;
     if (!version || !addon.version) { return false; }
     return compareVersion(addon.version, version) < 0;
   }
 
-  private static async relatedAddons(addonInfos: AddonInfo[]) {
-    const addons: [AddonInfo, any][] = [];
-    for (const addon of await AddonManager.getAllAddons()) {
-      if (!addon.id) { continue; }
-      const relateAddon = addonInfos.find(addonInfo => {
-        if (addonInfo.id === addon.id) { return true; }
-        if (addonInfo.name.length > 0 && addonInfo.name === addon.name) { return true; }
-        if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) { return true; }
-        if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) { return true; }
-        if (addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0] === addon.id) { return true; }
-        return false;
-      });
-      if (relateAddon) {
-        addons.push([relateAddon, addon]);
-      }
-    }
-    return addons;
-  }
-
   private static async outdateAddons() {
-    const addons = await this.relatedAddons(this.addonInfos.map(infos => infos[0]));
+    const addons = await relatedAddons(this.addonInfos.map(infos => infos[0]));
     return addons.filter(([addonInfo, addon]) => this.addonCanUpdate(addonInfo, addon));
   }
 
@@ -616,21 +608,21 @@ export class AddonTable {
         label: "menu-remote-update-time",
         staticWidth: true,
         width: 150,
-        hidden: true,
+        hidden: false,
       },
       {
         dataKey: "menu-remote-version",
         label: "menu-remote-version",
         staticWidth: true,
         width: 100,
-        hidden: true,
+        hidden: false,
       },
       {
         dataKey: "menu-local-version",
         label: "menu-local-version",
         staticWidth: true,
         width: 85,
-        hidden: true,
+        hidden: false,
       },
       {
         dataKey: "menu-install-state",

@@ -1,5 +1,6 @@
-import { Sources, autoSource, currentSource, customSourceApi, setAutoSource } from "../utils/configuration";
-
+import { addonIDMapManager } from "../utils/addonIDMapManager";
+import { Sources, autoSource, currentSource, setAutoSource } from "../utils/configuration";
+const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 // cpoy from https://github.com/zotero-chinese/zotero-plugins/blob/3fe315d38e740bf8742186cd59e08903317493c9/src/plugins.ts#L1C1-L52C2
 export interface AddonInfo {
@@ -54,27 +55,63 @@ export interface AddonInfo {
     avatar: string;
   };
 
-  // 插件id，用以判断插件是否安装，zotero-chinese仓库暂无此项，保留供后续使用
+  // 插件id
   id?: string;
 }
 
-export function z7XpiDownloadUrls(addonInfo: AddonInfo) {
-  const z7DownloadUrls = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"))?.xpiDownloadUrl;
+export function xpiDownloadUrls(addonInfo: AddonInfo) {
+  const z7DownloadUrls = addonReleaseInfo(addonInfo)?.xpiDownloadUrl;
   if (!z7DownloadUrls) { return []; }
   const sourceID = currentSource().id === "source-auto" ? autoSource()?.id : currentSource().id;
   switch (sourceID) {
     case "source-zotero-chinese-github":
-      return [z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub];
+      return [z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub].filter(e => e);
     case "source-zotero-chinese-ghproxy":
-      return [z7DownloadUrls.ghProxy, z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.kgithub];
+      return [z7DownloadUrls.ghProxy, z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.kgithub].filter(e => e);
     case "source-zotero-chinese-jsdelivr":
-      return [z7DownloadUrls.jsdeliver, z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub];
+      return [z7DownloadUrls.jsdeliver, z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub].filter(e => e);
     case "source-zotero-chinese-gitee":
-      return [z7DownloadUrls.gitee, z7DownloadUrls.github, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub];
+      return [z7DownloadUrls.gitee, z7DownloadUrls.github, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub].filter(e => e);
     default:
-      return [z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub];
+      return [z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub].filter(e => e);
   }
 }
+
+export function addonReleaseInfo(addonInfo: AddonInfo) {
+  const release = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
+  if ((release?.xpiDownloadUrl?.github?.length ?? 0) === 0) { return; }
+  return release
+}
+
+export type AssociatedAddonInfo = [AddonInfo, { [key: string]: string }]
+export async function relatedAddons(addonInfos: AddonInfo[]) {
+  const addons: [AddonInfo, any][] = [];
+  for (const addon of await AddonManager.getAllAddons()) {
+    if (!addon.id) { continue; }
+    const relateAddon = addonInfos.find(addonInfo => {
+      if (addonInfo.id === addon.id) { return true; }
+      if (addonInfo.name.length > 0 && addonInfo.name === addon.name) { return true; }
+      if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) { return true; }
+      if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) { return true; }
+      if (addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0] === addon.id) { return true; }
+      return false;
+    });
+    if (relateAddon) {
+      addons.push([relateAddon, addon]);
+    }
+  }
+  return addons;
+}
+
+// export enum InstallState {
+//   unknown = 0,
+//   notInstalled = 1,
+//   normal = 2,
+//   outdate = 3,
+//   disabled = 4,
+//   uncompatible = 5,
+//   pendingUninstall = 6,
+// }
 
 export class AddonInfoManager {
   static shared = new AddonInfoManager();
@@ -137,11 +174,7 @@ class AddonInfoAPI {
       }
       const response = await Zotero.HTTP.request("GET", url, options);
       const addons = JSON.parse(response.response) as AddonInfo[];
-      const validAddons = addons.filter(addon => {
-        const release = addon.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
-        if (release?.xpiDownloadUrl?.github) { return true; }
-        return false;
-      })
+      const validAddons = addons.filter(addon => addonReleaseInfo(addon));
       return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
         return (b.star ?? 0) - (a.star ?? 0);
       });
