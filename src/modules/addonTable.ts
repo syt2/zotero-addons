@@ -4,7 +4,7 @@ import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, addonReleaseInfo, relatedAddons, xpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { compareVersion, installAddonWithPopWindowFrom, undoUninstall, uninstall } from "../utils/utils";
+import { compareVersion, installAddonFrom, installAddonWithPopWindowFrom, undoUninstall, uninstall } from "../utils/utils";
 import { addonIDMapManager } from "../utils/addonIDMapManager";
 import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 import { getPref, setPref } from "../utils/prefs";
@@ -46,7 +46,6 @@ export class AddonTable {
   static async checkUncompatibleAtFirstTime() {
     const key = 'checkUncompatibleAddonsIn' + (ztoolkit.isZotero7() ? "7" : "6");
     if (getPref(key)) { return; }
-    await this.updateAddonInfos(true);
     const relateAddon = await relatedAddons(this.addonInfos.map(infos => infos[0]));
     setPref(key, true);
     const uncompatibleAddons = relateAddon.filter(e => e[1].appDisabled || !e[1].isCompatible || !e[1].isPlatformCompatible);
@@ -67,7 +66,7 @@ export class AddonTable {
     if (confirm !== 0) {
       return;
     }
-    await this.installAddons(uncompatibleAddons.map(e => e[0]), true);
+    await this.installAddons(uncompatibleAddons.map(e => e[0]), { forceInstall: true });
   }
 
   private static addonInfos: AssociatedAddonInfo[] = [];
@@ -105,6 +104,15 @@ export class AddonTable {
       await this.refresh(true);
       refreshButton.disabled = false;
     });
+    const autoUpdateCheckbox = win.document.querySelector('#auto-update');
+    autoUpdateCheckbox.checked = getPref('autoUpdate');
+    autoUpdateCheckbox?.addEventListener('command', (e: any) => {
+      const selected = (e.target as XUL.Checkbox).checked;
+      setPref('autoUpdate', selected);
+      if (selected) {
+        this.updateExistAddons();
+      }
+    });
     // win.open(); 
   }
 
@@ -128,6 +136,35 @@ export class AddonTable {
         this.tableHelper?.treeInstance.selection.rangedSelect(newIdx, newIdx, true, false);
       }
     });
+  }
+
+  static async updateExistAddons() {
+    if (this.addonInfos.length <= 0) {
+      await this.updateAddonInfos(false);
+    }
+    const addons = await this.outdateAddons();
+    if (addons.length <= 0) { return; }
+    const progressWin = new ztoolkit.ProgressWindow(config.addonName, {
+      closeOnClick: true,
+      closeTime: -1,
+    }).createLine({
+      type: "default",
+      progress: 0,
+    }).show(-1);
+    let num = 0;
+    for (const addon of addons) {
+      progressWin.changeLine({
+        text: `${addon[0].name} ${addon[1].version} => ${addon[0].releases[0].currentVersion}`,
+        progress: num++ / addons.length,
+      });
+      await this.installAddons([addon[0]], { slience: true });
+    }
+    progressWin.changeLine({
+      text: getString('update-succeed'),
+      progress: 100,
+      type: "success",
+    });
+    progressWin.startCloseTimer(3000);
   }
 
   private static async tableMenuItems() {
@@ -256,7 +293,7 @@ export class AddonTable {
         return true;
       })
       .render(undefined, (_) => {
-        this.refresh();
+        this.refresh(AddonInfoManager.shared.addonInfos.length <= 0);
       });
   }
 
@@ -373,7 +410,7 @@ export class AddonTable {
       case "menu-reinstall":
       case "menu-update":
       case "menu-install-and-update":
-        this.installAddons(selectAddons.map(e => e[0]), true);
+        this.installAddons(selectAddons.map(e => e[0]), { forceInstall: true });
         break;
       case "menu-uninstall":
         this.uninstallAddons(selectAddons.map(e => e[0]));
@@ -427,12 +464,19 @@ export class AddonTable {
     }
   }
 
-  private static async installAddons(addons: AddonInfo[], forceInstall: boolean) {
+  private static async installAddons(addons: AddonInfo[], options?: {
+    forceInstall?: boolean,
+    slience?: boolean,
+  }) {
     await Promise.all(addons.map(async addon => {
       const urls = xpiDownloadUrls(addon).filter(x => {
         return (x?.length ?? 0) > 0;
       }) as string[];
-      await installAddonWithPopWindowFrom(urls, addon.name, addon.repo, forceInstall);
+      if (options?.slience) {
+        await installAddonFrom(urls, addon.name, addon.repo, options.forceInstall)
+      } else {
+        await installAddonWithPopWindowFrom(urls, addon.name, addon.repo, options?.forceInstall);
+      }
     }));
   }
 
@@ -550,32 +594,6 @@ export class AddonTable {
   private static async outdateAddons() {
     const addons = await relatedAddons(this.addonInfos.map(infos => infos[0]));
     return addons.filter(([addonInfo, addon]) => this.addonCanUpdate(addonInfo, addon));
-  }
-
-  private static async updateExistAddons() {
-    const addons = await this.outdateAddons();
-    if (addons.length <= 0) { return; }
-    const progressWin = new ztoolkit.ProgressWindow(config.addonName, {
-      closeOnClick: true,
-      closeTime: -1,
-    }).createLine({
-      type: "default",
-      progress: 0,
-    }).show(-1);
-    let num = 0;
-    for (const addon of addons) {
-      progressWin.changeLine({
-        text: `${addon[0].name} ${addon[1].version} => ${addon[0].releases[0].currentVersion}`,
-        progress: num++ / addons.length,
-      });
-      await this.installAddons([addon[0]], false);
-    }
-    progressWin.changeLine({
-      text: getString('update-succeed'),
-      progress: 100,
-      type: "success",
-    });
-    progressWin.startCloseTimer(3000);
   }
 
 

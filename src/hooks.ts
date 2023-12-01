@@ -7,6 +7,7 @@ import { Sources, currentSource, setCurrentSource, setCustomSourceApi } from "./
 import { extractFileNameFromUrl, installAddonWithPopWindowFrom } from "./utils/utils";
 import { AddonInfoDetail } from "./modules/addonDetail";
 import { AddonListenerManager } from "./modules/addonListenerManager";
+import { getPref } from "./utils/prefs";
 
 async function onStartup() {
   await Promise.all([
@@ -20,17 +21,18 @@ async function onStartup() {
 
   await onMainWindowLoad(window);
 
-  // 首次在新版本上启动时检查不兼容插件
-  AddonTable.checkUncompatibleAtFirstTime();
-
   (async () => {
     if (currentSource().id === "source-auto") {
       // 自动切换到可连接的源地址
       await AddonInfoManager.autoSwitchAvaliableApi();
-      // 若在自动切换过程中已经展示，则刷新
-      AddonTable.refresh(false);
     } else {
-      AddonInfoManager.shared.fetchAddonInfos(true);
+      await AddonInfoManager.shared.fetchAddonInfos(true);
+    }
+    // 若在获取过程中已经展示，则刷新
+    AddonTable.refresh(false);
+
+    if (getPref('autoUpdate')) {
+      AddonTable.updateExistAddons();
     }
 
     // 首次在新版本上启动时检查不兼容插件

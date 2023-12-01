@@ -3,5 +3,5 @@ refresh =
     .label = 刷新
 selectSource = 选择源：
 customSource = 自定义源：
-install =
-    .label = Install
+autoUpdate =
+    .label = 自动更新插件
