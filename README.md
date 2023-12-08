@@ -102,7 +102,7 @@ Search `@example` in `src/examples.ts`. The examples are called in `src/hooks.ts
 
 - Preferences bindings
 - UI Events
-- Tabel
+- Table
 - Locale
 
 See [`src/modules/preferenceScript.ts`](./src/modules/preferenceScript.ts)
