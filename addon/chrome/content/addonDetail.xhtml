@@ -66,6 +66,8 @@
 <body>
   <div class="viewport-container">
     <div style="display: flex; align-items: center;">
+      <img id="addon-icon"
+        style="vertical-align: middle; width: 32px; height: 100%; object-fit: contain; object-position: left; cursor: pointer; padding-right: 8px;" />
       <a id="addon-name"
         style="font-weight: bold; font-size: large; text-decoration: underline; color: cornflowerblue; cursor: pointer;"></a>
     </div>
@@ -85,7 +87,7 @@
       <img id="local-version-icon"
         style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; padding-left: 2px;" />
     </div>
-    <label id="description" style="font-size: medium; margin-top: 12px; text-align: left;"></label>
+    <label id="description" style="font-size: medium; margin-top: 12px; text-align: left; padding-right: 16px;"></label>
   </div>
 
   <div class="footer-container" style="padding: 10px; flex-direction: column;"
@@ -94,6 +96,7 @@
     <button id="update" data-l10n-id="update" style="cursor: pointer;"></button>
     <button id="reinstall" data-l10n-id="reinstall" style="cursor: pointer;"></button>
     <button id="uninstall" data-l10n-id="uninstall" style="cursor: pointer;"></button>
+    <button id="remove" data-l10n-id="remove" style="cursor: pointer;"></button>
     <button id="uninstallUndo" data-l10n-id="uninstallUndo" style="cursor: pointer;"></button>
     <button id="enable" data-l10n-id="enable" style="cursor: pointer;"></button>
     <button id="disable" data-l10n-id="disable" style="cursor: pointer;"></button>

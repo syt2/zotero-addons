@@ -52,6 +52,7 @@ menu-update = 更新
 menu-reinstall = 重新安装
 menu-install-and-update = 安装 & 更新
 menu-uninstall = 卸载
+menu-remove = 移除
 menu-uninstall-undo = 恢复
 menu-homepage = 主页
 menu-refresh = 刷新插件列表

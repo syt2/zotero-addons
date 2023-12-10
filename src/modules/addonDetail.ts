@@ -4,7 +4,7 @@ import { compareVersion, installAddonWithPopWindowFrom, undoUninstall, uninstall
 import { config } from "../../package.json";
 import { isWindowAlive } from "../utils/window";
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
-
+const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 export class AddonInfoDetail {
   private static window?: Window;
@@ -48,8 +48,14 @@ export class AddonInfoDetail {
     this.uninstallButton.addEventListener("click", async e => {
       if (this.uninstallButton.disabled) { return; }
       this.uninstallButton.disabled = true;
-      await uninstall(await this.localAddon());
+      await uninstall(await this.localAddon(), {popConfirmDialog: true});
       this.uninstallButton.disabled = false;
+    });
+    this.removeButton.addEventListener("click", async e => {
+      if (this.removeButton.disabled) { return; }
+      this.removeButton.disabled = true;
+      await uninstall(await this.localAddon());
+      this.removeButton.disabled = false;
     });
     this.uninstallUndoButton.addEventListener("click", async e => {
       if (this.uninstallUndoButton.disabled) { return; }
@@ -74,7 +80,15 @@ export class AddonInfoDetail {
       if (!addonInfo.author?.url) { return; }
       Zotero.launchURL(`${addonInfo.author.url}`);
     });
+    this.authorIcon.addEventListener("click", e => {
+      if (!addonInfo.author?.url) { return; }
+      Zotero.launchURL(`${addonInfo.author.url}`);
+    });
     this.addonName.addEventListener("click", e => {
+      if (!addonInfo.repo) { return; }
+      Zotero.launchURL(`https://github.com/${addonInfo.repo}`);
+    });
+    this.addonIcon.addEventListener("click", e => {
       if (!addonInfo.repo) { return; }
       Zotero.launchURL(`https://github.com/${addonInfo.repo}`);
     });
@@ -101,6 +115,9 @@ export class AddonInfoDetail {
   private static get uninstallButton() {
     return this.window?.document.querySelector("#uninstall") as HTMLButtonElement;
   }
+  private static get removeButton() {
+    return this.window?.document.querySelector("#remove") as HTMLButtonElement;
+  }
   private static get uninstallUndoButton() {
     return this.window?.document.querySelector("#uninstallUndo") as HTMLButtonElement;
   }
@@ -113,8 +130,14 @@ export class AddonInfoDetail {
   private static get authorName() {
     return this.window?.document.querySelector("#author-name") as HTMLLinkElement;
   }
+  private static get authorIcon() {
+    return this.window?.document.querySelector("#avatar-icon") as HTMLImageElement;
+  }
   private static get addonName() {
     return this.window?.document.querySelector("#addon-name") as HTMLLinkElement;
+  }
+  private static get addonIcon() {
+    return this.window?.document.querySelector("#addon-icon") as HTMLImageElement;
   }
   private static async localAddon(): Promise<any | undefined> {
     if (!this.addonInfo) { return undefined; }
@@ -136,7 +159,12 @@ export class AddonInfoDetail {
     const windowTitle = win.document.querySelector("#win-title") as HTMLTitleElement;
     windowTitle.innerHTML = addonInfo.name;
 
+    this.addonIcon.src = localAddon ? AddonManager.getPreferredIconURL(localAddon) : "";
+    this.addonIcon.hidden = !localAddon;
     this.addonName.innerHTML = addonInfo.name;
+
+    this.authorIcon.src = addonInfo.author?.avatar ?? "";
+    this.authorName.innerHTML = addonInfo.author?.name ?? "Unknown";
 
     const starIcon = win.document.querySelector("#stars-icon") as HTMLImageElement;
     starIcon.src = `https://img.shields.io/github/stars/${addonInfo.repo}?label=${getString('menu-star')}`;
@@ -147,9 +175,6 @@ export class AddonInfoDetail {
     const localVersionIcon = win.document.querySelector("#local-version-icon") as HTMLImageElement;
     localVersionIcon.src = (localAddon?.version) ? `https://img.shields.io/badge/${getString('menu-local-version')}-${localAddon!.version!.replace('-', '--')}-red` : "";
 
-    const avatarIcon = win.document.querySelector("#avatar-icon") as HTMLImageElement;
-    avatarIcon.src = addonInfo.author?.avatar ?? "";
-    this.authorName.innerHTML = addonInfo.author?.name ?? "Unknown";
 
     const description = win.document.querySelector("#description") as HTMLLabelElement;
     description.innerHTML = localAddon?.description ?? addonInfo.description ?? "";
@@ -158,6 +183,7 @@ export class AddonInfoDetail {
     this.updateButton.hidden = true;
     this.reinstallButton.hidden = true;
     this.uninstallButton.hidden = true;
+    this.removeButton.hidden = true;
     this.uninstallUndoButton.hidden = true;
     this.enableButton.hidden = true;
     this.disableButton.hidden = true;
@@ -180,6 +206,7 @@ export class AddonInfoDetail {
       const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relatedAddon[0][1].id);
       if (dbAddon.length > 0) {
         dbAddon[0].pendingUninstall ? this.uninstallUndoButton.hidden = false : this.uninstallButton.hidden = false;
+        this.removeButton.hidden = !dbAddon[0].pendingUninstall;
       }
       if (!relatedAddon[0][1].appDisabled && (dbAddon.length <= 0 || !dbAddon[0].pendingUninstall)) {
         if (relatedAddon[0][1].userDisabled) {

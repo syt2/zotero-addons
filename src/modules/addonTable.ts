@@ -10,6 +10,7 @@ import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
+const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 type TableMenuItemID =
   "menu-install" |
@@ -19,6 +20,7 @@ type TableMenuItemID =
   "menu-enable" |
   "menu-disable" |
   "menu-uninstall" |
+  "menu-remove" |
   "menu-uninstall-undo" |
   "menu-homepage" |
   "menu-refresh" |
@@ -138,11 +140,21 @@ export class AddonTable {
     });
   }
 
-  static async updateExistAddons() {
+  static async updateExistAddons(options?: { filterAutoUpdatableAddons?: boolean }) {
     if (this.addonInfos.length <= 0) {
       await this.updateAddonInfos(false);
     }
-    const addons = await this.outdateAddons();
+    const addons = (await this.outdateAddons()).filter(e => {
+      if (options?.filterAutoUpdatableAddons) {
+        const systemUpdatable = AddonManager.updateEnabled;
+        if (!systemUpdatable) { return false; }
+        if (e[1]?.applyBackgroundUpdates == 2) { return true; } // on
+        if (e[1]?.applyBackgroundUpdates == 0) { return false; } // off
+        return AddonManager.autoUpdateDefault;
+      } else {
+        return true;
+      }
+    })
     if (addons.length <= 0) { return; }
     const progressWin = new ztoolkit.ProgressWindow(config.addonName, {
       closeOnClick: true,
@@ -187,7 +199,12 @@ export class AddonTable {
             }
             const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relatedAddon[0][1].id);
             if (dbAddon.length > 0) {
-              result.push(dbAddon[0].pendingUninstall ? "menu-uninstall-undo" : "menu-uninstall");
+              if (dbAddon[0].pendingUninstall) {
+                result.push("menu-uninstall-undo");
+                result.push("menu-remove");
+              } else {
+                result.push("menu-uninstall");
+              }
             }
             if (!relatedAddon[0][1].appDisabled && (dbAddon.length <= 0 || !dbAddon[0].pendingUninstall)) {
               if (relatedAddon[0][1].userDisabled) {
@@ -413,7 +430,10 @@ export class AddonTable {
         this.installAddons(selectAddons.map(e => e[0]), { forceInstall: true });
         break;
       case "menu-uninstall":
-        this.uninstallAddons(selectAddons.map(e => e[0]));
+        this.uninstallAddons(selectAddons.map(e => e[0]), true);
+        break;
+      case "menu-remove":
+        this.uninstallAddons(selectAddons.map(e => e[0]), false);
         break;
       case "menu-uninstall-undo":
         this.undoUninstallAddons(selectAddons.map(e => e[0]));
@@ -450,10 +470,10 @@ export class AddonTable {
     }
   }
 
-  private static async uninstallAddons(addons: AddonInfo[]) {
+  private static async uninstallAddons(addons: AddonInfo[], popConfirmDialog: boolean) {
     const relatedAddon = await relatedAddons(addons);
     for (const [addonInfo, addon] of relatedAddon) {
-      await uninstall(addon, true);
+      await uninstall(addon, { popConfirmDialog: popConfirmDialog });
     }
   }
 

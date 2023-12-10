@@ -25,8 +25,8 @@ export async function undoUninstall(addon: any) {
   }
 }
 
-export async function uninstall(addon: any, popConfirmDialog = true) {
-  if (popConfirmDialog) {
+export async function uninstall(addon: any, options?: { popConfirmDialog?: boolean, canRestore?: boolean }) {
+  if (options?.popConfirmDialog) {
     const confirm = await Services.prompt.confirmEx(
       null,
       getString('uninstall-confirm-title'),
@@ -43,7 +43,7 @@ export async function uninstall(addon: any, popConfirmDialog = true) {
     }
   }
   try {
-    await addon.uninstall(true);
+    await addon.uninstall(options?.canRestore);
     new ztoolkit.ProgressWindow(config.addonName, {
       closeOnClick: true,
       closeTime: 3000,

@@ -52,6 +52,7 @@ menu-update = Update
 menu-reinstall = Reinstall
 menu-install-and-update = Install & Update
 menu-uninstall = Uninstall
+menu-remove = Remove
 menu-uninstall-undo = Restore
 menu-homepage = Homepage
 menu-refresh = Refresh add-on list
