@@ -144,7 +144,7 @@ async function pInstallAddonFrom(url: string, name?: string, forceInstall = fals
     const xpiInstaller = await requestXpiInstaller(url, xpiName);
 
     // url或插件无效
-    if (!xpiInstaller 
+    if (!xpiInstaller
       || !xpiInstaller.addon
       || !xpiInstaller.addon.isCompatible
       || !xpiInstaller.addon.isPlatformCompatible) {
@@ -159,7 +159,12 @@ async function pInstallAddonFrom(url: string, name?: string, forceInstall = fals
       compareVersion(xpiInstaller.existingAddon.version, xpiInstaller.addon.version) >= 0) {
       return xpiInstaller.addon.id;
     }
-    xpiInstaller.install();
+    // https://github.com/mozilla/gecko-dev/blob/2ac4b481997e2bcf569c91d8bb7ab1e5a0b7b1b0/toolkit/mozapps/extensions/content/aboutaddonsCommon.js#L263
+    AddonManager.installAddonFromAOM(
+      (window as any).docShell.chromeEventHandler,
+      (document as any).documentURIObject,
+      xpiInstaller);
+    // xpiInstaller.install();
     return xpiInstaller.addon.id;
   } catch (error) {
     ztoolkit.log(`install addon ${xpiName} from ${url} failed: ${error}`);
