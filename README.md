@@ -194,7 +194,7 @@ Activate with `Shift+P`.
    > Put the path of the profile into the `profilePath` in `zotero-cmd.json` to specify which profile to use.
 
    ```sh
-   cp ./scripts/zotero-cmd-default.json ./scripts/zotero-cmd.json
+   cp ./scripts/zotero-cmd-template.json ./scripts/zotero-cmd.json
    vim ./scripts/zotero-cmd.json
    ```
 
@@ -391,7 +391,7 @@ This section shows the directory structure of a template.
 |   |-- stop.mjs                       # script to kill Zotero process
 |   |-- utils.mjs                      # utils functions for dev scripts
 |   |-- update-template.json      # template of `update.json`
-|   `-- zotero-cmd-default.json   # example of local env
+|   `-- zotero-cmd-template.json  # template of local env
 |-- src                           # source code
 |   |-- addon.ts                  # base class
 |   |-- hooks.ts                  # lifecycle hooks
