@@ -71,7 +71,7 @@ async function main() {
   startZotero();
   setTimeout(() => {
     openDevTool();
-  }, 2000);
+  }, 5000);
 
   // watch
   await watch();
