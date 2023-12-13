@@ -68,10 +68,7 @@ async function main() {
   await build();
 
   // start Zotero
-  startZotero();
-  setTimeout(() => {
-    openDevTool();
-  }, 5000);
+  startZotero(openDevTool);
 
   // watch
   await watch();
