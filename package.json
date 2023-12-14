@@ -1,6 +1,6 @@
 {
   "name": "zotero-addons",
-  "version": "0.6.0-4",
+  "version": "0.6.0-5",
   "description": "Zotero Addon Collection",
   "config": {
     "addonName": "Zotero Addons",
