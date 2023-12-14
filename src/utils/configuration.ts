@@ -34,11 +34,11 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
   },
   {
     id: "source-zotero-chinese-github-backup",
-    api: "https://github.com/syt2/zotero-addons-scraper/releases/latest/download/addon_infos.json",
+    api: "https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
   },
   {
     id: "source-zotero-chinese-ghproxy-backup",
-    api: "https://ghproxy.com/?q=https://github.com/syt2/zotero-addons-scraper/releases/latest/download/addon_infos.json",
+    api: "https://ghproxy.com/?q=https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
   },
   {
     id: "source-custom",
