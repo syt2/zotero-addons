@@ -33,7 +33,6 @@ export interface AddonInfo {
      */
     tagName: "latest" | "pre" | string;
 
-    currentVersion?: string;
     xpiDownloadUrl?: {
       github: string;
       gitee?: string;
@@ -44,6 +43,14 @@ export interface AddonInfo {
     releaseData?: string;
     downloadCount?: number;
     assetId?: number;
+    /**
+     * 此插件xpi的id
+     */
+    id?: string;
+    /**
+     * 此插件xpi的version
+     */
+    xpiVersion?: string;
   }>;
 
   description?: string;
@@ -53,9 +60,13 @@ export interface AddonInfo {
     url: string;
     avatar: string;
   };
+}
 
-  // 插件id，用以判断插件是否安装，zotero-chinese仓库暂无此项，保留供后续使用
-  id?: string;
+
+export function addonReleaseInfo(addonInfo: AddonInfo) {
+  const release = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
+  if ((release?.xpiDownloadUrl?.github?.length ?? 0) === 0) { return; }
+  return release
 }
 
 export function z7XpiDownloadUrls(addonInfo: AddonInfo) {

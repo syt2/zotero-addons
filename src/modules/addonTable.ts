@@ -1,7 +1,7 @@
 import { VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
-import { AddonInfo, AddonInfoManager, z7XpiDownloadUrls } from "./addonInfo";
+import { AddonInfo, AddonInfoManager, addonReleaseInfo, z7XpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
 import { compareVersion, currentInstalledXpis, installAddonWithPopWindowFrom, uninstall } from "../utils/utils";
@@ -275,7 +275,8 @@ export class AddonTable {
           result["installState"] = getString('state-uncompatible');
         }
       } else { // 本地未找到该插件
-        result["installState"] = currentInstalledXpis.includes(addonInfo.repo) ? getString('state-restart') : (addonInfo.id || addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0]) ? getString('state-notInstalled') : getString('state-unknown');
+        
+        result["installState"] = currentInstalledXpis.includes(addonInfo.repo) ? getString('state-restart') : (addonReleaseInfo(addonInfo)?.id || addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0]) ? getString('state-notInstalled') : getString('state-unknown');
       }
       return [
         addonInfo,
@@ -333,7 +334,7 @@ export class AddonTable {
   private static addonCanUpdate(addonInfo: AddonInfo, addon: any) {
     const release = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
     if (!release || (release.xpiDownloadUrl?.github?.length ?? 0) == 0) { return false; }
-    const version = release.currentVersion;
+    const version = release.xpiVersion ?? release.tagName;
     if (!version || !addon.version) { return false; }
     return compareVersion(addon.version, version) < 0;
   }
@@ -343,7 +344,7 @@ export class AddonTable {
     for (const addon of await AddonManager.getAllAddons()) {
       if (!addon.id) { continue; }
       const relateAddon = addonInfos.find(addonInfo => {
-        if (addonInfo.id === addon.id) { return true; }
+        if (addonReleaseInfo(addonInfo)?.id === addon.id) { return true; }
         if (addonInfo.name.length > 0 && addonInfo.name === addon.name) { return true; }
         if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) { return true; }
         if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) { return true; }
@@ -375,7 +376,7 @@ export class AddonTable {
     let num = 0;
     for (const addon of addons) {
       progressWin.changeLine({
-        text: `${addon[0].name} ${addon[1].version} => ${addon[0].releases[0].currentVersion}`,
+        text: `${addon[0].name} ${addon[1].version} => ${addon[0].releases[0].xpiVersion ?? addon[0].releases[0].tagName}`,
         progress: num++ / addons.length,
       });
       await this.installAddons([addon[0]], false);
