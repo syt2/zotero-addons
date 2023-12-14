@@ -58,7 +58,7 @@ export function setCurrentSource(source?: string) {
   if (source && Sources.find(e => e.id === source)) {
     setPref('source', source);
   } else {
-    setPref('source', 'source-zotero-chinese-github');
+    setPref('source', 'source-zotero-chinese-gitee');
   }
 }
 
