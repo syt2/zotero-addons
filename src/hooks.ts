@@ -1,7 +1,6 @@
 import { config } from "../package.json";
 import { AddonInfoManager } from "./modules/addonInfo";
 import { AddonTable } from "./modules/addonTable";
-import { addonIDMapManager } from "./utils/addonIDMapManager";
 import { Sources, setCurrentSource, setCustomSourceApi } from "./utils/configuration";
 import { getString, initLocale } from "./utils/locale";
 import { extractFileNameFromUrl, installAddonWithPopWindowFrom } from "./utils/utils";
@@ -21,7 +20,6 @@ async function onStartup() {
   registerConfigScheme();
 
   AddonInfoManager.shared.fetchAddonInfos(true);
-  addonIDMapManager.shared.fetchAddonIDIfNeed();
 
   AddonTable.registerInToolbar();
 }
