@@ -117,7 +117,7 @@ async function pInstallAddonFrom(url: string, name?: string, forceInstall = fals
       responseType: 'arraybuffer',
     });
     const xpiDownloadPath = OS.Path.join(
-      OS.Constants.Path.tmpDir,
+      (OS as any).Constants.Path.tmpDir,
       xpiName,
     );
     await OS.File.writeAtomic(xpiDownloadPath, response.response);

@@ -297,15 +297,19 @@ export class AddonTable {
       for (const order of this.sortOrder) {
         switch (order[0]) {
           case "name":
+            // eslint-disable-next-line no-case-declarations
             const [na, nb] = [a.name.toLowerCase(), b.name.toLowerCase()];
             if (na === nb) { break; }
             return na < nb ? order[1] : -order[1]
           case "star":
+            // eslint-disable-next-line no-case-declarations
             const [sa, sb] = [a.star ?? 0, b.star ?? 0];
             if (sa === sb) { break; }
             return sa < sb ? order[1] : -order[1];
           case "installState":
+            // eslint-disable-next-line no-case-declarations
             const [isa, isb] = [infoA[1]['installState'], infoB[1]['installState']];
+            // eslint-disable-next-line no-case-declarations
             const [isav, isbv] = [stateMap[isa] ?? 0, stateMap[isb] ?? 0];
             if (isav === isbv) { break; }
             if (isbv === 0) { return -1; }

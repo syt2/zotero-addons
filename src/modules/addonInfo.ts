@@ -75,6 +75,31 @@ export function z7XpiDownloadUrls(addonInfo: AddonInfo) {
   }
 }
 
+
+class AddonInfoAPI {
+  // fetch addon infos from source
+  static async fetchAddonInfos(): Promise<AddonInfo[]> {
+    const url = currentSource().api ?? customSourceApi();
+    ztoolkit.log(`fetch addon infos from ${url}`);
+    try {
+      const response = await Zotero.HTTP.request("GET", url);
+      const addons = JSON.parse(response.response) as AddonInfo[];
+      const validAddons = addons.filter(addon => {
+        const release = addon.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
+        if (release?.xpiDownloadUrl?.github) { return true; }
+        return false;
+      })
+      return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
+        return (b.star ?? 0) - (a.star ?? 0);
+      });
+    } catch (error) {
+      ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);
+    }
+    return [];
+  }
+}
+
+
 export class AddonInfoManager {
   static shared = new AddonInfoManager();
   private _fetching = false;
@@ -104,28 +129,5 @@ export class AddonInfoManager {
     this._addonInfos = await AddonInfoAPI.fetchAddonInfos();
     this._fetching = false;
     return this.addonInfos;
-  }
-}
-
-class AddonInfoAPI {
-  // fetch addon infos from source
-  static async fetchAddonInfos(): Promise<AddonInfo[]> {
-    const url = currentSource().api ?? customSourceApi();
-    ztoolkit.log(`fetch addon infos from ${url}`);
-    try {
-      const response = await Zotero.HTTP.request("GET", url);
-      const addons = JSON.parse(response.response) as AddonInfo[];
-      const validAddons = addons.filter(addon => {
-        const release = addon.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
-        if (release?.xpiDownloadUrl?.github) { return true; }
-        return false;
-      })
-      return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
-        return (b.star ?? 0) - (a.star ?? 0);
-      });
-    } catch (error) {
-      ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);
-    }
-    return [];
   }
 }
