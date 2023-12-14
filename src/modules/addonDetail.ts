@@ -153,7 +153,8 @@ export class AddonInfoDetail {
     const win = this.window;
     const addonInfo = this.addonInfo;
     if (!win || !addonInfo || !isWindowAlive(win)) { return; }
-    const version = addonReleaseInfo(addonInfo)?.currentVersion;
+    const tagName = addonReleaseInfo(addonInfo)?.tagName;
+    const version = addonReleaseInfo(addonInfo)?.xpiVersion;
     const localAddon = await this.localAddon();
 
     const windowTitle = win.document.querySelector("#win-title") as HTMLTitleElement;
@@ -169,7 +170,7 @@ export class AddonInfoDetail {
     const starIcon = win.document.querySelector("#stars-icon") as HTMLImageElement;
     starIcon.src = `https://img.shields.io/github/stars/${addonInfo.repo}?label=${getString('menu-star')}`;
     const downloadCountIcon = win.document.querySelector("#download-count-icon") as HTMLImageElement;
-    downloadCountIcon.src = version ? `https://img.shields.io/github/downloads/${addonInfo.repo}/${version!}/total?label=${getString('menu-download-count')}` : "";
+    downloadCountIcon.src = tagName ? `https://img.shields.io/github/downloads/${addonInfo.repo}/${tagName!}/total?label=${getString('menu-download-count')}` : "";
     const remoteVersionIcon = win.document.querySelector("#remote-version-icon") as HTMLImageElement;
     remoteVersionIcon.src = `https://img.shields.io/badge/${getString('menu-remote-version')}-${version?.replace('-', '--') ?? getString('unknown')}-gree`;
     const localVersionIcon = win.document.querySelector("#local-version-icon") as HTMLImageElement;
@@ -191,7 +192,7 @@ export class AddonInfoDetail {
     const relatedAddon = await relatedAddons([addonInfo]);
 
     const addonCanUpdate = (addonInfo: AddonInfo, addon: any) => {
-      const version = addonReleaseInfo(addonInfo)?.currentVersion;
+      const version = addonReleaseInfo(addonInfo)?.xpiVersion;
       if (!version || !addon.version) { return false; }
       return compareVersion(addon.version, version) < 0;
     }

@@ -133,7 +133,7 @@ export class AddonTable {
     await this.updateAddonInfos(force);
     this.updateTable();
     selectAddons.forEach(oldAddon => {
-      const newIdx = this.addonInfos.findIndex((newAddon) => oldAddon[0].id === newAddon[0].id || oldAddon[0].repo === newAddon[0].repo);
+      const newIdx = this.addonInfos.findIndex((newAddon) => oldAddon[0].repo === newAddon[0].repo || (addonReleaseInfo(newAddon[0])?.id && addonReleaseInfo(newAddon[0])?.id === addonReleaseInfo(oldAddon[0])?.id));
       if (newIdx >= 0) {
         this.tableHelper?.treeInstance.selection.rangedSelect(newIdx, newIdx, true, false);
       }
@@ -166,7 +166,7 @@ export class AddonTable {
     let num = 0;
     for (const addon of addons) {
       progressWin.changeLine({
-        text: `${addon[0].name} ${addon[1].version} => ${addon[0].releases[0].currentVersion}`,
+        text: `${addon[0].name} ${addon[1].version} => ${addon[0].releases[0].xpiVersion}`,
         progress: num++ / addons.length,
       });
       await this.installAddons([addon[0]], { slience: true });
@@ -275,7 +275,7 @@ export class AddonTable {
       .setProp("onColumnSort", ev => {
         if (typeof ev !== 'number') { return; }
         const treeInstance = this.tableHelper?.treeInstance as any;
-        if (ev < 0 || (ev >= treeInstance._getColumns()?.length ?? 0)) { return; }
+        if (ev < 0 || (ev >= (treeInstance._getColumns()?.length ?? 0))) { return; }
         const column = treeInstance?._getColumns()[ev];
         // 不接受排序的column
         if (["menu-desc", "menu-remote-version", "menu-local-version"].includes(column.dataKey)) {
@@ -512,7 +512,7 @@ export class AddonTable {
       result["menu-name"] = addonInfo.name;
       result["menu-desc"] = addonInfo.description ?? "";
       result['menu-star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
-      result["menu-remote-version"] = addonReleaseInfo(addonInfo)?.currentVersion?.toLowerCase().replace('v', '') ?? "";
+      result["menu-remote-version"] = addonReleaseInfo(addonInfo)?.xpiVersion?.toLowerCase().replace('v', '') ?? "";
       result["menu-local-version"] = "";
       result["menu-remote-update-time"] = addonReleaseInfo(addonInfo)?.releaseData ?? "";
       const inputDate = new Date(addonReleaseInfo(addonInfo)?.releaseData ?? "");
@@ -548,7 +548,7 @@ export class AddonTable {
           result["menu-install-state"] = getString('state-uncompatible');
         }
       } else { // 本地未找到该插件
-        result["menu-install-state"] = (addonInfo.id || addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0]) ? getString('state-notInstalled') : getString('state-unknown');
+        result["menu-install-state"] = (addonReleaseInfo(addonInfo)?.id || addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0]) ? getString('state-notInstalled') : getString('state-unknown');
       }
       return [
         addonInfo,
@@ -606,7 +606,7 @@ export class AddonTable {
   }
 
   private static addonCanUpdate(addonInfo: AddonInfo, addon: any) {
-    const version = addonReleaseInfo(addonInfo)?.currentVersion;
+    const version = addonReleaseInfo(addonInfo)?.xpiVersion;
     if (!version || !addon.version) { return false; }
     return compareVersion(addon.version, version) < 0;
   }

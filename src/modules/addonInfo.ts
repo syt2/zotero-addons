@@ -31,10 +31,19 @@ export interface AddonInfo {
      * `pre`：最新预发布；
      * `string`：发布对应的 `git.tag_name`；
      * 注意 `git.tag_name` 有的有 `v` 而有的没有，可以通过发布链接来判断
+     * 程序执行后，`tagName` 将替换为实际的 `git.tag_name`
      */
     tagName: "latest" | "pre" | string;
+    /**
+     * 插件 ID，自 XPI 中提取
+     */
+    id?: string;
 
-    currentVersion?: string;
+    /**
+     * 插件版本，自 XPI 中提取
+     */
+    xpiVersion?: string;
+
     xpiDownloadUrl?: {
       github: string;
       gitee?: string;
@@ -49,14 +58,12 @@ export interface AddonInfo {
 
   description?: string;
   star?: number;
+  watchers?: number;
   author?: {
     name: string;
     url: string;
     avatar: string;
   };
-
-  // 插件id
-  id?: string;
 }
 
 export function xpiDownloadUrls(addonInfo: AddonInfo) {
@@ -89,7 +96,7 @@ export async function relatedAddons(addonInfos: AddonInfo[]) {
   for (const addon of await AddonManager.getAllAddons()) {
     if (!addon.id) { continue; }
     const relateAddon = addonInfos.find(addonInfo => {
-      if (addonInfo.id === addon.id) { return true; }
+      if (addonReleaseInfo(addonInfo)?.id === addon.id) { return true; }
       if (addonInfo.name.length > 0 && addonInfo.name === addon.name) { return true; }
       if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) { return true; }
       if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) { return true; }
@@ -112,6 +119,31 @@ export async function relatedAddons(addonInfos: AddonInfo[]) {
 //   uncompatible = 5,
 //   pendingUninstall = 6,
 // }
+
+
+class AddonInfoAPI {
+  static async fetchAddonInfos(url: string, timeout?: number, onTimeoutCallback?: VoidFunction): Promise<AddonInfo[]> {
+    ztoolkit.log(`fetch addon infos from ${url}`);
+    try {
+      const options: { timeout?: number } = {};
+      if (timeout) {
+        options.timeout = timeout;
+      }
+      const response = await Zotero.HTTP.request("GET", url, options);
+      const addons = JSON.parse(response.response) as AddonInfo[];
+      const validAddons = addons.filter(addon => addonReleaseInfo(addon));
+      return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
+        return (b.star ?? 0) - (a.star ?? 0);
+      });
+    } catch (error) {
+      ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);
+      if (error instanceof Zotero.HTTP.TimeoutException) {
+        onTimeoutCallback?.();
+      }
+    }
+    return [];
+  }
+}
 
 export class AddonInfoManager {
   static shared = new AddonInfoManager();
@@ -158,30 +190,6 @@ export class AddonInfoManager {
         setAutoSource(source);
         ztoolkit.log(`switch to ${source.id} automatically`);
         return infos;
-      }
-    }
-    return [];
-  }
-}
-
-class AddonInfoAPI {
-  static async fetchAddonInfos(url: string, timeout?: number, onTimeoutCallback?: VoidFunction): Promise<AddonInfo[]> {
-    ztoolkit.log(`fetch addon infos from ${url}`);
-    try {
-      const options: { timeout?: number } = {};
-      if (timeout) {
-        options.timeout = timeout;
-      }
-      const response = await Zotero.HTTP.request("GET", url, options);
-      const addons = JSON.parse(response.response) as AddonInfo[];
-      const validAddons = addons.filter(addon => addonReleaseInfo(addon));
-      return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
-        return (b.star ?? 0) - (a.star ?? 0);
-      });
-    } catch (error) {
-      ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);
-      if (error instanceof Zotero.HTTP.TimeoutException) {
-        onTimeoutCallback?.();
       }
     }
     return [];
