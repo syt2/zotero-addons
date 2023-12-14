@@ -30,6 +30,8 @@ async function onStartup() {
 
   BasicExampleFactory.registerNotifier();
 
+  KeyExampleFactory.registerShortcuts();
+
   await onMainWindowLoad(window);
 }
 
@@ -47,8 +49,6 @@ async function onMainWindowLoad(win: Window): Promise<void> {
       progress: 0,
     })
     .show();
-
-  KeyExampleFactory.registerShortcuts();
 
   await Zotero.Promise.delay(1000);
   popupWin.changeLine({
@@ -150,9 +150,6 @@ function onShortcuts(type: string) {
       break;
     case "smaller":
       KeyExampleFactory.exampleShortcutSmallerCallback();
-      break;
-    case "confliction":
-      KeyExampleFactory.exampleShortcutConflictingCallback();
       break;
     default:
       break;
