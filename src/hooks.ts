@@ -36,6 +36,8 @@ async function onStartup() {
     } else {
       await AddonInfoManager.shared.fetchAddonInfos(true);
     }
+    AddonListenerManager.addListener();
+
     // 若在获取过程中已经展示，则刷新
     AddonTable.refresh(false);
 
@@ -47,7 +49,6 @@ async function onStartup() {
     AddonTable.checkUncompatibleAtFirstTime();
   })();
 
-  AddonListenerManager.addListener();
 }
 
 async function onMainWindowLoad(win: Window): Promise<void> {

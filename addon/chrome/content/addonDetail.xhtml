@@ -65,32 +65,36 @@
 
 <body>
   <div class="viewport-container">
-    <div style="display: flex; align-items: center;">
+    <div style="display: flex; align-items: center; flex-wrap: wrap;">
       <img id="addon-icon"
         style="vertical-align: middle; width: 32px; height: 100%; object-fit: contain; object-position: left; cursor: pointer; padding-right: 8px;" />
       <a id="addon-name"
         style="font-weight: bold; font-size: large; text-decoration: underline; color: cornflowerblue; cursor: pointer;"></a>
     </div>
-    <div style="display: flex; align-items: center; margin-top: 2px;">
+    <div style="display: flex; align-items: center; margin-top: 2px; flex-wrap: wrap;">
       <img id="avatar-icon"
         style="vertical-align: middle; width: 24px; height: 100%; object-fit: contain; object-position: left; border-radius: 50%; cursor: pointer;" />
       <a id="author-name"
         style="padding-left: 8px; text-decoration: underline; cursor: pointer; font-size: small; color: cornflowerblue;"></a>
     </div>
-    <div style="display: flex; align-items: center; margin-top: 4px;">
+    <div style="display: flex; align-items: center; margin-top: 4px; flex-wrap: wrap;">
       <img id="stars-icon"
-        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; padding-left: 2px;" />
-      <img id="download-count-icon"
-        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; padding-left: 2px;" />
-      <img id="remote-version-icon"
-        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; padding-left: 2px;" />
+        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; margin: 1px;" />
       <img id="local-version-icon"
-        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; padding-left: 2px;" />
+        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; margin: 1px;" />
+      <img id="remote-version-icon"
+        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; margin: 1px;" />
+      <img id="download-latest-count-icon"
+        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; margin: 1px;" />
+      <img id="download-all-count-icon"
+        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; margin: 1px;" />
+      <img id="release-time-icon"
+        style="vertical-align: middle; height: 100%; object-fit: contain; object-position: left; margin: 1px;" />
     </div>
     <label id="description" style="font-size: medium; margin-top: 12px; text-align: left; padding-right: 16px;"></label>
   </div>
 
-  <div class="footer-container" style="padding: 10px; flex-direction: column;"
+  <div class="footer-container" style="padding: 10px; display: flex; flex-wrap: wrap;"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     <button id="install" data-l10n-id="install" style="cursor: pointer;"></button>
     <button id="update" data-l10n-id="update" style="cursor: pointer;"></button>

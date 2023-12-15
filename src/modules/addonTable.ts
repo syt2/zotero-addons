@@ -1,7 +1,7 @@
 import { ColumnOptions, VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
-import { AddonInfo, AddonInfoManager, addonReleaseInfo, relatedAddons, xpiDownloadUrls } from "./addonInfo";
+import { AddonInfo, AddonInfoManager, addonReleaseInfo, addonReleaseTime, relatedAddons, xpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
 import { compareVersion, installAddonFrom, installAddonWithPopWindowFrom, undoUninstall, uninstall } from "../utils/utils";
@@ -515,16 +515,9 @@ export class AddonTable {
       result["menu-remote-version"] = addonReleaseInfo(addonInfo)?.xpiVersion?.toLowerCase().replace('v', '') ?? "";
       result["menu-local-version"] = "";
       result["menu-remote-update-time"] = addonReleaseInfo(addonInfo)?.releaseData ?? "";
-      const inputDate = new Date(addonReleaseInfo(addonInfo)?.releaseData ?? "");
-      if (inputDate) {
-        const year = inputDate.getFullYear();
-        const month = String(inputDate.getMonth() + 1).padStart(2, '0');
-        const day = String(inputDate.getDate()).padStart(2, '0');
-        const hours = String(inputDate.getHours()).padStart(2, '0');
-        const minutes = String(inputDate.getMinutes()).padStart(2, '0');
-        const seconds = String(inputDate.getSeconds()).padStart(2, '0');
-        const formattedDate = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
-        result["menu-remote-update-time"] = formattedDate;
+      const releaseTime = addonReleaseTime(addonInfo);
+      if (releaseTime) {
+        result["menu-remote-update-time"] = releaseTime;
       }
       const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
       if (relateAddon) { /// 本地有该插件

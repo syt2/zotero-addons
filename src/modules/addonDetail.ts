@@ -1,4 +1,4 @@
-import { AddonInfo, addonReleaseInfo, relatedAddons, xpiDownloadUrls } from "./addonInfo";
+import { AddonInfo, addonReleaseInfo, addonReleaseTime, relatedAddons, xpiDownloadUrls } from "./addonInfo";
 import { getString } from "../utils/locale";
 import { compareVersion, installAddonWithPopWindowFrom, undoUninstall, uninstall } from "../utils/utils";
 import { config } from "../../package.json";
@@ -48,7 +48,7 @@ export class AddonInfoDetail {
     this.uninstallButton.addEventListener("click", async e => {
       if (this.uninstallButton.disabled) { return; }
       this.uninstallButton.disabled = true;
-      await uninstall(await this.localAddon(), {popConfirmDialog: true});
+      await uninstall(await this.localAddon(), { popConfirmDialog: true });
       this.uninstallButton.disabled = false;
     });
     this.removeButton.addEventListener("click", async e => {
@@ -153,8 +153,10 @@ export class AddonInfoDetail {
     const win = this.window;
     const addonInfo = this.addonInfo;
     if (!win || !addonInfo || !isWindowAlive(win)) { return; }
-    const tagName = addonReleaseInfo(addonInfo)?.tagName;
-    const version = addonReleaseInfo(addonInfo)?.xpiVersion;
+    const releaseInfo = addonReleaseInfo(addonInfo);
+    const tagName = releaseInfo?.tagName;
+    const version = releaseInfo?.xpiVersion;
+    const releaseTime = addonReleaseTime(addonInfo);
     const localAddon = await this.localAddon();
 
     const windowTitle = win.document.querySelector("#win-title") as HTMLTitleElement;
@@ -169,13 +171,16 @@ export class AddonInfoDetail {
 
     const starIcon = win.document.querySelector("#stars-icon") as HTMLImageElement;
     starIcon.src = `https://img.shields.io/github/stars/${addonInfo.repo}?label=${getString('menu-star')}`;
-    const downloadCountIcon = win.document.querySelector("#download-count-icon") as HTMLImageElement;
-    downloadCountIcon.src = tagName ? `https://img.shields.io/github/downloads/${addonInfo.repo}/${tagName!}/total?label=${getString('menu-download-count')}` : "";
+    const downloadLatestCountIcon = win.document.querySelector("#download-latest-count-icon") as HTMLImageElement;
+    downloadLatestCountIcon.src = tagName ? `https://img.shields.io/github/downloads/${addonInfo.repo}/${tagName!}/total?label=${getString('menu-download-latest-count')}` : "";
+    const downloadAllCountIcon = win.document.querySelector("#download-all-count-icon") as HTMLImageElement;
+    downloadAllCountIcon.src = tagName ? `https://img.shields.io/github/downloads/${addonInfo.repo}/total?label=${getString('menu-download-all-count')}` : "";
     const remoteVersionIcon = win.document.querySelector("#remote-version-icon") as HTMLImageElement;
     remoteVersionIcon.src = `https://img.shields.io/badge/${getString('menu-remote-version')}-${version?.replace('-', '--') ?? getString('unknown')}-gree`;
     const localVersionIcon = win.document.querySelector("#local-version-icon") as HTMLImageElement;
     localVersionIcon.src = (localAddon?.version) ? `https://img.shields.io/badge/${getString('menu-local-version')}-${localAddon!.version!.replace('-', '--')}-red` : "";
-
+    const releaseTimeIcon = win.document.querySelector("#release-time-icon") as HTMLImageElement;
+    releaseTimeIcon.src = releaseTime ? `https://img.shields.io/badge/${getString('menu-remote-update-time')}-${releaseTime}-brown` : "";
 
     const description = win.document.querySelector("#description") as HTMLLabelElement;
     description.innerHTML = localAddon?.description ?? addonInfo.description ?? "";

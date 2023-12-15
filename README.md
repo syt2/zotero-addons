@@ -4,9 +4,9 @@
 [![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)
 [![Using Zotero Chinese Plugins](https://img.shields.io/badge/Using-Zotero%20Chinese%20Plugins-blue?style=flat-square&logo=github)](https://github.com/zotero-chinese/zotero-plugins)
 [![Using Zotero Scraper](https://img.shields.io/badge/Using-Zotero%20Addons%20Scraper-blue?style=flat-square&logo=github)](https://github.com/syt2/zotero-addons-scraper)  
-[![Release](https://img.shields.io/github/v/release/syt2/zotero-addons?style=flat-square&logo=github)](https://github.com/syt2/zotero-addons/releases/latest)
-![Downloads@all](https://img.shields.io/github/downloads/syt2/zotero-addons/total?style=flat-square&label=Downloads@all)
-![Downloads@latest](https://img.shields.io/github/downloads/syt2/zotero-addons/latest/total?style=flat-square&label=Downloads@latest)
+[![Release](https://img.shields.io/github/v/release/syt2/zotero-addons?style=flat-square&logo=github&color=red)](https://github.com/syt2/zotero-addons/releases/latest)
+![Downloads@all](https://img.shields.io/github/downloads/syt2/zotero-addons/total?style=flat-square&logo=github)
+![Downloads@latest](https://img.shields.io/github/downloads/syt2/zotero-addons/latest/total?style=flat-square&logo=github)
 
 ## Introduction
 
@@ -17,7 +17,8 @@ This is a Zotero Add-on for collecting and installing add-ons in [Zotero7](https
 ## Install
 
 1. Download the [latest release xpi file](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi)
-> For Zotero 6, download [v0.6.0-6](https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi).
+
+   > For Zotero 6, download [v0.6.0-6](https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi).
 
 2. Install in Zotero `(Tools) -> (Add-ons)`
 

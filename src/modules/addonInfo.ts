@@ -90,6 +90,20 @@ export function addonReleaseInfo(addonInfo: AddonInfo) {
   return release
 }
 
+export function addonReleaseTime(addonInfo: AddonInfo) {
+  const inputDate = new Date(addonReleaseInfo(addonInfo)?.releaseData ?? "");
+  if (inputDate) {
+    const year = inputDate.getFullYear();
+    const month = String(inputDate.getMonth() + 1).padStart(2, '0');
+    const day = String(inputDate.getDate()).padStart(2, '0');
+    const hours = String(inputDate.getHours()).padStart(2, '0');
+    const minutes = String(inputDate.getMinutes()).padStart(2, '0');
+    const seconds = String(inputDate.getSeconds()).padStart(2, '0');
+    const formattedDate = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+    return formattedDate;
+  }
+}
+
 export type AssociatedAddonInfo = [AddonInfo, { [key: string]: string }]
 export async function relatedAddons(addonInfos: AddonInfo[]) {
   const addons: [AddonInfo, any][] = [];
@@ -146,10 +160,16 @@ class AddonInfoAPI {
 }
 
 export class AddonInfoManager {
-  static shared = new AddonInfoManager();
-  private constructor() {
-    this.fetchAddonInfos();
+  private static _shared?: AddonInfoManager;
+
+  static get shared() {
+    if (!this._shared) {
+      this._shared = new AddonInfoManager();
+    }
+    return this._shared;
   }
+
+  private constructor() { }
 
   get addonInfos() {
     const url = currentSource().api;
