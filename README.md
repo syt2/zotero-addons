@@ -9,7 +9,7 @@ This is a Zotero Addon for collecting and installing addons in [Zotero6](https:/
 
 ## Install
 
-1. Download the [xpi file](https://github.com/syt2/zotero-addons/releases/download/0.6.0-3/zotero-addons.xpi).
+1. Download the [xpi file](https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi).
 2. Install in Zotero `(Tools) -> (Add-ons)`
 
 ## Usage
