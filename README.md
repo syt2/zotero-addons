@@ -69,7 +69,7 @@ If you are using this repo, I recommended that you put the following badge on yo
 - Prettier and ES Lint integration.
 
 > [!warning]
-> The localization system is upgraded (dtd is deprecated and we do not use .properties anymore). Only supports Zotero 7.0.0-beta.12 or higher now. If you want to support Zotero 6, you may need to use `dtd`, `properties`, and `ftl` at the same time. See the staled branch `zotero6-bootstrap`.
+> The localization system is upgraded (`dtd` is deprecated and we do not use `.properties` anymore). Only supports Zotero 7.0.0-beta.12 or higher now. If you want to support Zotero 6, you may need to use `dtd`, `properties`, and `ftl` at the same time. See the staled branch `zotero6-bootstrap`.
 
 ## Examples
 
@@ -139,7 +139,7 @@ Activate with `Shift+P`.
 ### 0 Requirement
 
 1. Install a beta version of Zotero: <https://www.zotero.org/support/beta_builds>
-2. Install [Node.js](https://nodejs.org/en/) and Git
+2. Install [Node.js](https://nodejs.org/en/) and [Git](https://git-scm.com/)
 
 > [!note]
 > This guide assumes that you have an initial understanding of the basic structure and workings of the Zotero plugin. If you don't, please refer to the [documentation](https://www.zotero.org/support/dev/zotero_7_for_developers) and official plugin examples [Make It Red](https://github.com/zotero/make-it-red) first.
@@ -264,7 +264,7 @@ Steps in `scripts/build.mjs`:
 >
 > - This environment variable is stored in `Zotero.${addonInstance}.data.env`. The outputs to console is disabled in prod mode.
 > - You can decide what users cannot see/use based on this variable.
-> - In production mode, the build script will pack the plugin and update the `update.json`
+> - In production mode, the build script will pack the plugin and update the `update.json`.
 
 ### 5 Release
 
@@ -279,7 +279,7 @@ npm run release
 > [!note]
 > In this template, release-it is configured to locally bump the version, build, and push commits and git.tags, subsequently GitHub Action will rebuild the plugin and publish the XPI to GitHub Release.
 >
-> If you need to release a locally built XPI, set `release-it.github.release` to `true` in `package.json` and remove `.github/workflows/release.yml`. Besides that, you need to set the environment variable `GITHUB_TOKEN`, get it in <https://github.com/settings/tokens>
+> If you need to release a locally built XPI, set `release-it.github.release` to `true` in `package.json` and remove `.github/workflows/release.yml`. Besides that, you need to set the environment variable `GITHUB_TOKEN`, get it in <https://github.com/settings/tokens>.
 
 #### About Prerelease
 
