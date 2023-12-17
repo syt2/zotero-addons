@@ -176,11 +176,11 @@ export class AddonInfoDetail {
     const downloadAllCountIcon = win.document.querySelector("#download-all-count-icon") as HTMLImageElement;
     downloadAllCountIcon.src = tagName ? `https://img.shields.io/github/downloads/${addonInfo.repo}/total?label=${getString('menu-download-all-count')}` : "";
     const remoteVersionIcon = win.document.querySelector("#remote-version-icon") as HTMLImageElement;
-    remoteVersionIcon.src = `https://img.shields.io/badge/${getString('menu-remote-version')}-${version?.replace('-', '--') ?? getString('unknown')}-gree`;
+    remoteVersionIcon.src = `https://img.shields.io/badge/${getString('menu-remote-version')}-${version?.replace('-', '--') ?? getString('unknown')}-orange`;
     const localVersionIcon = win.document.querySelector("#local-version-icon") as HTMLImageElement;
     localVersionIcon.src = (localAddon?.version) ? `https://img.shields.io/badge/${getString('menu-local-version')}-${localAddon!.version!.replace('-', '--')}-red` : "";
     const releaseTimeIcon = win.document.querySelector("#release-time-icon") as HTMLImageElement;
-    releaseTimeIcon.src = releaseTime ? `https://img.shields.io/badge/${getString('menu-remote-update-time')}-${releaseTime}-brown` : "";
+    releaseTimeIcon.src = releaseTime ? `https://img.shields.io/badge/${getString('menu-remote-update-time')}-${releaseTime}-yellowgreen` : "";
 
     const description = win.document.querySelector("#description") as HTMLLabelElement;
     description.innerHTML = localAddon?.description ?? addonInfo.description ?? "";

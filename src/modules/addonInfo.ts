@@ -160,14 +160,7 @@ class AddonInfoAPI {
 }
 
 export class AddonInfoManager {
-  private static _shared?: AddonInfoManager;
-
-  static get shared() {
-    if (!this._shared) {
-      this._shared = new AddonInfoManager();
-    }
-    return this._shared;
-  }
+  static shared = new AddonInfoManager();
 
   private constructor() { }
 
