@@ -1,7 +1,7 @@
 {
   "usage": "Copy and rename this file to zotero-cmd.json. Edit the cmd.",
   "killZoteroWindows": "taskkill /f /im zotero.exe",
-  "killZoteroUnix": "kill -9 $(ps -x | grep zotero)",
+  "killZoteroUnix": "kill -9 $(ps -x | grep '[z]otero' | awk '{print $1}')",
   "exec": {
     "@comment-zoteroBinPath": "Please input the path of the Zotero binary file in `zoteroBinPath`.",
     "@comment-zoteroBinPath-tip": "The path delimiter should be escaped as `\\` for win32. The path is `*/Zotero.app/Contents/MacOS/zotero` for MacOS.",
