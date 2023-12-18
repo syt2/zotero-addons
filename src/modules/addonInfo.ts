@@ -40,7 +40,7 @@ export interface AddonInfo {
       jsdeliver?: string;
       kgithub?: string;
     };
-    releaseData?: string;
+    releaseDate?: string;
     downloadCount?: number;
     assetId?: number;
     /**
