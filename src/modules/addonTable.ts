@@ -514,7 +514,6 @@ export class AddonTable {
       result['menu-star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
       result["menu-remote-version"] = addonReleaseInfo(addonInfo)?.xpiVersion?.toLowerCase().replace('v', '') ?? "";
       result["menu-local-version"] = "";
-      result["menu-remote-update-time"] = addonReleaseInfo(addonInfo)?.releaseData ?? "";
       const releaseTime = addonReleaseTime(addonInfo);
       if (releaseTime) {
         result["menu-remote-update-time"] = releaseTime;
@@ -581,7 +580,7 @@ export class AddonTable {
             if (r === 0) { return 1; }
             return l > r ? sortOrder : -sortOrder;
           case "menu-remote-update-time":
-            [l, r] = [addonReleaseInfo(a)?.releaseData ?? "", addonReleaseInfo(b)?.releaseData ?? ""];
+            [l, r] = [addonReleaseInfo(a)?.releaseDate ?? "", addonReleaseInfo(b)?.releaseDate ?? ""];
             if (l == r) { break; }
             return l > r ? sortOrder : -sortOrder;
         }

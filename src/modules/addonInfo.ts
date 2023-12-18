@@ -51,7 +51,7 @@ export interface AddonInfo {
       jsdeliver?: string;
       kgithub?: string;
     };
-    releaseData?: string;
+    releaseDate?: string;
     downloadCount?: number;
     assetId?: number;
   }>;
@@ -91,7 +91,7 @@ export function addonReleaseInfo(addonInfo: AddonInfo) {
 }
 
 export function addonReleaseTime(addonInfo: AddonInfo) {
-  const inputDate = new Date(addonReleaseInfo(addonInfo)?.releaseData ?? "");
+  const inputDate = new Date(addonReleaseInfo(addonInfo)?.releaseDate ?? "");
   if (inputDate) {
     const year = inputDate.getFullYear();
     const month = String(inputDate.getMonth() + 1).padStart(2, '0');
