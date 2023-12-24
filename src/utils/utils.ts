@@ -76,36 +76,56 @@ export async function installAddonFrom(url: string | string[], options?: {
   }
   if (urls.length <= 0) { return false; }
 
-  let popWin = undefined;
+  let result: boolean | string = false;
+
   if (options?.popWin) {
-    popWin = new ztoolkit.ProgressWindow(config.addonName, {
+    let text = `${getString("installing")} ${options.name ?? extractFileNameFromUrl(urls[0])}`;
+    const popWin = new ztoolkit.ProgressWindow(config.addonName, {
       closeOnClick: true,
       closeTime: -1,
     }).createLine({
-      text: `${getString("installing")} ${options.name ?? extractFileNameFromUrl(urls[0])}`,
+      text: text,
       type: "default",
-      progress: 0,
+      progress: 1,
     }).show(-1);
+
+    (async () => { // 假进度条
+      let coefficient = 5;
+      let progress = 0;
+      let cnt = 1;
+      while (!result) {
+        await Zotero.Promise.delay(500);
+        progress += coefficient * (0.8 + Math.random() * 0.5);
+        if (progress > 100) { progress = 100; }
+        coefficient *= 0.935;
+        let showText = text;
+        for (let i = 0; i < cnt; ++i) {
+          showText += '.';
+        }
+        cnt = (cnt + 1) % 7;
+        popWin.changeLine({
+          progress: Math.floor(progress),
+          text: showText,
+        });
+      }
+      popWin.changeLine({
+        text: `${options.name ?? extractFileNameFromUrl(urls[0])} ${result ? getString("install-succeed") : getString("install-failed")}`,
+        type: result ? "success" : "fail",
+        progress: 100,
+      });
+      popWin.startCloseTimer(2000);
+    })();
   }
-  let result = false;
   for (const xpiUrl of urls) {
     if (!xpiUrl || xpiUrl.length <= 0) { continue; }
     try {
       const install = await AddonManager.getInstallForURL(xpiUrl);
       const addon = await install.install();
       result = addon.id;
-      break;
+      return result;
     } catch (error) {
       ztoolkit.log(`install from ${xpiUrl} failed: ${error}`);
     }
-  }
-  if (options?.popWin && popWin) {
-    popWin.changeLine({
-      text: `${options.name ?? extractFileNameFromUrl(urls[0])} ${result ? getString("install-succeed") : getString("install-failed")}`,
-      type: result ? "success" : "fail",
-      progress: 0,
-    });
-    popWin.startCloseTimer(1000);
   }
   return result;
 }
