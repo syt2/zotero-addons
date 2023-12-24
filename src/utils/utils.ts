@@ -128,8 +128,10 @@ async function requestXpiInstaller(url: string, xpiName: string) {
       });
       await IOUtils.write(xpiDownloadPath, new Uint8Array(response.response));
     }
-    const xpiFile = Zotero.File.pathToFile(xpiDownloadPath);
-    const xpiInstaller = await AddonManager.getInstallForFile(xpiFile);
+    // 一直有 Error opening input stream (invalid filename?): 不知道啥问题
+    // 先去掉Zotero实现的接口，全部使用gecko的接口
+    const xpiFileURL = PathUtils.toFileURI(xpiDownloadPath);
+    const xpiInstaller = await AddonManager.getInstallForURL(xpiFileURL);
     return xpiInstaller;
   } catch (error) {
     ztoolkit.log(`download addon ${xpiName} from ${url} failed: ${error}`);
