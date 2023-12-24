@@ -141,7 +141,10 @@ async function requestXpiInstaller(url: string, xpiName: string) {
 
 // 从url安装插件，返回插件id
 async function pInstallAddonFrom(url: string, name?: string, forceInstall = false): Promise<string | undefined> {
-  const xpiName = name ?? extractFileNameFromUrl(url) ?? "tmp.xpi";
+  let xpiName = `${Math.floor(new Date().getTime() / 1000 / 60)}@` + (name ?? extractFileNameFromUrl(url) ?? `tmp.xpi`); // 每分钟下载一次
+  if (!xpiName.toLowerCase().endsWith('.xpi')) {
+    xpiName += '.xpi';
+  }
   try {
     const xpiInstaller = await requestXpiInstaller(url, xpiName);
 
@@ -162,6 +165,7 @@ async function pInstallAddonFrom(url: string, name?: string, forceInstall = fals
       return xpiInstaller.addon.id;
     }
     // https://github.com/mozilla/gecko-dev/blob/2ac4b481997e2bcf569c91d8bb7ab1e5a0b7b1b0/toolkit/mozapps/extensions/content/aboutaddonsCommon.js#L263
+    // https://github.com/mozilla/gecko-dev/blob/f170bc26fdcfda53a270dc4f257202e62f4b781f/toolkit/mozapps/extensions/content/drag-drop-addon-installer.js#L66
     AddonManager.installAddonFromAOM(
       (window as any).docShell.chromeEventHandler,
       (document as any).documentURIObject,
