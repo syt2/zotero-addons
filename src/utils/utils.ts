@@ -125,6 +125,7 @@ async function requestXpiInstaller(url: string, xpiName: string) {
     if (!(await IOUtils.exists(xpiDownloadPath))) {
       const response = await Zotero.HTTP.request('GET', url, {
         responseType: 'arraybuffer',
+        timeout: 0,
       });
       await IOUtils.write(xpiDownloadPath, new Uint8Array(response.response));
     }
