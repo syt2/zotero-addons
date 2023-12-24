@@ -4,8 +4,7 @@ import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, addonReleaseInfo, addonReleaseTime, relatedAddons, xpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { compareVersion, installAddonFrom, installAddonWithPopWindowFrom, undoUninstall, uninstall } from "../utils/utils";
-import { addonIDMapManager } from "../utils/addonIDMapManager";
+import { compareVersion, installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
@@ -68,7 +67,7 @@ export class AddonTable {
     if (confirm !== 0) {
       return;
     }
-    await this.installAddons(uncompatibleAddons.map(e => e[0]), { forceInstall: true });
+    await this.installAddons(uncompatibleAddons.map(e => e[0]), { popWin: true });
   }
 
   private static addonInfos: AssociatedAddonInfo[] = [];
@@ -169,7 +168,7 @@ export class AddonTable {
         text: `${addon[0].name} ${addon[1].version} => ${addon[0].releases[0].xpiVersion}`,
         progress: num++ / addons.length,
       });
-      await this.installAddons([addon[0]], { slience: true });
+      await this.installAddons([addon[0]]);
     }
     progressWin.changeLine({
       text: getString('update-succeed'),
@@ -427,7 +426,7 @@ export class AddonTable {
       case "menu-reinstall":
       case "menu-update":
       case "menu-install-and-update":
-        this.installAddons(selectAddons.map(e => e[0]), { forceInstall: true });
+        this.installAddons(selectAddons.map(e => e[0]), { popWin: true });
         break;
       case "menu-uninstall":
         this.uninstallAddons(selectAddons.map(e => e[0]), true);
@@ -485,18 +484,13 @@ export class AddonTable {
   }
 
   private static async installAddons(addons: AddonInfo[], options?: {
-    forceInstall?: boolean,
-    slience?: boolean,
+    popWin?: boolean,
   }) {
     await Promise.all(addons.map(async addon => {
       const urls = xpiDownloadUrls(addon).filter(x => {
         return (x?.length ?? 0) > 0;
       }) as string[];
-      if (options?.slience) {
-        await installAddonFrom(urls, addon.name, addon.repo, options.forceInstall)
-      } else {
-        await installAddonWithPopWindowFrom(urls, addon.name, addon.repo, options?.forceInstall);
-      }
+      await installAddonFrom(urls, { name: addon.name, popWin: options?.popWin });
     }));
   }
 
@@ -540,7 +534,7 @@ export class AddonTable {
           result["menu-install-state"] = getString('state-uncompatible');
         }
       } else { // 本地未找到该插件
-        result["menu-install-state"] = (addonReleaseInfo(addonInfo)?.id || addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0]) ? getString('state-notInstalled') : getString('state-unknown');
+        result["menu-install-state"] = addonReleaseInfo(addonInfo)?.id ? getString('state-notInstalled') : getString('state-unknown');
       }
       return [
         addonInfo,

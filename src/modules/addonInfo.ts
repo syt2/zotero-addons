@@ -1,4 +1,3 @@
-import { addonIDMapManager } from "../utils/addonIDMapManager";
 import { Sources, autoSource, currentSource, setAutoSource } from "../utils/configuration";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
@@ -114,7 +113,6 @@ export async function relatedAddons(addonInfos: AddonInfo[]) {
       if (addonInfo.name.length > 0 && addonInfo.name === addon.name) { return true; }
       if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) { return true; }
       if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) { return true; }
-      if (addonIDMapManager.shared.repoToAddonIDMap[addonInfo.repo]?.[0] === addon.id) { return true; }
       return false;
     });
     if (relateAddon) {

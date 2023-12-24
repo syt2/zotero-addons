@@ -1,6 +1,6 @@
 import { AddonInfo, addonReleaseInfo, addonReleaseTime, relatedAddons, xpiDownloadUrls } from "./addonInfo";
 import { getString } from "../utils/locale";
-import { compareVersion, installAddonWithPopWindowFrom, undoUninstall, uninstall } from "../utils/utils";
+import { compareVersion, installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { config } from "../../package.json";
 import { isWindowAlive } from "../utils/window";
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
@@ -100,7 +100,7 @@ export class AddonInfoDetail {
     const urls = xpiDownloadUrls(addon).filter(x => {
       return (x?.length ?? 0) > 0;
     }) as string[];
-    await installAddonWithPopWindowFrom(urls, addon.name, addon.repo, true);
+    await installAddonFrom(urls, { name: addon.name, popWin: true });
   }
 
   private static get installButton() {

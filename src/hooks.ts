@@ -25,6 +25,10 @@ async function onStartup() {
 
   initLocale();
 
+  // 自v1.4.4不在使用IDMap，本地删除prefs
+  // 暂存几个版本后删除
+  Zotero.Prefs.clear('extensions.zotero.zoteroaddonsaddonIDMap', true);
+
   registerConfigScheme();
 
   await onMainWindowLoad(window);

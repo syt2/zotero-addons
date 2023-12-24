@@ -3,7 +3,7 @@ import { getString } from "../utils/locale";
 import { AddonTable } from "../modules/addonTable";
 import { AddonInfoManager } from "../modules/addonInfo";
 import { Sources, currentSource, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { extractFileNameFromUrl, installAddonWithPopWindowFrom } from "../utils/utils";
+import { extractFileNameFromUrl, installAddonFrom } from "../utils/utils";
 
 
 // 注册自定义scheme处理
@@ -91,7 +91,7 @@ export function registerConfigScheme() {
               {}
             );
             if (install === 0) {
-              installAddonWithPopWindowFrom(addonURL, extractFileNameFromUrl(addonURL) ?? "", undefined, true);
+              installAddonFrom(addonURL, { popWin: true });
             }
           })();
         }
