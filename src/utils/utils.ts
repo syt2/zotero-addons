@@ -7,12 +7,10 @@ export function compareVersion(versionA: string, versionB: string): number {
   const partsA = versionA.toLowerCase().replace('v', '').split('.')
   const partsB = versionB.toLowerCase().replace('v', '').split('.')
 
-  for (let i = 0; i < 3; i++) {
-    if (partsA[i] < partsB[i]) {
-      return -1;
-    } else if (partsA[i] > partsB[i]) {
-      return 1;
-    }
+  for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+    const a = i < partsA.length ? partsA[i] : '0', b = i < partsB.length ? partsB[i] : '0';
+    if (a < b) { return -1; }
+    if (a > b) { return 1; }
   }
   return 0; // 版本号相同
 }
