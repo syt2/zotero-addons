@@ -1,4 +1,5 @@
 **/builds
+**/build
 node_modules
 package-lock.json
 zotero-cmd.json
