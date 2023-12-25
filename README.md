@@ -16,9 +16,9 @@ This is a Zotero Add-on for collecting and installing add-ons in [Zotero7](https
 
 ## Install
 
-1. Download the [latest release xpi file](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi)
+1. Download the [latest release xpi file](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi) (only for **Zotero 7**)
 
-   > For Zotero 6, download [v0.6.0-6](https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi).
+   > For Zotero 6, download this [xpi file](https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi).
 
 2. Install in Zotero `(Tools) -> (Add-ons)`
 
