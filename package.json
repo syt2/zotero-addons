@@ -18,7 +18,7 @@
     "stop": "node scripts/stop.mjs",
     "lint": "prettier --write . && eslint . --ext .ts --fix",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "release": "release-it",
+    "release": "release-it --only-version --preReleaseId=beta",
     "update-deps": "npm update --save"
   },
   "repository": {
@@ -124,7 +124,12 @@
       "release": false,
       "assets": [
         "build/*.xpi"
-      ]
+      ],
+      "comments": {
+        "submit": true,
+        "issue": ":rocket: _This issue has been resolved in v${version}. See [${releaseName}](${releaseUrl}) for release notes._",
+        "pr": ":rocket: _This pull request is included in v${version}. See [${releaseName}](${releaseUrl}) for release notes._"
+      }
     },
     "hooks": {
       "before:init": "npm run lint",
