@@ -1,7 +1,13 @@
 import { Sources, autoSource, currentSource, setAutoSource } from "../utils/configuration";
+import { compareVersion } from "../utils/utils";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 
-// cpoy from https://github.com/zotero-chinese/zotero-plugins/blob/3fe315d38e740bf8742186cd59e08903317493c9/src/plugins.ts#L1C1-L52C2
+
+/**
+ * Datastruct of Remote AddonInfo
+ * Copy from https://github.com/zotero-chinese/zotero-plugins
+ */
 export interface AddonInfo {
   /**
    * 插件名称
@@ -65,6 +71,11 @@ export interface AddonInfo {
   };
 }
 
+/**
+ * Extract download urls of xpi file from AddonInfo 
+ * @param addonInfo AddonInfo specified
+ * @returns Download urls (Adapted to current Zotero version)
+ */
 export function xpiDownloadUrls(addonInfo: AddonInfo) {
   const z7DownloadUrls = addonReleaseInfo(addonInfo)?.xpiDownloadUrl;
   if (!z7DownloadUrls) { return []; }
@@ -83,12 +94,22 @@ export function xpiDownloadUrls(addonInfo: AddonInfo) {
   }
 }
 
+/**
+ * Extract add-on release information from AddonInfo
+ * @param addonInfo AddonInfo
+ * @returns AddonInfo.releases (Adapted to current Zotero version)
+ */
 export function addonReleaseInfo(addonInfo: AddonInfo) {
   const release = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
   if ((release?.xpiDownloadUrl?.github?.length ?? 0) === 0) { return; }
   return release
 }
 
+/**
+ * Extract add-on xpi release time from AddonInfo 
+ * @param addonInfo AddonInfo
+ * @returns AddonInfo.releases.releaseDate string with yyyy/MM/dd hh:mm:ss format (Adapted to current Zotero version)
+ */
 export function addonReleaseTime(addonInfo: AddonInfo) {
   const inputDate = new Date(addonReleaseInfo(addonInfo)?.releaseDate ?? "");
   if (inputDate) {
@@ -103,7 +124,12 @@ export function addonReleaseTime(addonInfo: AddonInfo) {
   }
 }
 
-export type AssociatedAddonInfo = [AddonInfo, { [key: string]: string }]
+
+/**
+ * Extract and filter local addon obj from AddonInfo
+ * @param addonInfos AddonInfo array
+ * @returns [AddonInfo, addon][] pair which addon installed
+ */
 export async function relatedAddons(addonInfos: AddonInfo[]) {
   const addons: [AddonInfo, any][] = [];
   for (const addon of await AddonManager.getAllAddons()) {
@@ -122,18 +148,71 @@ export async function relatedAddons(addonInfos: AddonInfo[]) {
   return addons;
 }
 
-// export enum InstallState {
-//   unknown = 0,
-//   notInstalled = 1,
-//   normal = 2,
-//   outdate = 3,
-//   disabled = 4,
-//   uncompatible = 5,
-//   pendingUninstall = 6,
-// }
+/**
+ * Addon install status
+ */
+export enum InstallStatus {
+  unknown = 0,
+  notInstalled = 1,
+  normal = 2,
+  updatable = 3,
+  disabled = 4,
+  incompatible = 5,
+  pendingUninstall = 6,
+}
+
+/**
+ * Get addon install status
+ * @param addonInfo AddonInfo
+ * @param relateAddon AddonInfo and its related local addon. If passed undefined, InstallStatus.unknown will return
+ * @returns InstallStatus
+ */
+export async function addonInstallStatus(addonInfo: AddonInfo, relateAddon?: [AddonInfo, any]) {
+  if (relateAddon) { // has local addon
+    if (relateAddon[1]) { 
+      const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relateAddon[1].id);
+      if (dbAddon.length > 0 && dbAddon[0].pendingUninstall) { // deleted
+        return InstallStatus.pendingUninstall;
+      } else { // exist
+        if (relateAddon[1].appDisabled || !relateAddon[1].isCompatible || !relateAddon[1].isPlatformCompatible) {
+          return InstallStatus.incompatible;
+        } else if (relateAddon[1].userDisabled) {
+          return InstallStatus.disabled;
+        } else if (addonCanUpdate(relateAddon[0], relateAddon[1])) {
+          return InstallStatus.updatable;
+        } else {
+          return InstallStatus.normal;
+        }
+      }
+    } else { // incompatible
+      return InstallStatus.incompatible;
+    }
+  } else { // not found
+    return addonReleaseInfo(addonInfo)?.id ? InstallStatus.notInstalled : InstallStatus.unknown;
+  }
+}
+
+  /**
+   * Check addon can upgrade
+   * @param addonInfo AddonInfo
+   * @param addon local addon
+   * @returns bool
+   */
+  export function addonCanUpdate(addonInfo: AddonInfo, addon: any) {
+    const version = addonReleaseInfo(addonInfo)?.xpiVersion;
+    if (!version || !addon.version) { return false; }
+    return compareVersion(addon.version, version) < 0;
+  }
 
 
 class AddonInfoAPI {
+  /**
+   * Fetch AddonInfo from url
+   * @param url url to fetch AddonInfo JSON
+   * @param timeout set timeout if specified
+   * @param onTimeoutCallback timeout callback if specified timeout
+   * @returns AddonInfo[]
+   */
   static async fetchAddonInfos(url: string, timeout?: number, onTimeoutCallback?: VoidFunction): Promise<AddonInfo[]> {
     ztoolkit.log(`fetch addon infos from ${url}`);
     try {
@@ -162,6 +241,9 @@ export class AddonInfoManager {
 
   private constructor() { }
 
+  /**
+   * Get AddonInfos from memory
+   */
   get addonInfos() {
     const url = currentSource().api;
     if (!url) { return []; }
@@ -172,6 +254,11 @@ export class AddonInfoManager {
   }
 
   private sourceInfos: { [key: string]: AddonInfo[] } = {};
+  /**
+   * Fetch AddonInfos from current selected source
+   * @param forceRefresh force fetch
+   * @returns AddonInfo[]
+   */
   async fetchAddonInfos(forceRefresh = false) {
     const source = currentSource();
     if (source.id === "source-auto" && !source.api) {
@@ -190,6 +277,11 @@ export class AddonInfoManager {
     return this.addonInfos;
   }
 
+  /**
+   * Switch to a connectable source
+   * @param timeout Check next source if current source exceed timeout 
+   * @returns AddonInfos from automatic source
+   */
   static async autoSwitchAvaliableApi(timeout: number = 3000) {
     for (const source of Sources) {
       if (!source.api) { continue; }

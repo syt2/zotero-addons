@@ -1,6 +1,8 @@
 import { getPref, setPref } from "./prefs";
 
-
+/**
+ * Add-on Source ID
+ */
 type SourceID =
   "source-auto" |
   "source-zotero-chinese-github" |
@@ -12,11 +14,19 @@ type SourceID =
   "source-zotero-scraper-jsdelivr-backup" |
   "source-custom";
 
+/**
+ * Add-on Source
+ * id: Source ID
+ * api: Retrieve the JSON of addonInfo through this URL
+ */
 interface Source {
   id: SourceID;
   api?: string;
 };
 
+/**
+ * Support sources
+ */
 export const Sources: Readonly<Readonly<Source>[]> = <const>[
   {
     id: "source-auto",
@@ -55,6 +65,10 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
 ];
 
 
+/**
+ * Get selected source
+ * @returns selected source
+ */
 export function currentSource(): Readonly<Source> {
   const curSource = getPref('source') as string;
   const match = Sources.find(source => {
@@ -84,6 +98,10 @@ export function currentSource(): Readonly<Source> {
   return Sources[0];
 }
 
+/**
+ * Set selected source
+ * @param source Selected source
+ */
 export function setCurrentSource(source?: string) {
   if (source && Sources.find(e => e.id === source)) {
     setPref('source', source);
@@ -93,18 +111,34 @@ export function setCurrentSource(source?: string) {
 }
 
 let _autoSource: Readonly<Source> | undefined = undefined;
+/**
+ * Get current auto source
+ * @returns auto source with its auto api url
+ */
 export function autoSource(): Readonly<Source> | undefined {
   return _autoSource;
 }
 
+/**
+ * Set current auto source
+ * @param source A Source
+ */
 export function setAutoSource(source: Readonly<Source>) {
   _autoSource = source;
 }
 
+/**
+ * Get custom source's api
+ * @returns Custom source's api url string
+ */
 export function customSourceApi() {
   return getPref('customSource') as string;
 }
 
+/**
+ * Set custom source's api
+ * @param api custom source's api url string 
+ */
 export function setCustomSourceApi(api: string) {
   setPref('customSource', api);
 }

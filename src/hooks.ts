@@ -25,9 +25,8 @@ async function onStartup() {
 
   initLocale();
 
-  // 自v1.4.4不在使用IDMap，本地删除prefs
-  // 暂存几个版本后删除
-  Zotero.Prefs.clear('extensions.zotero.zoteroaddonsaddonIDMap', true);
+  // TODO: Remove after a few versions released. Not used after v1.4.4. Deleted pref in v1.4.6
+  Zotero.Prefs.clear('extensions.zotero.zoteroaddons.addonIDMap', true);
 
   registerConfigScheme();
 
@@ -35,20 +34,22 @@ async function onStartup() {
 
   (async () => {
     if (currentSource().id === "source-auto") {
-      // 自动切换到可连接的源地址
+      // if selected auto source, switch to a connectable source automatically at launching
       await AddonInfoManager.autoSwitchAvaliableApi();
     } else {
+      // fetch addonInfo from specific source
       await AddonInfoManager.shared.fetchAddonInfos(true);
     }
 
-    // 若在获取过程中已经展示，则刷新
+    // refresh table if AddonTable already displayed, so specific `force` to false
     AddonTable.refresh(false);
 
-    if (getPref('autoUpdate')) {
+    if (getPref('autoUpdate')) { 
+      // update automatically if need
       AddonTable.updateExistAddons();
     }
 
-    // 首次在新版本上启动时检查不兼容插件
+    // Check incompatible plugins if need
     AddonTable.checkUncompatibleAtFirstTime();
   })();
 

@@ -3,12 +3,16 @@ import { getString } from "../utils/locale";
 import { AddonTable } from "../modules/addonTable";
 import { AddonInfoManager } from "../modules/addonInfo";
 import { Sources, currentSource, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { extractFileNameFromUrl, installAddonFrom } from "../utils/utils";
+import { installAddonFrom } from "../utils/utils";
 
 
-// 注册自定义scheme处理
-// zotero://zoteroaddoncollection/configSource?source=XXX&customURL=XXX
-// zotero://zoteroaddoncollection/install?source=XXX
+/**
+ * register custom scheme in Zotero
+ * - for config source from url:
+ *   zotero://zoteroaddoncollection/configSource?source=source-custom&customURL={encodeURIComponent(SOME URL)}
+ * - for install add-on from url:
+ *   zotero://zoteroaddoncollection/install?source={encodeURIComponent(SOME URL)}
+ */
 export function registerConfigScheme() {
   const ZOTERO_SCHEME = "zotero";
   const ZOTERO_PROTOCOL_CONTRACTID = "@mozilla.org/network/protocol;1?name=" + ZOTERO_SCHEME;

@@ -1,10 +1,10 @@
 import { ColumnOptions, VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
-import { AddonInfo, AddonInfoManager, addonReleaseInfo, addonReleaseTime, relatedAddons, xpiDownloadUrls } from "./addonInfo";
+import { AddonInfo, AddonInfoManager, InstallStatus, addonCanUpdate, addonInstallStatus, addonReleaseInfo, addonReleaseTime, relatedAddons, xpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { compareVersion, installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
+import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
@@ -26,9 +26,25 @@ type TableMenuItemID =
   "menu-systemAddon" |
   "menu-updateAllIfNeed" |
   "menu-sep";
-type AssociatedAddonInfo = [AddonInfo, { [key: string]: string }]
+
+type TableColumnID =
+  "menu-name" |
+  "menu-desc" |
+  "menu-star" |
+  "menu-remote-update-time" |
+  "menu-remote-version" |
+  "menu-local-version" |
+  "menu-install-state";
+
+/**
+ * AddonInfo with its table column value 
+ */
+type AssociatedAddonInfo = [AddonInfo, Partial<Record<TableColumnID, string>>];
 
 export class AddonTable {
+  /**
+   * Register An icon in toolbar
+   */
   static registerInToolbar() {
     const node = document.querySelector("#zotero-tb-advanced-search")!;
     const newNode = node?.cloneNode(true) as XUL.ToolBarButton;
@@ -44,6 +60,9 @@ export class AddonTable {
     document.querySelector("#zotero-items-toolbar")?.insertBefore(newNode, node?.nextElementSibling);
   }
 
+  /**
+   * Check for incompatible plugins when launching for the first time on a new Zotero version
+   */
   static async checkUncompatibleAtFirstTime() {
     const key = 'checkUncompatibleAddonsIn' + (ztoolkit.isZotero7() ? "7" : "6");
     if (getPref(key)) { return; }
@@ -74,7 +93,9 @@ export class AddonTable {
   private static window?: Window;
   private static tableHelper?: VirtualizedTableHelper;
 
-  // display addon table window
+  /**
+   * Display addon table window
+   */
   static async showAddonsWindow() {
     if (isWindowAlive(this.window)) {
       this.window?.focus();
@@ -117,14 +138,25 @@ export class AddonTable {
     // win.open(); 
   }
 
+  /**
+   * Close addon table window
+   */
   static async close() {
     this.window?.close();
   }
 
+  /**
+   * Check this window is shown
+   * @returns bool
+   */
   static isShown() {
     return isWindowAlive(this.window);
   }
 
+  /**
+   * Refresh this window
+   * @param force force fetch AddonInfos from source
+   */
   static async refresh(force = false) {
     if (!this.isShown) { return; }
     const selectIndics = this.tableHelper?.treeInstance.selection.selected;
@@ -139,6 +171,11 @@ export class AddonTable {
     });
   }
 
+  /**
+   * Update exist upgradable addons
+   * @param options Additional options
+   * @param options.filterAutoUpdatableAddons Filter only auto upgradable add-ons that specificed in AddonManager
+   */
   static async updateExistAddons(options?: { filterAutoUpdatableAddons?: boolean }) {
     if (this.addonInfos.length <= 0) {
       await this.updateAddonInfos(false);
@@ -191,7 +228,7 @@ export class AddonTable {
           if (relatedAddon.length > 0) {
             if (relatedAddon[0][1].appDisabled) {
               result.push("menu-reinstall");
-            } else if (this.addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
+            } else if (addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
               result.push("menu-update");
             } else {
               result.push("menu-reinstall");
@@ -258,7 +295,7 @@ export class AddonTable {
       })
       .setProp("getRowCount", () => this.addonInfos.length)
       .setProp("getRowData", (index) => this.addonInfos[index][1])
-      .setProp("getRowString", (index) => this.addonInfos[index][1].name || "")
+      .setProp("getRowString", (index) => this.addonInfos[index][1]["menu-name"] || "")
       .setProp("onItemContextMenu", (ev, x, y) => {
         const replaceElem = win.document.querySelector("#listContainerPlaceholder") ?? win.document.querySelector("#listMenu");
         if (!replaceElem) { return false; }
@@ -276,7 +313,7 @@ export class AddonTable {
         const treeInstance = this.tableHelper?.treeInstance as any;
         if (ev < 0 || (ev >= (treeInstance._getColumns()?.length ?? 0))) { return; }
         const column = treeInstance?._getColumns()[ev];
-        // 不接受排序的column
+        // columns that diabled sort
         if (["menu-desc", "menu-remote-version", "menu-local-version"].includes(column.dataKey)) {
           delete treeInstance?._columns?._columns[ev]?.sortDirection;
         }
@@ -502,7 +539,7 @@ export class AddonTable {
     if (curRefreshTag !== this.refreshTag) { return; } // 不是本次刷新
     const relateAddons = await relatedAddons(addonInfos);
     this.addonInfos = await Promise.all(addonInfos.map(async addonInfo => {
-      const result: { [key: string]: string } = {};
+      const result: Partial<Record<TableColumnID, string>> = {};
       result["menu-name"] = addonInfo.name;
       result["menu-desc"] = addonInfo.description ?? "";
       result['menu-star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
@@ -513,29 +550,9 @@ export class AddonTable {
         result["menu-remote-update-time"] = releaseTime;
       }
       const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
-      if (relateAddon) { /// 本地有该插件
-        result["menu-local-version"] = relateAddon[1]?.version ?? "";
-        if (relateAddon[1]) {
-          const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relateAddon[1].id);
-          if (dbAddon.length > 0 && dbAddon[0].pendingUninstall) { // 插件被删除
-            result["menu-install-state"] = getString("state-pendingUninstall");
-          } else { // 插件已安装
-            if (relateAddon[1].appDisabled || !relateAddon[1].isCompatible || !relateAddon[1].isPlatformCompatible) {
-              result["menu-install-state"] = getString('state-uncompatible');
-            } else if (relateAddon[1].userDisabled) {
-              result["menu-install-state"] = getString('state-disabled')
-            } else if (this.addonCanUpdate(relateAddon[0], relateAddon[1])) {
-              result["menu-install-state"] = getString("state-outdate");
-            } else {
-              result["menu-install-state"] = getString("state-installed");
-            }
-          }
-        } else { // 插件不兼容当前zotero
-          result["menu-install-state"] = getString('state-uncompatible');
-        }
-      } else { // 本地未找到该插件
-        result["menu-install-state"] = addonReleaseInfo(addonInfo)?.id ? getString('state-notInstalled') : getString('state-unknown');
-      }
+      result["menu-local-version"] = relateAddon?.[1].version ?? "";
+      const installState = await addonInstallStatus(addonInfo, relateAddon);
+      result["menu-install-state"] = this.installStatusDescription(installState);
       return [
         addonInfo,
         result,
@@ -543,14 +560,16 @@ export class AddonTable {
     }));
 
     const stateMap: { [key: string]: number } = {};
-    let idx = 0;
-    stateMap[getString('state-unknown')] = idx++;
-    stateMap[getString('state-notInstalled')] = idx++;
-    stateMap[getString('state-uncompatible')] = idx++;
-    stateMap[getString('state-disabled')] = idx++;
-    stateMap[getString('state-pendingUninstall')] = idx++;
-    stateMap[getString('state-installed')] = idx++;
-    stateMap[getString('state-outdate')] = idx++;
+    const installStates: InstallStatus[] = [
+      InstallStatus.unknown, 
+      InstallStatus.notInstalled, 
+      InstallStatus.incompatible,
+      InstallStatus.disabled,
+      InstallStatus.pendingUninstall, 
+      InstallStatus.normal, 
+      InstallStatus.updatable, 
+    ];
+    installStates.forEach((status, idx) => stateMap[this.installStatusDescription(status)] = idx);
 
     const sortColumn = this.columns.find(column => 'sortDirection' in column);
     if (sortColumn) {
@@ -568,7 +587,8 @@ export class AddonTable {
             if (l == r) { break; }
             return l > r ? sortOrder : -sortOrder;
           case "menu-install-state":
-            [l, r] = [stateMap[infoA[1]['menu-install-state']] ?? 0, stateMap[infoB[1]['menu-install-state']] ?? 0];
+            [l, r] = [stateMap[infoA[1]['menu-install-state'] ?? this.installStatusDescription(InstallStatus.unknown)] ?? 0, 
+                      stateMap[infoB[1]['menu-install-state'] ?? this.installStatusDescription(InstallStatus.unknown)] ?? 0];
             if (l === r) { break; }
             if (l === 0) { return -1; }
             if (r === 0) { return 1; }
@@ -591,17 +611,29 @@ export class AddonTable {
     });
   }
 
-  private static addonCanUpdate(addonInfo: AddonInfo, addon: any) {
-    const version = addonReleaseInfo(addonInfo)?.xpiVersion;
-    if (!version || !addon.version) { return false; }
-    return compareVersion(addon.version, version) < 0;
-  }
-
   private static async outdateAddons() {
     const addons = await relatedAddons(this.addonInfos.map(infos => infos[0]));
-    return addons.filter(([addonInfo, addon]) => this.addonCanUpdate(addonInfo, addon));
+    return addons.filter(([addonInfo, addon]) => addonCanUpdate(addonInfo, addon));
   }
 
+  private static installStatusDescription(status: InstallStatus) {
+    switch (status) {
+      case InstallStatus.unknown:
+        return getString('state-unknown');
+      case InstallStatus.notInstalled:
+        return getString('state-notInstalled');
+      case InstallStatus.normal:
+        return getString('state-installed');
+      case InstallStatus.updatable:
+        return getString('state-outdate');
+      case InstallStatus.disabled:
+        return getString('state-disabled');
+      case InstallStatus.incompatible:
+        return getString('state-uncompatible');
+      case InstallStatus.pendingUninstall:
+        return getString('state-pendingUninstall');
+    }
+  }
 
   private static largePrefHelper = new LargePrefHelper("zotero.addons.ui", config.prefsPrefix, "parser");
   private static _columns: ColumnOptions[] = [];

@@ -10,10 +10,17 @@ export class AddonInfoDetail {
   private static window?: Window;
   private static addonInfo?: AddonInfo;
 
+  /**
+   * Close detail window
+   */
   static async close() {
     this.window?.close();
   }
 
+  /**
+   * Show detail window for specific AddonInfo
+   * @param addonInfo AddonInfo specified
+   */
   static async showDetailWindow(addonInfo: AddonInfo) {
     this.window?.close();
     this.addonInfo = addonInfo;
@@ -149,6 +156,9 @@ export class AddonInfoDetail {
     return localAddon;
   }
 
+  /**
+   * Refresh shown detail window if need
+   */
   static async refresh() {
     const win = this.window;
     const addonInfo = this.addonInfo;
