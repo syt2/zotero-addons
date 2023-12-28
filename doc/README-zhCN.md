@@ -147,17 +147,17 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 
 1. 点击 `Use this template`；
 2. 使用 `git clone` 克隆上一步生成的仓库；
-	<details >
-	<summary>💡 从 GitHub Codespace 开始</summary>
+   <details >
+   <summary>💡 从 GitHub Codespace 开始</summary>
 
-	_GitHub CodeSpace_ 使你可以直接开始开发而无需在本地下载代码/IDE/依赖.
+   _GitHub CodeSpace_ 使你可以直接开始开发而无需在本地下载代码/IDE/依赖.
 
-	重复下列步骤，仅需三十秒即可开始构建你的第一个插件！
+   重复下列步骤，仅需三十秒即可开始构建你的第一个插件！
 
-	- 去 [homepage](https://github.com/windingwind/zotero-plugin-template)顶部，点击绿色按钮`Use this template`，点击 `Open in codespace`， 你需要登录你的GitHub账号.
-	- 等待 codespace 加载.
+   - 去 [homepage](https://github.com/windingwind/zotero-plugin-template)顶部，点击绿色按钮`Use this template`，点击 `Open in codespace`， 你需要登录你的GitHub账号.
+   - 等待 codespace 加载.
 
-  	</details>
+   </details>
 
 3. 进入项目文件夹；
 
@@ -165,53 +165,53 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 
 1. 修改 `./package.json` 中的设置，包括：
 
-    ```json5
-    {
-      version: "", // to 0.0.0
-      author: "",
-      description: "",
-      homepage: "",
-      config: {
-        addonName: "", // name to be displayed in the plugin manager
-        addonID: "", // ID to avoid conflict. IMPORTANT!
-        addonRef: "", // e.g. Element ID prefix
-        addonInstance: "", // the plugin's root instance: Zotero.${addonInstance}
-        prefsPrefix: "extensions.zotero.${addonRef}", // the prefix of prefs
-        releasePage: "", // URL to releases
-        updateJSON: "", // URL to update.json
-      },
-    }
-    ```
+   ```json5
+   {
+     version: "", // to 0.0.0
+     author: "",
+     description: "",
+     homepage: "",
+     config: {
+       addonName: "", // name to be displayed in the plugin manager
+       addonID: "", // ID to avoid conflict. IMPORTANT!
+       addonRef: "", // e.g. Element ID prefix
+       addonInstance: "", // the plugin's root instance: Zotero.${addonInstance}
+       prefsPrefix: "extensions.zotero.${addonRef}", // the prefix of prefs
+       releasePage: "", // URL to releases
+       updateJSON: "", // URL to update.json
+     },
+   }
+   ```
 
-    > [!warning]
-    > 注意设置 addonID 和 addonRef 以避免冲突.
+   > [!warning]
+   > 注意设置 addonID 和 addonRef 以避免冲突.
 
 如果你需要在GitHub以外的地方托管你的 XPI 包，请删除 `releasePage` 并添加 `updateLink`，并将值设置为你的 XPI 下载地址.
 
-2. 复制 Zotero 启动配置，填入 Zotero 可执行文件路径和 profile 路径. 
+2. 复制 Zotero 启动配置，填入 Zotero 可执行文件路径和 profile 路径.
 
-	> (可选项) 此操作仅需执行一次: 使用 `/path/to/zotero -p` 启动 Zotero，创建一个新的配置文件并用作开发配置文件.
-	> 将配置文件的路径 `profilePath` 放入 `zotero-cmd.json` 中，以指定要使用的配置文件.
+   > (可选项) 此操作仅需执行一次: 使用 `/path/to/zotero -p` 启动 Zotero，创建一个新的配置文件并用作开发配置文件.
+   > 将配置文件的路径 `profilePath` 放入 `zotero-cmd.json` 中，以指定要使用的配置文件.
 
-	```sh
-	cp ./scripts/zotero-cmd-template.json ./scripts/zotero-cmd.json
-	vim ./scripts/zotero-cmd.json
-	```
+   ```sh
+   cp ./scripts/zotero-cmd-template.json ./scripts/zotero-cmd.json
+   vim ./scripts/zotero-cmd.json
+   ```
 
 3. 运行 `npm install` 以安装相关依赖
 
-	> 如果你使用 `pnpm` 作为包管理器，你需要添加 `public-hoist-pattern[]=*@types/bluebird*` 到`.npmrc`, 详情请查看 zotero-types（https://github.com/windingwind/zotero-types?tab=readme-ov-file#usage）的文档.
+   > 如果你使用 `pnpm` 作为包管理器，你需要添加 `public-hoist-pattern[]=*@types/bluebird*` 到`.npmrc`, 详情请查看 zotero-types（https://github.com/windingwind/zotero-types?tab=readme-ov-file#usage）的文档.
 
 ### 3 开始开发(Coding)
 
 使用 `npm start` 启动开发服务器，它将：
 
-* 在开发模式下预构建插件
-* 启动 Zotero ，并让其从 `build/` 中加载插件
-* 打开开发者工具（devtool） 
-* 监听 `src/**` 和 `addon/**`.
-    - 如果 `src/**` 修改了，运行 esbuild 并且重新加载
-    - 如果 `addon/**` 修改了，(在开发模式下)重新构建插件并且重新加载
+- 在开发模式下预构建插件
+- 启动 Zotero ，并让其从 `build/` 中加载插件
+- 打开开发者工具（devtool）
+- 监听 `src/**` 和 `addon/**`.
+  - 如果 `src/**` 修改了，运行 esbuild 并且重新加载
+  - 如果 `addon/**` 修改了，(在开发模式下)重新构建插件并且重新加载
 
 #### 自动热重载
 
@@ -242,7 +242,7 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 
 - 调试 UI. Zotero 建立在 Firefox XUL 框架之上. 使用 [XUL Explorer](https://udn.realityripple.com/docs/Archive/Mozilla/XUL_Explorer) 等软件调试 XUL UI.
 
-    > XUL 文档: <http://www.devdoc.net/web/developer.mozilla.org/en-US/docs/XUL.html>
+  > XUL 文档: <http://www.devdoc.net/web/developer.mozilla.org/en-US/docs/XUL.html>
 
 ### 4 构建(Build)
 
@@ -250,15 +250,15 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 
 `scripts/build.mjs` 的运行步骤:
 
-* 创建/清空 `build/`
-* 复制 `addon/**` 到 `build/addon/**`
-* 替换占位符：使用 `replace-in-file` 去替换在 `package.json` 中定义的关键字和配置 (`xhtml`、`.flt` 等)
-* 准备本地化文件以避免冲突，查看官方文档了解更多（https://www.zotero.org/support/dev/zotero_7_for_developers#avoiding_localization_conflicts）
-    * 重命名`**/*.flt` 为 `**/${addonRef}-*.flt`
-    * 在每个消息前加上 `addonRef-`
-* 使用 Esbuild 来将 `.ts` 源码构建为 `.js`，从 `src/index.ts` 构建到`./build/addon/chrome/content/scripts`
-* (仅在生产模式下工作) 压缩 `./build/addon` 目录为 `./build/*.xpi`
-* (仅在生产模式下工作) 准备 `update.json` 或 `update-beta.json`
+- 创建/清空 `build/`
+- 复制 `addon/**` 到 `build/addon/**`
+- 替换占位符：使用 `replace-in-file` 去替换在 `package.json` 中定义的关键字和配置 (`xhtml`、`.flt` 等)
+- 准备本地化文件以避免冲突，查看官方文档了解更多（https://www.zotero.org/support/dev/zotero_7_for_developers#avoiding_localization_conflicts）
+  - 重命名`**/*.flt` 为 `**/${addonRef}-*.flt`
+  - 在每个消息前加上 `addonRef-`
+- 使用 Esbuild 来将 `.ts` 源码构建为 `.js`，从 `src/index.ts` 构建到`./build/addon/chrome/content/scripts`
+- (仅在生产模式下工作) 压缩 `./build/addon` 目录为 `./build/*.xpi`
+- (仅在生产模式下工作) 准备 `update.json` 或 `update-beta.json`
 
 > [!note]
 >
@@ -279,9 +279,9 @@ npm run release
 ```
 
 > [!note]
-> 在此模板中，release-it 被配置为在本地升级版本、构建、推送提交和 git 标签，随后GitHub Action 将重新构建插件并将 XPI 发布到 GitHub Release. 
+> 在此模板中，release-it 被配置为在本地升级版本、构建、推送提交和 git 标签，随后GitHub Action 将重新构建插件并将 XPI 发布到 GitHub Release.
 >
-> 如果你需要发布一个本地构建的 XPI，将  `package.json` 中的 `release-it.github.release` 设置为 `true`，然后移除 `.github/workflows/release.yml`. 此外，你还需要设置环境变量 `GITHUB_TOKEN`，获取 GitHub Token（https://github.com/settings/tokens）.
+> 如果你需要发布一个本地构建的 XPI，将 `package.json` 中的 `release-it.github.release` 设置为 `true`，然后移除 `.github/workflows/release.yml`. 此外，你还需要设置环境变量 `GITHUB_TOKEN`，获取 GitHub Token（https://github.com/settings/tokens）.
 
 #### 关于预发布
 
