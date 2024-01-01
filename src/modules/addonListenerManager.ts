@@ -3,7 +3,7 @@ import { AddonTable } from "./addonTable";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 export class AddonListenerManager {
-  static addonEventListener = {
+  private static addonEventListener = {
     onEnabled: async (addon: any) => {
       AddonTable.refresh();
       AddonInfoDetail.refresh();
@@ -46,10 +46,16 @@ export class AddonListenerManager {
     },
   }
 
+  /**
+   * Add addon listener in Zotero
+   */
   static addListener() {
     AddonManager.addAddonListener(this.addonEventListener);
   }
 
+  /**
+   * Remove addon listener in Zotero
+   */
   static removeListener() {
     AddonManager.addAddonListener(this.addonEventListener);
   }
