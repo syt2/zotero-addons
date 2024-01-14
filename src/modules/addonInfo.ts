@@ -247,13 +247,13 @@ export class AddonInfoManager {
   get addonInfos() {
     const url = currentSource().api;
     if (!url) { return []; }
-    if (url in this.sourceInfos) {
-      return this.sourceInfos[url];
+    if (url in this.sourceInfos && (new Date().getTime() - this.sourceInfos[url][0].getTime()) < 12 * 60 * 60 * 1000) {
+      return this.sourceInfos[url][1];
     }
     return [];
   }
 
-  private sourceInfos: { [key: string]: AddonInfo[] } = {};
+  private sourceInfos: { [key: string]: [Date, AddonInfo[]] } = {};
   /**
    * Fetch AddonInfos from current selected source
    * @param forceRefresh force fetch
@@ -272,7 +272,7 @@ export class AddonInfoManager {
     }
     const infos = await AddonInfoAPI.fetchAddonInfos(url, 5000);
     if (infos.length > 0) {
-      this.sourceInfos[url] = infos;
+      this.sourceInfos[url] = [new Date(), infos];
     }
     return this.addonInfos;
   }
@@ -289,7 +289,7 @@ export class AddonInfoManager {
         ztoolkit.log(`check source from ${source.api} timeout!`);
       });
       if (infos.length > 0) {
-        this.shared.sourceInfos[source.api] = infos;
+        this.shared.sourceInfos[source.api] = [new Date(), infos];
         setAutoSource(source);
         ztoolkit.log(`switch to ${source.id} automatically`);
         return infos;
