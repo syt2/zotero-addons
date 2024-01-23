@@ -228,7 +228,7 @@ class AddonInfoAPI {
       });
     } catch (error) {
       ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);
-      if (error instanceof Zotero.HTTP.TimeoutException) {
+      if (error instanceof (Zotero.HTTP as any).TimeoutException) {
         onTimeoutCallback?.();
       }
     }

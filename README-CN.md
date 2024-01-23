@@ -10,57 +10,60 @@
 
 [English](README.md) | [简体中文](README-CN.md)
 
-## Introduction
+## 简介
 
-This is a Zotero Add-on for collecting and installing add-ons in [Zotero7](https://www.zotero.org).
+这是一个用于在 [Zotero 7](https://www.zotero.org) 内展示和安装插件的 [Zotero 7](https://www.zotero.org) 插件
 
-> For Zotero 6, see [here](https://github.com/syt2/zotero-addons/tree/z6#readme).
+> 对于 Zotero 6, 请[点击此处查看](https://github.com/syt2/zotero-addons/tree/z6#readme).
 
-## Install
+## 安装
 
-1. Download the [latest release xpi file](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi) (only for **Zotero 7**)
+1. 下载[最新版xpi安装包](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi) (仅支持 **Zotero 7**)
 
-   > For Zotero 6, download this [xpi file](https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi).
+   > 对于 Zotero 6, 请下载此[xpi安装包](https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi).
 
-2. Install in Zotero `(Tools) -> (Add-ons)`
+2. 在 Zotero 内安装 `(工具) -> (附加组件)`
 
-## Usage
+## 使用方法
 
-After install this add-on in Zotero, click <img align="center" src="addon/chrome/content/icons/favicon.png" width=24/> in Toolbar
+安装完成后，点击工具栏的 <img align="center" src="addon/chrome/content/icons/favicon.png" width=24/> 按钮
 
-## Add-on Data Source
+## 插件数据源
+
+对于国内用户，若遇到插件页面空白、加载不出插件的情况，请尝试切换不同的数据源  
+插件提供**自动源**选项，将会自动选择可连接的源
 
 ### [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)
 
-The main data source for add-ons comes from **[zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)**.
+插件主数据源来自Zotero中文社区 **[zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)**.
 
-Switch the source to `(zotero-chinese)` in Zotero to use this source.
+在插件列表界面选择 `(zotero中文社区)` 即可使用该数据源
 
-> If you have new add-ons to add, submit it to [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
+> 若你有新的插件想要添加到插件源内，请提交至 [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
 
 ### [syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper)
 
-Switch the source to `(addon-scraper)` in Zotero to use this source.
+在插件列表界面选择 `(插件爬虫)` 即可使用该数据源
 
-### Custom Source
+### 自定义源
 
-You can also use other custom data sources, as long as the data source format is consistent with the format in the [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
+任何符合 [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins) 格式的数据源都可用作本插件的数据源，你可以在插件内选择`自定义源`并提供数据源URL即可
 
-## Develop
+## 开发
 
 ### Scheme
 
-- Custom Data Source
+- 自定义数据源Scheme
 
   `zotero://zoteroaddoncollection/configSource?source=source-custom&customURL={encodeURIComponent(SOME URL)}`
-  can change add-on data source automatically to a custom url.
+  将自动切换到指定的URL作为自定义数据源使用
 
-- Install Add-on from URL
+- 从URL安装插件Scheme
 
   `zotero://zoteroaddoncollection/install?source={encodeURIComponent(SOME URL)}`
-  can install add-on from the custom url.
+  将从指定的URL安装插件
 
-## Star History
+## Star 历史
 
 <a href="https://star-history.com/#syt2/zotero-addons&Timeline">
   <picture>
