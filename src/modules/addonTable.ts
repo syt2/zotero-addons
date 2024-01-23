@@ -109,6 +109,12 @@ export class AddonTable {
       `chrome,centerscreen,resizable,status,width=960,height=480,dialog=no`,
       windowArgs,
     );
+    win.addEventListener('keypress', (e: KeyboardEvent) => {
+      if (((Zotero.isMac && e.metaKey && !e.ctrlKey) || (!Zotero.isMac && e.ctrlKey)) && !e.altKey && e.key === 'w') {
+        this.close();
+        AddonInfoDetail.close();
+      }
+    });
     win.onclose = () => {
       AddonInfoDetail.close();
     }
@@ -561,13 +567,13 @@ export class AddonTable {
 
     const stateMap: { [key: string]: number } = {};
     const installStates: InstallStatus[] = [
-      InstallStatus.unknown, 
-      InstallStatus.notInstalled, 
+      InstallStatus.unknown,
+      InstallStatus.notInstalled,
       InstallStatus.incompatible,
       InstallStatus.disabled,
-      InstallStatus.pendingUninstall, 
-      InstallStatus.normal, 
-      InstallStatus.updatable, 
+      InstallStatus.pendingUninstall,
+      InstallStatus.normal,
+      InstallStatus.updatable,
     ];
     installStates.forEach((status, idx) => stateMap[this.installStatusDescription(status)] = idx);
 
@@ -587,8 +593,8 @@ export class AddonTable {
             if (l == r) { break; }
             return l > r ? sortOrder : -sortOrder;
           case "menu-install-state":
-            [l, r] = [stateMap[infoA[1]['menu-install-state'] ?? this.installStatusDescription(InstallStatus.unknown)] ?? 0, 
-                      stateMap[infoB[1]['menu-install-state'] ?? this.installStatusDescription(InstallStatus.unknown)] ?? 0];
+            [l, r] = [stateMap[infoA[1]['menu-install-state'] ?? this.installStatusDescription(InstallStatus.unknown)] ?? 0,
+            stateMap[infoB[1]['menu-install-state'] ?? this.installStatusDescription(InstallStatus.unknown)] ?? 0];
             if (l === r) { break; }
             if (l === 0) { return -1; }
             if (r === 0) { return 1; }
