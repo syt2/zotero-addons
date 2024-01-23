@@ -13,11 +13,11 @@ const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager
  * @returns -1|1|0
  */
 export function compareVersion(versionA: string, versionB: string): 1|-1|0 {
-  const partsA = versionA.toLowerCase().replace('v', '').split('.')
-  const partsB = versionB.toLowerCase().replace('v', '').split('.')
+  const partsA = versionA.split(/\D+/).filter(e => e).map(Number);
+  const partsB = versionB.split(/\D+/).filter(e => e).map(Number);
 
   for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
-    const a = i < partsA.length ? partsA[i] : '0', b = i < partsB.length ? partsB[i] : '0';
+    const a = i < partsA.length ? partsA[i] : 0, b = i < partsB.length ? partsB[i] : 0;
     if (a < b) { return -1; }
     if (a > b) { return 1; }
   }
@@ -149,7 +149,7 @@ export async function installAddonFrom(url: string | string[], options?: {
           onDownloadEnded: (install: any) => {
             // Install failed, error will be reported elsewhere.
             if (!install.addon) { return; }
-  
+
             if (install.addon.appDisabled) {
               ztoolkit.log(`Incompatible add-on from ${xpiUrl}`);
               install.removeListener(listener);
