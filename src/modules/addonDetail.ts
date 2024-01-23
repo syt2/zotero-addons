@@ -33,6 +33,11 @@ export class AddonInfoDetail {
     );
     await windowArgs._initPromise.promise;
     this.window = win;
+    win.addEventListener('keypress', (e: KeyboardEvent) => {
+      if (((Zotero.isMac && e.metaKey && !e.ctrlKey) || (!Zotero.isMac && e.ctrlKey)) && !e.altKey && e.key === 'w') {
+        this.close();
+      }
+    });
 
     this.installButton.addEventListener("click", async e => {
       if (this.installButton.disabled) { return; }
