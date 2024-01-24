@@ -77,20 +77,55 @@ export interface AddonInfo {
  * @returns Download urls (Adapted to current Zotero version)
  */
 export function xpiDownloadUrls(addonInfo: AddonInfo) {
-  const z7DownloadUrls = addonReleaseInfo(addonInfo)?.xpiDownloadUrl;
-  if (!z7DownloadUrls) { return []; }
+  const downloadsURLs = addonReleaseInfo(addonInfo)?.xpiDownloadUrl;
+  if (!downloadsURLs) { return []; }
   const sourceID = currentSource().id === "source-auto" ? autoSource()?.id : currentSource().id;
+  const result = Object.values(downloadsURLs).filter(e => !!e);
+  let firstElement: string | undefined = undefined;
   switch (sourceID) {
     case "source-zotero-chinese-github":
-      return [z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub].filter(e => e);
+    case "source-zotero-scraper-github":
+      firstElement = downloadsURLs.github;
+      break;
     case "source-zotero-chinese-ghproxy":
-      return [z7DownloadUrls.ghProxy, z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.kgithub].filter(e => e);
+    case "source-zotero-scraper-ghproxy":
+      firstElement = downloadsURLs.ghProxy;
+      break;
     case "source-zotero-chinese-jsdelivr":
-      return [z7DownloadUrls.jsdeliver, z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub].filter(e => e);
+    case "source-zotero-scraper-jsdelivr":
+      firstElement = downloadsURLs.jsdeliver;
+      break;
     case "source-zotero-chinese-gitee":
-      return [z7DownloadUrls.gitee, z7DownloadUrls.github, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub].filter(e => e);
-    default:
-      return [z7DownloadUrls.github, z7DownloadUrls.gitee, z7DownloadUrls.jsdeliver, z7DownloadUrls.ghProxy, z7DownloadUrls.kgithub].filter(e => e);
+      firstElement = downloadsURLs.gitee;
+      break;
+  }
+  if (firstElement) {
+    const index = result.indexOf(firstElement);
+    if (index >= 0) {
+      result.unshift(result.splice(index, 1)[0]);
+    }
+  }
+  return result.filter(e => e);
+}
+
+/**
+ * 
+ * @param url Source name of the xpi url
+ * @returns source name key
+ */
+export function xpiURLSourceName(url: string) {
+  if (url.startsWith("https://github.com")) {
+    return "source-github";
+  } else if (url.startsWith("https://gitee.com")) {
+    return "source-gitee";
+  } else if (url.startsWith("https://ghproxy.com")) {
+    return "source-ghproxy";
+  } else if (url.startsWith("https://cdn.jsdelivr.net")) {
+    return "source-jsdelivr";
+  } else if (url.startsWith("https://kkgithub.com")) {
+    return "source-kgithub";
+  } else {
+    return "source-others";
   }
 }
 

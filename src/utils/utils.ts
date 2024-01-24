@@ -1,6 +1,7 @@
 import { ProgressWindowHelper } from "zotero-plugin-toolkit/dist/helpers/progressWindow";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
+import { xpiURLSourceName } from "../modules/addonInfo";
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 /**
@@ -102,7 +103,13 @@ export async function installAddonFrom(url: string | string[], options?: {
   if (startIndex >= url.length || startIndex < 0) { return; }
   const xpiUrl = url[startIndex];
   const xpiName = options?.name ?? extractFileNameFromUrl(xpiUrl) ?? "Unknown";
-  const source = getString('downloading-source', { args: { name: `${startIndex + 1}` } });
+  let sourceName = xpiURLSourceName(xpiUrl);
+  if (sourceName === "source-others") {
+    sourceName = `${getString(sourceName)} ${startIndex + 1}`;
+  } else {
+    sourceName = getString(sourceName);
+  }
+  const source = getString('downloading-source', { args: { name: sourceName } });
 
   let popWin: ProgressWindowHelper | undefined = undefined;
   if (options?.popWin) {

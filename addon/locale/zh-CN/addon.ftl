@@ -47,9 +47,9 @@ source-zotero-chinese-github = GitHub (zotero中文社区)
 source-zotero-chinese-gitee = Gitee (zotero中文社区)
 source-zotero-chinese-jsdelivr = jsDelivr (zotero中文社区)
 source-zotero-chinese-ghproxy = gh-proxy (zotero中文社区)
-source-zotero-scraper-github-backup = GitHub (插件爬虫)
-source-zotero-scraper-ghproxy-backup = gh-proxy (插件爬虫)
-source-zotero-scraper-jsdelivr-backup = jsDelivr (插件爬虫)
+source-zotero-scraper-github = GitHub (插件爬虫)
+source-zotero-scraper-ghproxy = gh-proxy (插件爬虫)
+source-zotero-scraper-jsdelivr = jsDelivr (插件爬虫)
 
 menu-install = 安装
 menu-update = 更新
@@ -64,3 +64,10 @@ menu-systemAddon = 管理本地插件
 menu-updateAllIfNeed = 一键更新可升级插件
 menu-enable = 启用
 menu-disable = 禁用
+
+source-github = GitHub
+source-gitee = Gitee
+source-jsdelivr = jsDelivr
+source-ghproxy = gh-proxy
+source-kgithub = kGitHub
+source-others = 未知

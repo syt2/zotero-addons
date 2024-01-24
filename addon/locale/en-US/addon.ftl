@@ -47,9 +47,9 @@ source-zotero-chinese-github = GitHub (zotero-chinese)
 source-zotero-chinese-gitee = Gitee (zotero-chinese)
 source-zotero-chinese-jsdelivr = jsDelivr (zotero-chinese)
 source-zotero-chinese-ghproxy = gh-proxy (zotero-chinese)
-source-zotero-scraper-github-backup = GitHub (addon-scraper)
-source-zotero-scraper-ghproxy-backup = gh-proxy (addon-scraper)
-source-zotero-scraper-jsdelivr-backup = jsDelivr (addon-scraper)
+source-zotero-scraper-github = GitHub (addon-scraper)
+source-zotero-scraper-ghproxy = gh-proxy (addon-scraper)
+source-zotero-scraper-jsdelivr = jsDelivr (addon-scraper)
 
 menu-install = Install
 menu-update = Update
@@ -64,3 +64,10 @@ menu-systemAddon = Manage installed add-ons
 menu-updateAllIfNeed = Update upgradable add-ons
 menu-enable = Enable
 menu-disable = Disable
+
+source-github = GitHub
+source-gitee = Gitee
+source-jsdelivr = jsDelivr
+source-ghproxy = gh-proxy
+source-kgithub = kGitHub
+source-others = Unknown
