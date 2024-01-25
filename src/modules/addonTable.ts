@@ -46,7 +46,10 @@ export class AddonTable {
    * Register An icon in toolbar
    */
   static registerInToolbar() {
-    const newNode = ztoolkit.UI.createXULElement(document, "toolbarbutton");
+    const toolbar = document.querySelector("#zotero-items-toolbar")!;
+    const lookupNode = toolbar.querySelector("#zotero-tb-lookup")!;
+    const newNode = lookupNode?.cloneNode(true) as XUL.ToolBarButton;
+    // const newNode = ztoolkit.UI.createXULElement(document, "toolbarbutton");
     newNode.setAttribute("id", "zotero-toolbaritem-addons");
     newNode.setAttribute("tooltiptext", getString("menuitem-addons"));
     newNode.setAttribute("command", "");
@@ -56,7 +59,6 @@ export class AddonTable {
     newNode.addEventListener("click", async (event: any) => {
       this.showAddonsWindow();
     });
-    const toolbar = document.querySelector("#zotero-items-toolbar")!;
     const searchNode = toolbar.querySelector("#zotero-tb-search");
     newNode.style.listStyleImage = `url(chrome://${config.addonRef}/content/icons/favicon.svg)`;
     toolbar.insertBefore(newNode, searchNode);
