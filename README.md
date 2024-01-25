@@ -1,4 +1,4 @@
-# <img align="center" src="addon/chrome/content/icons/favicon.png" width=80/> Zotero Addons
+# <img align="center" src="addon/chrome/content/icons/favicon.svg" width=80/> Zotero Addons
 
 [![zotero target version](https://img.shields.io/badge/Zotero-7-green?style=flat-square&logo=zotero&logoColor=CC2936)](https://www.zotero.org)
 [![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)
@@ -26,7 +26,7 @@ This is a Zotero Add-on for collecting and installing add-ons in [Zotero7](https
 
 ## Usage
 
-After install this add-on in Zotero, click <img align="center" src="addon/chrome/content/icons/favicon.png" width=24/> in Toolbar
+After install this add-on in Zotero, click <img align="center" src="addon/chrome/content/icons/favicon.svg" width=24/> in Toolbar
 
 ## Add-on Data Source
 
