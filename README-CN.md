@@ -1,4 +1,4 @@
-# <img align="center" src="addon/chrome/content/icons/favicon.svg" width=80/> Zotero Addons
+# <img align="center" src="addon/chrome/content/icons/favicon.svg" width=60/> Zotero Addons
 
 [![zotero target version](https://img.shields.io/badge/Zotero-7-green?style=flat-square&logo=zotero&logoColor=CC2936)](https://www.zotero.org)
 [![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)
@@ -26,7 +26,7 @@
 
 ## 使用方法
 
-安装完成后，点击工具栏的 <img align="center" src="addon/chrome/content/icons/favicon.svg" width=24/> 按钮
+安装完成后，点击工具栏的 <img align="center" src="addon/chrome/content/icons/favicon.svg" width=20/> 按钮，或者在`工具`菜单内点击`插件集合`
 
 ## 插件数据源
 
