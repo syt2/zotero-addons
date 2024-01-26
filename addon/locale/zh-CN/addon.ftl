@@ -64,6 +64,7 @@ menu-systemAddon = 管理本地插件
 menu-updateAllIfNeed = 一键更新可升级插件
 menu-enable = 启用
 menu-disable = 禁用
+menu-items-count = 项
 
 source-github = GitHub
 source-gitee = Gitee

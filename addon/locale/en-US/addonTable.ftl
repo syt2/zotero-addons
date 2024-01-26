@@ -5,3 +5,5 @@ selectSource = Select Source:
 customSource = Custom Source:
 autoUpdate =
     .label = Automatic update add-ons
+hideToolbarEntrance =
+    .label = Hide toolbar entrance

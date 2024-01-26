@@ -64,6 +64,7 @@ menu-systemAddon = Manage installed add-ons
 menu-updateAllIfNeed = Update upgradable add-ons
 menu-enable = Enable
 menu-disable = Disable
+menu-items-count = items
 
 source-github = GitHub
 source-gitee = Gitee

@@ -60,6 +60,7 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   // Create ztoolkit for every window
   addon.data.ztoolkit = createZToolkit();
   AddonTable.registerInToolbar();
+  AddonTable.registerInMenuTool();
 }
 
 async function onMainWindowUnload(win: Window): Promise<void> {

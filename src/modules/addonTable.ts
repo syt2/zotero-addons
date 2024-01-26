@@ -43,10 +43,35 @@ type AssociatedAddonInfo = [AddonInfo, Partial<Record<TableColumnID, string>>];
 
 export class AddonTable {
   /**
-   * Register An icon in toolbar
+   * Register entrance in menu tools
+   */
+  static registerInMenuTool() {
+    ztoolkit.Menu.register("menuTools", {
+      tag: "menuseparator",
+    });
+    ztoolkit.Menu.register("menuTools", {
+      tag: "menuitem",
+      label: getString("menuitem-addons"),
+      commandListener: (event) => {
+        (async () => {
+          await this.showAddonsWindow({from: "menu"});
+        })();
+      },
+    });
+    ztoolkit.Menu.register("menuTools", {
+      tag: "menuseparator",
+    });
+  }
+
+  /**
+   * Register or unregister entrance in toolbar
    */
   static registerInToolbar() {
     const toolbar = document.querySelector("#zotero-items-toolbar")!;
+    if (getPref('hideToolbarEntrance')) {
+      toolbar.querySelectorAll("#zotero-toolbaritem-addons").forEach(e => e.remove());
+      return;
+    }
     const lookupNode = toolbar.querySelector("#zotero-tb-lookup")!;
     const newNode = lookupNode?.cloneNode(true) as XUL.ToolBarButton;
     // const newNode = ztoolkit.UI.createXULElement(document, "toolbarbutton");
@@ -57,7 +82,7 @@ export class AddonTable {
     newNode.setAttribute("mousedown", "");
     newNode.setAttribute("onmousedown", "");
     newNode.addEventListener("click", async (event: any) => {
-      this.showAddonsWindow();
+      this.showAddonsWindow({from: "toolbar"});
     });
     const searchNode = toolbar.querySelector("#zotero-tb-search");
     newNode.style.listStyleImage = `url(chrome://${config.addonRef}/content/icons/favicon.svg)`;
@@ -100,8 +125,9 @@ export class AddonTable {
   /**
    * Display addon table window
    */
-  static async showAddonsWindow() {
+  static async showAddonsWindow(options?: { from?: "toolbar" | "menu" }) {
     if (isWindowAlive(this.window)) {
+      options?.from && this.updateHideToolbarEntranceInWindow(options.from === "toolbar");
       this.window?.focus();
       this.refresh();
       return;
@@ -124,6 +150,7 @@ export class AddonTable {
     }
     await windowArgs._initPromise.promise;
     this.window = win;
+    options?.from && this.updateHideToolbarEntranceInWindow(options.from === "toolbar");
 
     await this.createTable();
 
@@ -144,6 +171,13 @@ export class AddonTable {
       if (selected) {
         this.updateExistAddons();
       }
+    });
+    const hideToolbarCheckbox = win.document.querySelector('#hide-toolbar-entrance');
+    hideToolbarCheckbox.checked = getPref('hideToolbarEntrance');
+    hideToolbarCheckbox?.addEventListener('command', (e: any) => {
+      const selected = (e.target as XUL.Checkbox).checked;
+      setPref('hideToolbarEntrance', selected);
+      this.registerInToolbar();
     });
     // win.open(); 
   }
@@ -225,60 +259,52 @@ export class AddonTable {
     progressWin.startCloseTimer(3000);
   }
 
+  private static updateHideToolbarEntranceInWindow(hide: boolean) {
+    const hideToolbarCheckbox: any = this.window?.document.querySelector('#hide-toolbar-entrance');
+    const autoUpdateCheckbox: any = this.window?.document.querySelector('#auto-update');
+    hideToolbarCheckbox.hidden = hide;
+    hide ? autoUpdateCheckbox.style.marginLeft = 'auto' : autoUpdateCheckbox.style.removeProperty('margin-left');
+  }
+
   private static async tableMenuItems() {
-    const result: TableMenuItemID[] = [];
+    const result: [TableMenuItemID, string][] = [];
     const selects = this.tableHelper?.treeInstance.selection.selected;
+    const append = (id: TableMenuItemID, selectCount?: number) => {
+      let str = getString(id);
+      if (selects && selects.size > 1 && selectCount) {
+        str += ` [${selectCount} ${getString('menu-items-count')}]`;
+      } 
+      result.push([id, str]);
+    };
 
     if (selects) {
-      if (selects.size == 1) {
-        const idx = [...selects][0];
-        if (idx >= 0 && idx < this.addonInfos.length) {
-          const addonInfo = this.addonInfos[idx];
-          const relatedAddon = await relatedAddons([addonInfo[0]]);
-          if (relatedAddon.length > 0) {
-            if (relatedAddon[0][1].appDisabled) {
-              result.push("menu-reinstall");
-            } else if (addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
-              result.push("menu-update");
-            } else {
-              result.push("menu-reinstall");
-            }
-            const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relatedAddon[0][1].id);
-            if (dbAddon.length > 0) {
-              if (dbAddon[0].pendingUninstall) {
-                result.push("menu-uninstall-undo");
-                result.push("menu-remove");
-              } else {
-                result.push("menu-uninstall");
-              }
-            }
-            if (!relatedAddon[0][1].appDisabled && (dbAddon.length <= 0 || !dbAddon[0].pendingUninstall)) {
-              if (relatedAddon[0][1].userDisabled) {
-                result.push("menu-enable");
-              } else {
-                result.push("menu-disable");
-              }
-            }
-          } else {
-            result.push("menu-install");
-          }
-        }
-        result.push("menu-homepage");
-      } else {
-        result.push("menu-install-and-update");
+      const selectedAddonSupportOps = await this.selectedAddonSupportOperations();
+      const possibleTabID: TableMenuItemID[] = [
+        "menu-install",
+        "menu-reinstall",
+        "menu-update",
+        "menu-uninstall-undo",
+        "menu-remove",
+        "menu-uninstall",
+        "menu-enable",
+        "menu-disable",
+      ];
+      possibleTabID.forEach(e => selectedAddonSupportOps.has(e) && append(e, selectedAddonSupportOps.get(e)?.length));
+      if (selects.size === 1) {
+        append("menu-homepage");
       }
-      result.push("menu-sep");
+      append("menu-sep");
     }
 
-    result.push("menu-refresh");
-    result.push("menu-sep");
+    append("menu-refresh");
+    append("menu-sep");
 
     if ((await this.outdateAddons()).length > 0) {
-      result.push("menu-updateAllIfNeed");
-      result.push("menu-sep");
+      append("menu-updateAllIfNeed");
+      append("menu-sep");
     }
 
-    result.push("menu-systemAddon");
+    append("menu-systemAddon");
     return result;
   }
 
@@ -360,6 +386,49 @@ export class AddonTable {
       });
   }
 
+  private static async selectedAddonSupportOperations() {
+    const selectedAddonOps = new Map<TableMenuItemID, AddonInfo[]>();
+    const append = (key: TableMenuItemID, addonInfo: AddonInfo) => {
+      const arr = selectedAddonOps.get(key) ?? [];
+      arr.push(addonInfo);
+      selectedAddonOps.set(key, arr);
+    }
+    const selects = this.tableHelper?.treeInstance.selection.selected;
+    if (!selects) { return selectedAddonOps; }
+    for (const idx of selects) {
+      const addonInfo = this.addonInfos[idx];
+      const relatedAddon = await relatedAddons([addonInfo[0]]);
+      if (relatedAddon.length > 0) {
+        if (relatedAddon[0][1].appDisabled) {
+          append("menu-reinstall", addonInfo[0]);
+        } else if (addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
+          append("menu-update", addonInfo[0]);
+        } else {
+          append("menu-reinstall", addonInfo[0]);
+        }
+        const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relatedAddon[0][1].id);
+        if (dbAddon.length > 0) {
+          if (dbAddon[0].pendingUninstall) {
+            append("menu-uninstall-undo", addonInfo[0]);
+            append("menu-remove", addonInfo[0]);
+          } else {
+            append("menu-uninstall", addonInfo[0]);
+          }
+        }
+        if (!relatedAddon[0][1].appDisabled && (dbAddon.length <= 0 || !dbAddon[0].pendingUninstall)) {
+          if (relatedAddon[0][1].userDisabled) {
+            append("menu-enable", addonInfo[0]);
+          } else {
+            append("menu-disable", addonInfo[0]);
+          }
+        }
+      } else {
+        append("menu-install", addonInfo[0]);
+      }
+    }
+    return selectedAddonOps;
+  }
+
   private static async replaceRightClickMenu(oldNode: Element) {
     ztoolkit.UI.replaceElement({
       tag: "menupopup",
@@ -372,7 +441,7 @@ export class AddonTable {
         },
       }],
       children: (await this.tableMenuItems()).map(item => {
-        if (item === "menu-sep") {
+        if (item[0] === "menu-sep") {
           return {
             tag: "menuseparator",
           }
@@ -380,8 +449,8 @@ export class AddonTable {
           return {
             tag: "menuitem",
             attributes: {
-              label: getString(item),
-              value: item,
+              label: item[1],
+              value: item[0],
             },
           }
         }
@@ -468,27 +537,29 @@ export class AddonTable {
       if (select < 0 || select >= this.addonInfos.length) { continue; }
       selectAddons.push(this.addonInfos[select]);
     }
+    const selectedAddonSupportOps = await this.selectedAddonSupportOperations();
+    ztoolkit.log(selectedAddonSupportOps);
     switch (item) {
       case "menu-install":
       case "menu-reinstall":
       case "menu-update":
       case "menu-install-and-update":
-        this.installAddons(selectAddons.map(e => e[0]), { popWin: true });
+        this.installAddons(selectedAddonSupportOps.get(item) ?? [], {popWin: true});
         break;
       case "menu-uninstall":
-        this.uninstallAddons(selectAddons.map(e => e[0]), true);
+        this.uninstallAddons(selectedAddonSupportOps.get(item) ?? [], true);
         break;
       case "menu-remove":
-        this.uninstallAddons(selectAddons.map(e => e[0]), false);
+        this.uninstallAddons(selectedAddonSupportOps.get(item) ?? [], false);
         break;
       case "menu-uninstall-undo":
-        this.undoUninstallAddons(selectAddons.map(e => e[0]));
+        this.undoUninstallAddons(selectedAddonSupportOps.get(item) ?? []);
         break;
       case "menu-enable":
-        this.enableAddons(selectAddons.map(e => e[0]), true);
+        this.enableAddons(selectedAddonSupportOps.get(item) ?? [], true);
         break;
       case "menu-disable":
-        this.enableAddons(selectAddons.map(e => e[0]), false);
+        this.enableAddons(selectedAddonSupportOps.get(item) ?? [], false);
         break;
       case "menu-homepage":
         selectAddons.forEach(addon => {

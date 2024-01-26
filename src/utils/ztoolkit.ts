@@ -33,18 +33,21 @@ import { BasicTool, unregister } from "zotero-plugin-toolkit/dist/basic";
 import { UITool } from "zotero-plugin-toolkit/dist/tools/ui";
 import { ProgressWindowHelper } from "zotero-plugin-toolkit/dist/helpers/progressWindow";
 import { VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
+import { MenuManager } from "zotero-plugin-toolkit/dist/managers/menu";
 
 class MyToolkit extends BasicTool {
 
   UI: UITool;
   VirtualizedTable: typeof VirtualizedTableHelper;
   ProgressWindow: typeof ProgressWindowHelper;
+  Menu: MenuManager;
 
   constructor() {
     super();
     this.UI = new UITool(this);
     this.VirtualizedTable = VirtualizedTableHelper;
     this.ProgressWindow = ProgressWindowHelper;
+    this.Menu = new MenuManager(this);
   }
 
   unregisterAll() {

@@ -5,3 +5,5 @@ selectSource = 选择源：
 customSource = 自定义源：
 autoUpdate =
     .label = 自动更新插件
+hideToolbarEntrance =
+    .label = 隐藏工具栏入口
