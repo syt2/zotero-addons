@@ -167,17 +167,17 @@ export function addonReleaseTime(addonInfo: AddonInfo) {
  */
 export async function relatedAddons(addonInfos: AddonInfo[]) {
   const addons: [AddonInfo, any][] = [];
-  for (const addon of await AddonManager.getAllAddons()) {
-    if (!addon.id) { continue; }
-    const relateAddon = addonInfos.find(addonInfo => {
-      if (addonReleaseInfo(addonInfo)?.id === addon.id) { return true; }
+  const localAddons: any[] = (await AddonManager.getAllAddons()).filter((e: any) => e.id);
+
+  for (const addonInfo of addonInfos) {
+    const relateAddon: any = localAddons.find((addon: any) => addonReleaseInfo(addonInfo)?.id === addon.id) ?? localAddons.find((addon: any) => {
       if (addonInfo.name.length > 0 && addonInfo.name === addon.name) { return true; }
       if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) { return true; }
       if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) { return true; }
       return false;
     });
     if (relateAddon) {
-      addons.push([relateAddon, addon]);
+      addons.push([addonInfo, relateAddon]);
     }
   }
   return addons;
