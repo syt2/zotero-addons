@@ -175,14 +175,14 @@ export class AddonInfoDetail {
     const localAddon = await this.localAddon();
 
     const windowTitle = win.document.querySelector("#win-title") as HTMLTitleElement;
-    windowTitle.innerHTML = addonInfo.name;
+    windowTitle.textContent = addonInfo.name;
 
     this.addonIcon.src = localAddon ? AddonManager.getPreferredIconURL(localAddon) : "";
     this.addonIcon.hidden = !localAddon;
-    this.addonName.innerHTML = addonInfo.name;
+    this.addonName.textContent = addonInfo.name;
 
     this.authorIcon.src = addonInfo.author?.avatar ?? "";
-    this.authorName.innerHTML = addonInfo.author?.name ?? "Unknown";
+    this.authorName.textContent = addonInfo.author?.name ?? "Unknown";
 
     const starIcon = win.document.querySelector("#stars-icon") as HTMLImageElement;
     starIcon.src = `https://img.shields.io/github/stars/${addonInfo.repo}?label=${getString('menu-star')}`;
@@ -198,7 +198,7 @@ export class AddonInfoDetail {
     releaseTimeIcon.src = releaseTime ? `https://img.shields.io/badge/${getString('menu-remote-update-time')}-${releaseTime}-yellowgreen` : "";
 
     const description = win.document.querySelector("#description") as HTMLLabelElement;
-    description.innerHTML = localAddon?.description ?? addonInfo.description ?? "";
+    description.textContent = localAddon?.description ?? addonInfo.description ?? "";
 
     this.installButton.hidden = true;
     this.updateButton.hidden = true;
