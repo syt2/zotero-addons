@@ -39,7 +39,7 @@ state-disabled = 🚫 Uitgeschakeld
 scheme-config-success = Configuratiebron geslaagd
 scheme-install-confirm-title = Onbekende add-on installeren?
 scheme-install-confirm-message = Weet je zeker dat je de add-on van onbekende bron wilt installeren? 
-scheme-install-confirm-confirm = Installeer
+scheme-install-confirm-confirm = Installeren
 
 source-custom = Aangepast
 source-auto = Auto
@@ -51,13 +51,13 @@ source-zotero-scraper-github = GitHub (addon-scraper)
 source-zotero-scraper-ghproxy = gh-proxy (addon-scraper)
 source-zotero-scraper-jsdelivr = jsDelivr (addon-scraper)
 
-menu-install = Installeer
+menu-install = Installeren
 menu-update = Bijwerken
 menu-reinstall = Herinstalleren
-menu-install-and-update = Installeer & bijwerken
-menu-uninstall = Deïnstalleer
-menu-remove = Verwijder
-menu-uninstall-undo = Herstel
+menu-install-and-update = Installeren & bijwerken
+menu-uninstall = Deïnstalleren
+menu-remove = Verwijderen
+menu-uninstall-undo = Herstellen
 menu-homepage = Startpagina
 menu-refresh = Add-on lijst vernieuwen
 menu-systemAddon = Geïnstalleerde add-ons beheren
