@@ -1,0 +1,16 @@
+install =
+    .label = Install
+update = 
+    .label = Update
+reinstall =
+    .label = Reinstall
+uninstall =
+    .label = Uninstall
+remove =
+    .label = Remove
+uninstallUndo =
+    .label = Restore
+enable = 
+    .label = Enable
+disable = 
+    .label = Disable
