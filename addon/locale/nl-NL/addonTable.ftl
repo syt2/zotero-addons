@@ -1,9 +1,9 @@
-title = Addons
+title = Add-ons
 refresh = 
-    .label = Refresh
-selectSource = Select Source:
-customSource = Custom Source:
+    .label = Verversen
+selectSource = Selecteer Bron:
+customSource = Aangepaste Bron:
 autoUpdate =
-    .label = Automatic update add-ons
+    .label = Automatische update add-ons
 hideToolbarEntrance =
-    .label = Hide toolbar entrance
+    .label = Verberg werkbalk ingang
