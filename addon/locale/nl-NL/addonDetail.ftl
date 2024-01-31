@@ -1,0 +1,16 @@
+install =
+    .label = Installeren
+update = 
+    .label = Bijwerken
+reinstall =
+    .label = Herinstalleren
+uninstall =
+    .label = Deïnstalleren
+remove =
+    .label = Verwijderen
+uninstallUndo =
+    .label = Herstellen
+enable = 
+    .label = Inschakelen
+disable = 
+    .label = Uitschakelen

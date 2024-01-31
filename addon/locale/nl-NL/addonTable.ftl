@@ -1,0 +1,9 @@
+title = Add-ons
+refresh = 
+    .label = Verversen
+selectSource = Selecteer Bron:
+customSource = Aangepaste Bron:
+autoUpdate =
+    .label = Automatische add-ons bijwerken
+hideToolbarEntrance =
+    .label = Werkbalkingang verbergen

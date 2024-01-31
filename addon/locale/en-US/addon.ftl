@@ -1,4 +1,4 @@
-menuitem-addons = Addon collection
+menuitem-addons = Add-on collection
 name = Name
 description = Description
 stars = ⭐️
