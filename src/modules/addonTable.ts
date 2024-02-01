@@ -538,7 +538,6 @@ export class AddonTable {
       selectAddons.push(this.addonInfos[select]);
     }
     const selectedAddonSupportOps = await this.selectedAddonSupportOperations();
-    ztoolkit.log(selectedAddonSupportOps);
     switch (item) {
       case "menu-install":
       case "menu-reinstall":
