@@ -1,9 +1,8 @@
 {
   "name": "zotero-addons",
   "version": "1.5.2",
-  "description": "Zotero Addon Collection",
   "config": {
-    "addonName": "Zotero Addons",
+    "addonName": "Zotero Add-ons",
     "addonID": "zoteroAddons@ytshen.com",
     "addonRef": "zoteroaddons",
     "addonInstance": "ZoteroAddons",

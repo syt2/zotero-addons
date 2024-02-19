@@ -1,8 +1,9 @@
 {
   "manifest_version": 2,
-  "name": "__addonName__",
+  "default_locale": "en",
+  "name": "__MSG_name__",
   "version": "__buildVersion__",
-  "description": "__description__",
+  "description": "__MSG_description__",
   "homepage_url": "__homepage__",
   "author": "__author__",
   "icons": {

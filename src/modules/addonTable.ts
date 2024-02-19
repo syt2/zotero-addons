@@ -236,7 +236,7 @@ export class AddonTable {
       }
     })
     if (addons.length <= 0) { return; }
-    const progressWin = new ztoolkit.ProgressWindow(config.addonName, {
+    const progressWin = new ztoolkit.ProgressWindow(getString('addon-name'), {
       closeOnClick: true,
       closeTime: -1,
     }).createLine({

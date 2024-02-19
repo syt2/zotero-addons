@@ -62,7 +62,7 @@ export async function uninstall(addon: any, options?: { popConfirmDialog?: boole
     }
   }
 
-  const popWin = new ztoolkit.ProgressWindow(config.addonName, {
+  const popWin = new ztoolkit.ProgressWindow(getString('addon-name'), {
     closeOnClick: true,
     closeTime: 3000,
   });
@@ -113,7 +113,7 @@ export async function installAddonFrom(url: string | string[], options?: {
 
   let popWin: ProgressWindowHelper | undefined = undefined;
   if (options?.popWin) {
-    popWin = new ztoolkit.ProgressWindow(config.addonName, {
+    popWin = new ztoolkit.ProgressWindow(getString('addon-name'), {
       closeOnClick: true,
       closeTime: -1,
     }).createLine({

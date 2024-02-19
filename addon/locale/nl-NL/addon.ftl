@@ -1,3 +1,4 @@
+addon-name = Zotero Add-ons
 menuitem-addons = Add-on collectie
 name = Naam
 description = Beschrijving

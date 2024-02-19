@@ -1,4 +1,3 @@
-import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { AddonTable } from "../modules/addonTable";
 import { AddonInfoManager } from "../modules/addonInfo";
@@ -71,7 +70,7 @@ export function registerConfigScheme() {
         if (success) {
           AddonTable.close();
           AddonTable.showAddonsWindow();
-          new ztoolkit.ProgressWindow(config.addonName, {
+          new ztoolkit.ProgressWindow(getString('addon-name'), {
             closeOnClick: true,
             closeTime: 3000,
           }).createLine({
