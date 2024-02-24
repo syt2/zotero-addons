@@ -1,5 +1,5 @@
-addon-name = Zotero Add-ons
-menuitem-addons = Add-on collectie
+addon-name = Add-on Markt voor Zotero
+menuitem-addons = Add-on Markt
 name = Naam
 description = Beschrijving
 stars = ⭐️

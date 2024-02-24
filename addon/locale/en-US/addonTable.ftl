@@ -1,4 +1,4 @@
-title = Addons
+title = Add-on Market
 refresh = 
     .label = Refresh
 selectSource = Select Source:

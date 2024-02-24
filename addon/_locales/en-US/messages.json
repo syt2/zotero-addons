@@ -1,10 +1,10 @@
 {
   "name": {
     "description": "name",
-    "message": "Zotero Add-ons"
+    "message": "Add-on Market for Zotero"
   },
   "description": {
     "description": "description",
-    "message": "Installeer add-ons rechtstreeks in Zotero"
+    "message": "Install add-ons directly in Zotero"
   }
 }

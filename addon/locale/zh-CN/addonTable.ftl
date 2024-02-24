@@ -1,4 +1,4 @@
-title = 插件集合
+title = 插件市场
 refresh = 
     .label = 刷新
 selectSource = 选择源：

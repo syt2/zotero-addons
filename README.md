@@ -1,4 +1,4 @@
-# <img align="center" src="addon/chrome/content/icons/favicon.svg" width=60/> Zotero Addons
+# <img align="center" src="addon/chrome/content/icons/favicon.svg" width=60/> Add-on Market for Zotero
 
 [![zotero target version](https://img.shields.io/badge/Zotero-7-green?style=flat-square&logo=zotero&logoColor=CC2936)](https://www.zotero.org)
 [![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)
@@ -11,8 +11,7 @@
 [English](README.md) | [简体中文](README-CN.md)
 
 ## Introduction
-
-This is a Zotero Add-on for collecting and installing add-ons in [Zotero7](https://www.zotero.org).
+This is a Zotero add-on that allows for the direct installation of other add-ons in [Zotero7](https://www.zotero.org).
 
 > For Zotero 6, see [here](https://github.com/syt2/zotero-addons/tree/z6#readme).
 
@@ -26,7 +25,7 @@ This is a Zotero Add-on for collecting and installing add-ons in [Zotero7](https
 
 ## Usage
 
-After install this add-on in Zotero, click <img align="center" src="addon/chrome/content/icons/favicon.svg" width=20/> in Toolbar, or click `Addon collection` in `Tools` menu.
+After install this add-on in Zotero, click <img align="center" src="addon/chrome/content/icons/favicon.svg" width=20/> in Toolbar, or click `Add-on market` in `Tools` menu.
 
 ## Add-on Data Source
 
@@ -34,13 +33,13 @@ After install this add-on in Zotero, click <img align="center" src="addon/chrome
 
 The main data source for add-ons comes from **[zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)**.
 
-Switch the source to `(zotero-chinese)` in Zotero to use this source.
+Switch the source to `(zotero-chinese)` in Add-on Market to use this source.
 
 > If you have new add-ons to add, submit it to [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
 
 ### [syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper)
 
-Switch the source to `(addon-scraper)` in Zotero to use this source.
+Switch the source to `(addon-scraper)` in Add-on Market to use this source.
 
 ### Custom Source
 

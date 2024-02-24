@@ -1,5 +1,5 @@
-addon-name = Zotero 插件集合
-menuitem-addons = 插件集合
+addon-name = Zotero插件市场
+menuitem-addons = 插件市场
 name = 名称
 description = 简介
 stars = ⭐️

@@ -2,7 +2,7 @@
   "name": "zotero-addons",
   "version": "1.5.2",
   "config": {
-    "addonName": "Zotero Add-ons",
+    "addonName": "Add-on Market for Zotero",
     "addonID": "zoteroAddons@ytshen.com",
     "addonRef": "zoteroaddons",
     "addonInstance": "ZoteroAddons",

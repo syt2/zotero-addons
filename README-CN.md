@@ -1,4 +1,4 @@
-# <img align="center" src="addon/chrome/content/icons/favicon.svg" width=60/> Zotero Addons
+# <img align="center" src="addon/chrome/content/icons/favicon.svg" width=60/> Zotero 插件市场
 
 [![zotero target version](https://img.shields.io/badge/Zotero-7-green?style=flat-square&logo=zotero&logoColor=CC2936)](https://www.zotero.org)
 [![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)
@@ -12,7 +12,7 @@
 
 ## 简介
 
-这是一个用于在 [Zotero 7](https://www.zotero.org) 内展示和安装插件的 [Zotero 7](https://www.zotero.org) 插件
+这是一个用于在 [Zotero 7](https://www.zotero.org) 内浏览和安装插件的 [Zotero 7](https://www.zotero.org) 插件
 
 > 对于 Zotero 6, 请[点击此处查看](https://github.com/syt2/zotero-addons/tree/z6#readme).
 
@@ -26,7 +26,7 @@
 
 ## 使用方法
 
-安装完成后，点击工具栏的 <img align="center" src="addon/chrome/content/icons/favicon.svg" width=20/> 按钮，或者在`工具`菜单内点击`插件集合`
+安装完成后，点击工具栏的 <img align="center" src="addon/chrome/content/icons/favicon.svg" width=20/> 按钮，或者在`工具`菜单内点击`插件市场`
 
 ## 插件数据源
 
@@ -37,13 +37,13 @@
 
 插件主数据源来自Zotero中文社区 **[zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)**.
 
-在插件列表界面选择 `(zotero中文社区)` 即可使用该数据源
+在插件市场界面选择 `(zotero中文社区)` 即可使用该数据源
 
 > 若你有新的插件想要添加到插件源内，请提交至 [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
 
 ### [syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper)
 
-在插件列表界面选择 `(插件爬虫)` 即可使用该数据源
+在插件市场界面选择 `(插件爬虫)` 即可使用该数据源
 
 ### 自定义源
 

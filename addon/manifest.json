@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "default_locale": "en",
+  "default_locale": "en-US",
   "name": "__MSG_name__",
   "version": "__buildVersion__",
   "description": "__MSG_description__",

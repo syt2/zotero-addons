@@ -1,4 +1,4 @@
-title = Add-ons
+title = Add-on Markt
 refresh = 
     .label = Verversen
 selectSource = Selecteer Bron:
