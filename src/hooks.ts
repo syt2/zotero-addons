@@ -14,7 +14,7 @@ async function onStartup() {
   initLocale();
   ztoolkit.ProgressWindow.setIconURI(
     "default",
-    `chrome://${config.addonRef}/content/icons/favicon.png`,
+    `chrome://${config.addonRef}/content/icons/favicon.svg`,
   );
 
   registerConfigScheme();
