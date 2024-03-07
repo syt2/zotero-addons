@@ -22,6 +22,7 @@ async function onStartup() {
   AddonInfoManager.shared.fetchAddonInfos(true);
 
   AddonTable.registerInToolbar();
+  AddonTable.registerInMenuTool();
 }
 
 function onShutdown(): void {
