@@ -54,7 +54,7 @@ export interface AddonInfo {
   }>;
 
   description?: string;
-  star?: number;
+  stars?: number;
   author?: {
     name: string;
     url: string;
@@ -93,7 +93,7 @@ class AddonInfoAPI {
     const url = currentSource().api ?? customSourceApi();
     ztoolkit.log(`fetch addon infos from ${url}`);
     try {
-      const response = await Zotero.HTTP.request("GET", url);
+      const response = await Zotero.HTTP.request("GET", url, {});
       const addons = JSON.parse(response.response) as AddonInfo[];
       const validAddons = addons.filter(addon => {
         const release = addon.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
@@ -101,7 +101,7 @@ class AddonInfoAPI {
         return false;
       })
       return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
-        return (b.star ?? 0) - (a.star ?? 0);
+        return (b.stars ?? 0) - (a.stars ?? 0);
       });
     } catch (error) {
       ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);

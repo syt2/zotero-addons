@@ -262,7 +262,7 @@ export class AddonTable {
       const result: { [key: string]: string } = {};
       result["name"] = addonInfo.name;
       result["description"] = addonInfo.description ?? "";
-      result['star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
+      result['star'] = addonInfo.stars === 0 ? "0" : addonInfo.stars ? String(addonInfo.stars) : "?"
       const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
       if (relateAddon) { /// 本地有该插件
         if (relateAddon[1] && relateAddon[1].isCompatible && relateAddon[1].isPlatformCompatible) {
@@ -304,7 +304,7 @@ export class AddonTable {
             return na < nb ? order[1] : -order[1]
           case "star":
             // eslint-disable-next-line no-case-declarations
-            const [sa, sb] = [a.star ?? 0, b.star ?? 0];
+            const [sa, sb] = [a.stars ?? 0, b.stars ?? 0];
             if (sa === sb) { break; }
             return sa < sb ? order[1] : -order[1];
           case "installState":

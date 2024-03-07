@@ -1,9 +1,9 @@
 {
   "name": "zotero-addons",
   "version": "0.6.6",
-  "description": "Zotero Addon Collection",
+  "description": "Install add-ons directly in Zotero",
   "config": {
-    "addonName": "Zotero Addons",
+    "addonName": "Add-on Market for Zotero",
     "addonID": "zoteroAddons@ytshen.com",
     "addonRef": "zoteroaddons",
     "addonInstance": "ZoteroAddons",
