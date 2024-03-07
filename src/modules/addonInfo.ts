@@ -43,7 +43,14 @@ export interface AddonInfo {
      * 插件 ID，自 XPI 中提取
      */
     id?: string;
-
+    /**
+     * 插件名称， XPI 中提取
+     */
+    name?: string;
+    /**
+     * 插件descrption， XPI 中提取
+     */
+    description?: string;
     /**
      * 插件版本，自 XPI 中提取
      */
@@ -57,13 +64,10 @@ export interface AddonInfo {
       kgithub?: string;
     };
     releaseDate?: string;
-    downloadCount?: number;
-    assetId?: number;
   }>;
 
   description?: string;
   stars?: number;
-  watchers?: number;
   author?: {
     name: string;
     url: string;
@@ -171,7 +175,7 @@ export async function relatedAddons(addonInfos: AddonInfo[]) {
 
   for (const addonInfo of addonInfos) {
     const relateAddon: any = localAddons.find((addon: any) => addonReleaseInfo(addonInfo)?.id === addon.id) ?? localAddons.find((addon: any) => {
-      if (addonInfo.name.length > 0 && addonInfo.name === addon.name) { return true; }
+      if (addon.name && (addonReleaseInfo(addonInfo)?.name === addon.name || addonInfo.name === addon.name)) { return true; }
       if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) { return true; }
       if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) { return true; }
       return false;
@@ -204,7 +208,7 @@ export enum InstallStatus {
  */
 export async function addonInstallStatus(addonInfo: AddonInfo, relateAddon?: [AddonInfo, any]) {
   if (relateAddon) { // has local addon
-    if (relateAddon[1]) { 
+    if (relateAddon[1]) {
       const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relateAddon[1].id);
       if (dbAddon.length > 0 && dbAddon[0].pendingUninstall) { // deleted
         return InstallStatus.pendingUninstall;
@@ -227,17 +231,17 @@ export async function addonInstallStatus(addonInfo: AddonInfo, relateAddon?: [Ad
   }
 }
 
-  /**
-   * Check addon can upgrade
-   * @param addonInfo AddonInfo
-   * @param addon local addon
-   * @returns bool
-   */
-  export function addonCanUpdate(addonInfo: AddonInfo, addon: any) {
-    const version = addonReleaseInfo(addonInfo)?.xpiVersion;
-    if (!version || !addon.version) { return false; }
-    return compareVersion(addon.version, version) < 0;
-  }
+/**
+ * Check addon can upgrade
+ * @param addonInfo AddonInfo
+ * @param addon local addon
+ * @returns bool
+ */
+export function addonCanUpdate(addonInfo: AddonInfo, addon: any) {
+  const version = addonReleaseInfo(addonInfo)?.xpiVersion;
+  if (!version || !addon.version) { return false; }
+  return compareVersion(addon.version, version) < 0;
+}
 
 
 class AddonInfoAPI {

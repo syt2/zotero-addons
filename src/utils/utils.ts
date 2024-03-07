@@ -13,7 +13,7 @@ const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager
  * @param versionB Another version string
  * @returns -1|1|0
  */
-export function compareVersion(versionA: string, versionB: string): 1|-1|0 {
+export function compareVersion(versionA: string, versionB: string): 1 | -1 | 0 {
   const partsA = versionA.split(/\D+/).filter(e => e).map(Number);
   const partsB = versionB.split(/\D+/).filter(e => e).map(Number);
 

@@ -54,7 +54,7 @@ export class AddonTable {
       label: getString("menuitem-addons"),
       commandListener: (event) => {
         (async () => {
-          await this.showAddonsWindow({from: "menu"});
+          await this.showAddonsWindow({ from: "menu" });
         })();
       },
     });
@@ -82,7 +82,7 @@ export class AddonTable {
     newNode.setAttribute("mousedown", "");
     newNode.setAttribute("onmousedown", "");
     newNode.addEventListener("click", async (event: any) => {
-      this.showAddonsWindow({from: "toolbar"});
+      this.showAddonsWindow({ from: "toolbar" });
     });
     const searchNode = toolbar.querySelector("#zotero-tb-search");
     newNode.style.listStyleImage = `url(chrome://${config.addonRef}/content/icons/favicon.svg)`;
@@ -246,7 +246,7 @@ export class AddonTable {
     let num = 0;
     for (const addon of addons) {
       progressWin.changeLine({
-        text: `${addon[0].name} ${addon[1].version} => ${addon[0].releases[0].xpiVersion}`,
+        text: `${addonReleaseInfo(addon[0])?.name ?? addon[0].name} ${addon[1].version} => ${addon[0].releases[0].xpiVersion}`,
         progress: num++ / addons.length,
       });
       await this.installAddons([addon[0]]);
@@ -273,7 +273,7 @@ export class AddonTable {
       let str = getString(id);
       if (selects && selects.size > 1 && selectCount) {
         str += ` [${selectCount} ${getString('menu-items-count')}]`;
-      } 
+      }
       result.push([id, str]);
     };
 
@@ -543,7 +543,7 @@ export class AddonTable {
       case "menu-reinstall":
       case "menu-update":
       case "menu-install-and-update":
-        this.installAddons(selectedAddonSupportOps.get(item) ?? [], {popWin: true});
+        this.installAddons(selectedAddonSupportOps.get(item) ?? [], { popWin: true });
         break;
       case "menu-uninstall":
         this.uninstallAddons(selectedAddonSupportOps.get(item) ?? [], true);
@@ -607,7 +607,7 @@ export class AddonTable {
       const urls = xpiDownloadUrls(addon).filter(x => {
         return (x?.length ?? 0) > 0;
       }) as string[];
-      await installAddonFrom(urls, { name: addon.name, popWin: options?.popWin });
+      await installAddonFrom(urls, { name: addonReleaseInfo(addon)?.name ?? addon.name, popWin: options?.popWin });
     }));
   }
 
@@ -620,10 +620,11 @@ export class AddonTable {
     const relateAddons = await relatedAddons(addonInfos);
     this.addonInfos = await Promise.all(addonInfos.map(async addonInfo => {
       const result: Partial<Record<TableColumnID, string>> = {};
-      result["menu-name"] = addonInfo.name;
-      result["menu-desc"] = addonInfo.description ?? "";
+      const releaseInfo = addonReleaseInfo(addonInfo);
+      result["menu-name"] = releaseInfo?.name ?? addonInfo.name;
+      result["menu-desc"] = releaseInfo?.description ?? addonInfo.description ?? "";
       result['menu-star'] = addonInfo.stars === 0 ? "0" : addonInfo.stars ? String(addonInfo.stars) : "?"
-      result["menu-remote-version"] = addonReleaseInfo(addonInfo)?.xpiVersion?.toLowerCase().replace('v', '') ?? "";
+      result["menu-remote-version"] = releaseInfo?.xpiVersion?.toLowerCase().replace('v', '') ?? "";
       result["menu-local-version"] = "";
       const releaseTime = addonReleaseTime(addonInfo);
       if (releaseTime) {
@@ -659,7 +660,7 @@ export class AddonTable {
         let l, r;
         switch (sortColumn.dataKey) {
           case "menu-name":
-            [l, r] = [a.name.toLowerCase(), b.name.toLowerCase()];
+            [l, r] = [(addonReleaseInfo(a)?.name ?? a.name).toLowerCase(), (addonReleaseInfo(b)?.name ?? b.name).toLowerCase()];
             if (l == r) { break; }
             return l > r ? sortOrder : -sortOrder;
           case "menu-star":
