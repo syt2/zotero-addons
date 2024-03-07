@@ -622,7 +622,7 @@ export class AddonTable {
       const result: Partial<Record<TableColumnID, string>> = {};
       result["menu-name"] = addonInfo.name;
       result["menu-desc"] = addonInfo.description ?? "";
-      result['menu-star'] = addonInfo.star === 0 ? "0" : addonInfo.star ? String(addonInfo.star) : "?"
+      result['menu-star'] = addonInfo.stars === 0 ? "0" : addonInfo.stars ? String(addonInfo.stars) : "?"
       result["menu-remote-version"] = addonReleaseInfo(addonInfo)?.xpiVersion?.toLowerCase().replace('v', '') ?? "";
       result["menu-local-version"] = "";
       const releaseTime = addonReleaseTime(addonInfo);
@@ -663,7 +663,7 @@ export class AddonTable {
             if (l == r) { break; }
             return l > r ? sortOrder : -sortOrder;
           case "menu-star":
-            [l, r] = [a.star ?? 0, b.star ?? 0];
+            [l, r] = [a.stars ?? 0, b.stars ?? 0];
             if (l == r) { break; }
             return l > r ? sortOrder : -sortOrder;
           case "menu-install-state":

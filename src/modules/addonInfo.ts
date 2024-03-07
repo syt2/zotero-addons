@@ -62,7 +62,7 @@ export interface AddonInfo {
   }>;
 
   description?: string;
-  star?: number;
+  stars?: number;
   watchers?: number;
   author?: {
     name: string;
@@ -259,7 +259,7 @@ class AddonInfoAPI {
       const addons = JSON.parse(response.response) as AddonInfo[];
       const validAddons = addons.filter(addon => addonReleaseInfo(addon));
       return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
-        return (b.star ?? 0) - (a.star ?? 0);
+        return (b.stars ?? 0) - (a.stars ?? 0);
       });
     } catch (error) {
       ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);
