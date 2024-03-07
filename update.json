@@ -3,7 +3,7 @@
     "zoteroAddons@ytshen.com": {
       "updates": [
         {
-          "version": "0.6.6",
+          "version": "0.6.7",
           "update_link": "https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi",
           "applications": {
             "gecko": {
@@ -12,7 +12,7 @@
           }
         },
         {
-          "version": "0.6.6",
+          "version": "0.6.7",
           "update_link": "https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi",
           "applications": {
             "zotero": {
