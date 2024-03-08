@@ -66,6 +66,7 @@ menu-updateAllIfNeed = Update upgradable add-ons
 menu-enable = Enable
 menu-disable = Disable
 menu-items-count = items
+menu-open-xpi-location = Show in File Manager
 
 source-github = GitHub
 source-gitee = Gitee

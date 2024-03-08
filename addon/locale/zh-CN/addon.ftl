@@ -66,6 +66,7 @@ menu-updateAllIfNeed = 一键更新可升级插件
 menu-enable = 启用
 menu-disable = 禁用
 menu-items-count = 项
+menu-open-xpi-location = 在文件管理器中打开
 
 source-github = GitHub
 source-gitee = Gitee

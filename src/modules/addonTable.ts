@@ -25,6 +25,7 @@ type TableMenuItemID =
   "menu-refresh" |
   "menu-systemAddon" |
   "menu-updateAllIfNeed" |
+  "menu-open-xpi-location" |
   "menu-sep";
 
 type TableColumnID =
@@ -259,6 +260,9 @@ export class AddonTable {
     progressWin.startCloseTimer(3000);
   }
 
+
+
+  // MARK: private
   private static updateHideToolbarEntranceInWindow(hide: boolean) {
     const hideToolbarCheckbox: any = this.window?.document.querySelector('#hide-toolbar-entrance');
     const autoUpdateCheckbox: any = this.window?.document.querySelector('#auto-update');
@@ -288,6 +292,7 @@ export class AddonTable {
         "menu-uninstall",
         "menu-enable",
         "menu-disable",
+        "menu-open-xpi-location",
       ];
       possibleTabID.forEach(e => selectedAddonSupportOps.has(e) && append(e, selectedAddonSupportOps.get(e)?.length));
       if (selects.size === 1) {
@@ -305,6 +310,16 @@ export class AddonTable {
     }
 
     append("menu-systemAddon");
+    if (selects?.size === 1) {
+      for (const idx of selects) {
+        const addonInfo = this.addonInfos[idx];
+        const relatedAddon = await relatedAddons([addonInfo[0]]);
+        const dbAddon = await XPIDatabase.getAddon((addon: any) => addon.id === relatedAddon[0][1].id);
+        if (dbAddon && dbAddon.path) {
+          append("menu-open-xpi-location");
+        }
+      }
+    }
     return result;
   }
 
@@ -406,16 +421,16 @@ export class AddonTable {
         } else {
           append("menu-reinstall", addonInfo[0]);
         }
-        const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relatedAddon[0][1].id);
-        if (dbAddon.length > 0) {
-          if (dbAddon[0].pendingUninstall) {
+        const dbAddon = await XPIDatabase.getAddon((addon: any) => addon.id === relatedAddon[0][1].id);
+        if (dbAddon) {
+          if (dbAddon.pendingUninstall) {
             append("menu-uninstall-undo", addonInfo[0]);
             append("menu-remove", addonInfo[0]);
           } else {
             append("menu-uninstall", addonInfo[0]);
           }
         }
-        if (!relatedAddon[0][1].appDisabled && (dbAddon.length <= 0 || !dbAddon[0].pendingUninstall)) {
+        if (!relatedAddon[0][1].appDisabled && !(dbAddon && dbAddon.pendingUninstall)) {
           if (relatedAddon[0][1].userDisabled) {
             append("menu-enable", addonInfo[0]);
           } else {
@@ -566,6 +581,19 @@ export class AddonTable {
           Zotero.launchURL(`https://github.com/${addon[0].repo}`);
         });
         break;
+      case "menu-open-xpi-location":
+        // see in https://github.com/zotero/zotero/blob/d688ebc10ff573c6faf66d0e63980044d04d4186/chrome/content/zotero/zoteroPane.js#L5081
+        selectAddons.forEach(async selectedAddon => {
+          const dbAddon = await XPIDatabase.getAddon((addon: any) => addon.id === addonReleaseInfo(selectedAddon[0])?.id);
+          if (!dbAddon || !dbAddon.path) { return; }
+          const file = Zotero.File.pathToFile(dbAddon.path);
+          try {
+            file.reveal();
+          } catch {
+            Zotero.launchFile(file.parent as any);
+          }
+        });
+        break;
       case "menu-refresh":
         this.refresh(true);
         break;
@@ -611,7 +639,7 @@ export class AddonTable {
     }));
   }
 
-  private static refreshTag: number = 0;
+  private static refreshTag = 0;
   private static async updateAddonInfos(force = false) {
     this.refreshTag += 1;
     const curRefreshTag = this.refreshTag;

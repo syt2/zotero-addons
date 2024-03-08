@@ -66,6 +66,7 @@ menu-updateAllIfNeed = Bijwerkbare add-ons bijwerken
 menu-enable = Inschakelen
 menu-disable = Uitschakelen
 menu-items-count = items
+menu-open-xpi-location = Weergeven in Bestandsbeheer
 
 source-github = GitHub
 source-gitee = Gitee

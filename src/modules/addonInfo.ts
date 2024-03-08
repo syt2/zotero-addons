@@ -209,8 +209,8 @@ export enum InstallStatus {
 export async function addonInstallStatus(addonInfo: AddonInfo, relateAddon?: [AddonInfo, any]) {
   if (relateAddon) { // has local addon
     if (relateAddon[1]) {
-      const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relateAddon[1].id);
-      if (dbAddon.length > 0 && dbAddon[0].pendingUninstall) { // deleted
+      const dbAddon = await XPIDatabase.getAddon((addon: any) => addon.id === relateAddon[1].id);
+      if (dbAddon && dbAddon.pendingUninstall) { // deleted
         return InstallStatus.pendingUninstall;
       } else { // exist
         if (relateAddon[1].appDisabled || !relateAddon[1].isCompatible || !relateAddon[1].isPlatformCompatible) {
@@ -278,7 +278,9 @@ class AddonInfoAPI {
 export class AddonInfoManager {
   static shared = new AddonInfoManager();
 
-  private constructor() { }
+  private constructor() {
+    //
+  }
 
   /**
    * Get AddonInfos from memory
@@ -321,7 +323,7 @@ export class AddonInfoManager {
    * @param timeout Check next source if current source exceed timeout 
    * @returns AddonInfos from automatic source
    */
-  static async autoSwitchAvaliableApi(timeout: number = 3000) {
+  static async autoSwitchAvaliableApi(timeout = 3000) {
     for (const source of Sources) {
       if (!source.api) { continue; }
       const infos = await AddonInfoAPI.fetchAddonInfos(source.api, timeout, () => {

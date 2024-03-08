@@ -224,12 +224,12 @@ export class AddonInfoDetail {
       } else {
         this.reinstallButton.hidden = false;
       }
-      const dbAddon = XPIDatabase.getAddons().filter((addon: any) => addon.id === relatedAddon[0][1].id);
-      if (dbAddon.length > 0) {
-        dbAddon[0].pendingUninstall ? this.uninstallUndoButton.hidden = false : this.uninstallButton.hidden = false;
-        this.removeButton.hidden = !dbAddon[0].pendingUninstall;
+      const dbAddon = await XPIDatabase.getAddon((addon: any) => addon.id === relatedAddon[0][1].id);
+      if (dbAddon) {
+        dbAddon.pendingUninstall ? this.uninstallUndoButton.hidden = false : this.uninstallButton.hidden = false;
+        this.removeButton.hidden = !dbAddon.pendingUninstall;
       }
-      if (!relatedAddon[0][1].appDisabled && (dbAddon.length <= 0 || !dbAddon[0].pendingUninstall)) {
+      if (!relatedAddon[0][1].appDisabled && !(dbAddon && dbAddon.pendingUninstall)) {
         if (relatedAddon[0][1].userDisabled) {
           this.enableButton.hidden = false;
         } else {
