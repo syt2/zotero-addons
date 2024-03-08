@@ -42,7 +42,7 @@ export class AddonTable {
   }
 
   static registerInToolbar() {
-    const node = document.querySelector("#zotero-tb-advanced-search")!;
+    const node = document.querySelector("#zotero-tb-advanced-search") ?? document.querySelector("#zotero-tb-lookup")!;;
     const newNode = node?.cloneNode(true) as XUL.ToolBarButton;
     newNode.setAttribute("id", "zotero-toolbaritem-addons");
     newNode.setAttribute("tooltiptext", getString("menuitem-addons"));
