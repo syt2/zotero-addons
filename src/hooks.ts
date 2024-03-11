@@ -72,7 +72,7 @@ function onShutdown(): void {
   AddonTable.close();
   AddonInfoDetail.close();
   AddonListenerManager.removeListener();
-  document.querySelector("#zotero-toolbaritem-addons")?.remove();
+  AddonTable.unregisterAll();
   // Remove addon object
   addon.data.alive = false;
   delete Zotero[config.addonInstance];

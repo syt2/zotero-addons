@@ -49,9 +49,11 @@ export class AddonTable {
   static registerInMenuTool() {
     ztoolkit.Menu.register("menuTools", {
       tag: "menuseparator",
+      id: "addon-table-menuseparator-1"
     });
     ztoolkit.Menu.register("menuTools", {
       tag: "menuitem",
+      id: "addon-table-entrance",
       label: getString("menuitem-addons"),
       commandListener: (event) => {
         (async () => {
@@ -61,6 +63,7 @@ export class AddonTable {
     });
     ztoolkit.Menu.register("menuTools", {
       tag: "menuseparator",
+      id: "addon-table-menuseparator-2"
     });
   }
 
@@ -88,6 +91,13 @@ export class AddonTable {
     const searchNode = toolbar.querySelector("#zotero-tb-search");
     newNode.style.listStyleImage = `url(chrome://${config.addonRef}/content/icons/favicon.svg)`;
     toolbar.insertBefore(newNode, searchNode);
+  }
+
+  static unregisterAll() {
+    document.querySelector("#zotero-toolbaritem-addons")?.remove();
+    ztoolkit.Menu.unregister("addon-table-menuseparator-1");
+    ztoolkit.Menu.unregister("addon-table-entrance");
+    ztoolkit.Menu.unregister("addon-table-menuseparator-2");
   }
 
   /**
