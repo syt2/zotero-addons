@@ -85,16 +85,16 @@
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     <button id="refresh" data-l10n-id="refresh" style="cursor: pointer;"></button>
     <groupbox>
-      <hbox>
+      <div style="display: flex;">
         <label data-l10n-id="selectSource" style="margin-top: 5px;"></label>
         <div id="sourceContainerPlaceholder"></div>
-      </hbox>
+    </div>
     </groupbox>
     <groupbox id="customSource-container">
-      <hbox>
+      <div style="display: flex;">
         <label data-l10n-id="customSource" style="margin-top: 6px;"></label>
         <html:input type="text" id="customSourceInput"></html:input>
-      </hbox>
+      </div>
     </groupbox>
     <checkbox id="hide-toolbar-entrance" style="padding-left: 2px; margin-left: auto;" hidden="true" data-l10n-id="hideToolbarEntrance">
     </checkbox>
