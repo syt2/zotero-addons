@@ -14,7 +14,6 @@ import { installAddonFrom } from "../utils/utils";
  */
 export function registerConfigScheme() {
   const ZOTERO_SCHEME = "zotero";
-  const ZOTERO_PROTOCOL_CONTRACTID = "@mozilla.org/network/protocol;1?name=" + ZOTERO_SCHEME;
   const customScheme = ZOTERO_SCHEME + "://zoteroaddoncollection"
   const CustomSchemeExtension = {
     noContent: true,
@@ -106,9 +105,9 @@ export function registerConfigScheme() {
       this.doAction(uri);
     }
   };
-  const zoteroProtocolHandler = Components.classes[ZOTERO_PROTOCOL_CONTRACTID]
-    .getService(Components.interfaces.nsISupports)
-    .wrappedJSObject
-
-  zoteroProtocolHandler._extensions[customScheme] = CustomSchemeExtension
+  try {
+    Services.io.getProtocolHandler(ZOTERO_SCHEME).wrappedJSObject._extensions[customScheme] = CustomSchemeExtension
+  } catch (e) {
+    ztoolkit.log(`register custom protocol failed: ${e}`);
+  }
 }
