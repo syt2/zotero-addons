@@ -162,7 +162,7 @@ export async function installAddonFrom(url: string | string[], options?: {
               install.removeListener(listener);
               install.cancel();
               popWin?.changeLine({
-                text: getString("install-failed", { args: { name: xpiName } }),
+                text: `${getString("install-failed", { args: { name: xpiName } })} [${getString('install-failed-uncompatible')}]`,
                 type: "fail",
                 progress: 0,
               });
@@ -189,7 +189,7 @@ export async function installAddonFrom(url: string | string[], options?: {
             ztoolkit.log(`install failed ${AddonManager.errorToString(install.error)} from ${xpiUrl}`);
             install.removeListener(listener);
             popWin?.changeLine({
-              text: getString("install-failed", { args: { name: xpiName } }),
+              text: `${getString("install-failed", { args: { name: xpiName } })} [${AddonManager.errorToString(install.error)}]`,
               type: "fail",
               progress: 0,
             }).addDescription(AddonManager.errorToString(install.error).slice(0, 45));

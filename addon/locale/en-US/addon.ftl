@@ -21,6 +21,7 @@ download-failed = Download { $name } failed
 uninstall-succeed = Uninstall { $name } succeed
 uninstall-failed = Uninstall { $name } failed
 uninstall-confirm-title = Uninstall add-on?
+install-failed-uncompatible = This Add-on is not adapted to current version of Zotero.
 uninstall-confirm-message = Are you sure you want to uninstall { $name }? 
 uninstall-confirm-confirm = Uninstall
 update-all-uncompatible-title = Update uncompatible add-ons?

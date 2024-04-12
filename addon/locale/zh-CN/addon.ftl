@@ -20,6 +20,7 @@ install-succeed = 安装 { $name } 成功
 download-failed = 下载 { $name } 失败
 uninstall-succeed = 卸载 { $name } 成功
 uninstall-failed = 卸载 { $name } 失败
+install-failed-uncompatible = 插件未适配当前Zotero版本
 uninstall-confirm-title = 卸载插件?
 uninstall-confirm-message = 确定卸载 { $name }? 
 uninstall-confirm-confirm = 卸载

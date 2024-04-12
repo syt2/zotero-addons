@@ -20,6 +20,7 @@ install-succeed = Installatie { $name } geslaagd
 download-failed = Downloaden { $name } mislukt
 uninstall-succeed = Deïnstallatie { $name } geslaagd
 uninstall-failed = Deïnstallatie { $name } mislukt
+install-failed-uncompatible = Deze Add-on is niet aangepast aan de huidige versie van Zotero.
 uninstall-confirm-title = Add-on deïnstalleren?
 uninstall-confirm-message = Weet je zeker dat je { $name } wilt deïnstalleren? 
 uninstall-confirm-confirm = Deïnstalleren
