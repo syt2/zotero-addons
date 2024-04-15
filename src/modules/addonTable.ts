@@ -320,6 +320,7 @@ export class AddonTable {
       for (const idx of selects) {
         const addonInfo = this.addonInfos[idx];
         const relatedAddon = await relatedAddons([addonInfo[0]]);
+        if (relatedAddon.length <= 0) { continue; }
         const dbAddon = await XPIDatabase.getAddon((addon: any) => addon.id === relatedAddon[0][1].id);
         if (dbAddon && dbAddon.path) {
           append("menu-open-xpi-location");
