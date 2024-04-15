@@ -151,6 +151,9 @@ export class AddonInfoDetail {
   private static get addonIcon() {
     return this.window?.document.querySelector("#addon-icon") as HTMLImageElement;
   }
+  private static get uncompatibleDescription() {
+    return this.window?.document.querySelector("#uncompatibleDescription") as HTMLLabelElement;
+  }
   private static async localAddon(): Promise<any | undefined> {
     if (!this.addonInfo) { return undefined; }
     const relateAddons = await relatedAddons([this.addonInfo]);
@@ -199,6 +202,18 @@ export class AddonInfoDetail {
 
     const description = win.document.querySelector("#description") as HTMLLabelElement;
     description.textContent = localAddon?.description ?? releaseInfo?.description ?? addonInfo.description ?? "";
+
+    this.uncompatibleDescription.hidden = true;
+    if (releaseInfo?.minZoteroVersion && releaseInfo.maxZoteroVersion) {
+      if (compareVersion(Zotero.version, releaseInfo.minZoteroVersion.replace('*', '0')) < 0 || compareVersion(Zotero.version, releaseInfo.maxZoteroVersion.replace('*', '999')) > 0) {
+        this.uncompatibleDescription.hidden = false;
+        this.uncompatibleDescription.textContent = getString('release-uncompatible-description', { args: { 
+          minVersion: releaseInfo.minZoteroVersion,
+          maxVersion: releaseInfo.maxZoteroVersion,
+          currentVersion: Zotero.version,
+        }});
+      }
+    }
 
     this.installButton.hidden = true;
     this.updateButton.hidden = true;

@@ -55,6 +55,14 @@ export interface AddonInfo {
      * 插件版本，自 XPI 中提取
      */
     xpiVersion?: string;
+    /**
+     * 最低需要的Zotero版本,可能带*
+     */
+    minZoteroVersion?: string;
+    /**
+     * 最高可用的Zotero版本,可能带*
+     */
+    maxZoteroVersion?: string;
 
     xpiDownloadUrl?: {
       github: string;

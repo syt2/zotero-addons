@@ -75,3 +75,5 @@ source-jsdelivr = jsDelivr
 source-ghproxy = gh-proxy
 source-kgithub = kGitHub
 source-others = Unknown
+
+release-uncompatible-description = This version only works for ({ $minVersion })-({ $maxVersion }), and is not compatible with your current version of Zotero ({ $currentVersion }).

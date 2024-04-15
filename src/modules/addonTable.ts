@@ -4,7 +4,7 @@ import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, InstallStatus, addonCanUpdate, addonInstallStatus, addonReleaseInfo, addonReleaseTime, relatedAddons, xpiDownloadUrls } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
-import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
+import { compareVersion, installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
@@ -659,7 +659,13 @@ export class AddonTable {
       result["menu-name"] = releaseInfo?.name ?? addonInfo.name;
       result["menu-desc"] = releaseInfo?.description ?? addonInfo.description ?? "";
       result['menu-star'] = addonInfo.stars === 0 ? "0" : addonInfo.stars ? String(addonInfo.stars) : "?"
-      result["menu-remote-version"] = releaseInfo?.xpiVersion?.toLowerCase().replace('v', '') ?? "";
+      const remoteVersion = releaseInfo?.xpiVersion?.toLowerCase().replace('v', '') ?? "";
+      result["menu-remote-version"] = remoteVersion;
+      if (remoteVersion && releaseInfo?.minZoteroVersion && releaseInfo.maxZoteroVersion) {
+        if (compareVersion(Zotero.version, releaseInfo.minZoteroVersion.replace('*', '0')) < 0 || compareVersion(Zotero.version, releaseInfo.maxZoteroVersion.replace('*', '999')) > 0) {
+          result["menu-remote-version"] = `❌ ${remoteVersion}`
+        }
+      }
       result["menu-local-version"] = "";
       const releaseTime = addonReleaseTime(addonInfo);
       if (releaseTime) {
