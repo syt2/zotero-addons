@@ -12,7 +12,7 @@
           }
         },
         {
-          "version": "1.6.0",
+          "version": "1.6.1",
           "update_link": "https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi",
           "applications": {
             "zotero": {
