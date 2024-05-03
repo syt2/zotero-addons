@@ -192,50 +192,40 @@ export class UIExampleFactory {
 
   @example
   static async registerExtraColumn() {
-    await ztoolkit.ItemTree.register(
-      "test1",
-      "text column",
-      (
-        field: string,
-        unformatted: boolean,
-        includeBaseMapped: boolean,
-        item: Zotero.Item,
-      ) => {
+    const field = "test1";
+    await Zotero.ItemTreeManager.registerColumns({
+      pluginID: config.addonID,
+      dataKey: field,
+      label: "text column",
+      dataProvider: (item: Zotero.Item, dataKey: string) => {
         return field + String(item.id);
       },
-      {
-        iconPath: "chrome://zotero/skin/cross.png",
-      },
-    );
+      iconPath: "chrome://zotero/skin/cross.png",
+    });
   }
 
   @example
   static async registerExtraColumnWithCustomCell() {
-    await ztoolkit.ItemTree.register(
-      "test2",
-      "custom column",
-      (
-        field: string,
-        unformatted: boolean,
-        includeBaseMapped: boolean,
-        item: Zotero.Item,
-      ) => {
-        return String(item.id);
+    const field = "test2";
+    await Zotero.ItemTreeManager.registerColumns({
+      pluginID: config.addonID,
+      dataKey: field,
+      label: "custom column",
+      dataProvider: (item: Zotero.Item, dataKey: string) => {
+        return field + String(item.id);
       },
-      {
-        renderCell(index, data, column) {
-          ztoolkit.log("Custom column cell is rendered!");
-          const span = document.createElementNS(
-            "http://www.w3.org/1999/xhtml",
-            "span",
-          );
-          span.className = `cell ${column.className}`;
-          span.style.background = "#0dd068";
-          span.innerText = "⭐" + data;
-          return span;
-        },
+      renderCell(index, data, column) {
+        ztoolkit.log("Custom column cell is rendered!");
+        const span = document.createElementNS(
+          "http://www.w3.org/1999/xhtml",
+          "span",
+        );
+        span.className = `cell ${column.className}`;
+        span.style.background = "#0dd068";
+        span.innerText = "⭐" + data;
+        return span;
       },
-    );
+    });
   }
 
   @example
@@ -279,7 +269,7 @@ export class UIExampleFactory {
   }
 
   @example
-  static registerLibraryTabPanel() {
+  static registerItemPaneSection() {
     Zotero.ItemPaneManager.registerSection({
       paneID: "example",
       pluginID: config.addonID,
@@ -302,7 +292,7 @@ export class UIExampleFactory {
   }
 
   @example
-  static async registerReaderTabPanel() {
+  static async registerReaderItemPaneSection() {
     Zotero.ItemPaneManager.registerSection({
       paneID: "reader-example",
       pluginID: config.addonID,

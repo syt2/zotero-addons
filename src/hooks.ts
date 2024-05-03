@@ -32,6 +32,14 @@ async function onStartup() {
 
   KeyExampleFactory.registerShortcuts();
 
+  await UIExampleFactory.registerExtraColumn();
+
+  await UIExampleFactory.registerExtraColumnWithCustomCell();
+
+  UIExampleFactory.registerItemPaneSection();
+
+  UIExampleFactory.registerReaderItemPaneSection();
+
   await onMainWindowLoad(window);
 }
 
@@ -67,15 +75,7 @@ async function onMainWindowLoad(win: Window): Promise<void> {
 
   UIExampleFactory.registerWindowMenuWithSeparator();
 
-  await UIExampleFactory.registerExtraColumn();
-
-  await UIExampleFactory.registerExtraColumnWithCustomCell();
-
   await UIExampleFactory.registerCustomItemBoxRow();
-
-  UIExampleFactory.registerLibraryTabPanel();
-
-  UIExampleFactory.registerReaderTabPanel();
 
   PromptExampleFactory.registerNormalCommandExample();
 
