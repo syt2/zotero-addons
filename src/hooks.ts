@@ -39,6 +39,9 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   // Create ztoolkit for every window
   addon.data.ztoolkit = createZToolkit();
 
+  // @ts-ignore
+  window.MozXULElement.insertFTLIfNeeded(`${config.addonRef}-mainWindow.ftl`);
+
   const popupWin = new ztoolkit.ProgressWindow(config.addonName, {
     closeOnClick: true,
     closeTime: -1,
@@ -72,7 +75,7 @@ async function onMainWindowLoad(win: Window): Promise<void> {
 
   UIExampleFactory.registerLibraryTabPanel();
 
-  await UIExampleFactory.registerReaderTabPanel();
+  UIExampleFactory.registerReaderTabPanel();
 
   PromptExampleFactory.registerNormalCommandExample();
 
