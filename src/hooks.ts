@@ -40,7 +40,7 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   // Create ztoolkit for every window
   addon.data.ztoolkit = createZToolkit();
 
-  // @ts-ignore
+  // @ts-ignore This is a moz feature
   window.MozXULElement.insertFTLIfNeeded(`${config.addonRef}-mainWindow.ftl`);
 
   const popupWin = new ztoolkit.ProgressWindow(config.addonName, {
