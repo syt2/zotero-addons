@@ -65,11 +65,8 @@ If you are using this repo, I recommended that you put the following badge on yo
 - Plugin develop/build/release workflow:
   - Automatically generate/update plugin id/version, update configrations, and set environment variables (`development` / `production`);
   - Automatically build and reload code in Zotero;
-  - Automatically release to GitHub (using [release-it](https://github.com/release-it/release-it));
+  - Automatically release to GitHub;
 - Prettier and ES Lint integration.
-
-> [!warning]
-> The localization system is upgraded (`dtd` is deprecated and we do not use `.properties` anymore). Only supports Zotero 7.0.0-beta.12 or higher now. If you want to support Zotero 6, you may need to use `dtd`, `properties`, and `ftl` at the same time. See the staled branch `zotero6-bootstrap`.
 
 ## Examples
 
@@ -178,8 +175,6 @@ Activate with `Shift+P`.
        addonRef: "", // e.g. Element ID prefix
        addonInstance: "", // the plugin's root instance: Zotero.${addonInstance}
        prefsPrefix: "extensions.zotero.${addonRef}", // the prefix of prefs
-       releasePage: "", // URL to releases
-       updateJSON: "", // URL to update.json
      },
    }
    ```
@@ -187,17 +182,19 @@ Activate with `Shift+P`.
    > [!warning]
    > Be careful to set the addonID and addonRef to avoid conflict.
 
-   If you need to host your XPI packages outside of GitHub, remove `releasePage` and add `updateLink` with the value set to your XPI download URL.
+   If you need to host your XPI packages outside of GitHub, moidify `updateURL` and add `xpiDownloadLink` in `zotero-plugin.config.ts`.
 
-2. Copy zotero command line config file. Modify the commands that starts your installation of the beta Zotero.
+2. Copy the environment variable file. Modify the commands that starts your installation of the beta Zotero.
 
-   > (Optional) Do this only once: Start the beta Zotero with `/path/to/zotero -p`. Create a new profile and use it as your development profile.
-   > Put the path of the profile into the `profilePath` in `zotero-cmd.json` to specify which profile to use.
+   > Create a development profile (Optional)  
+   > Start the beta Zotero with `/path/to/zotero -p`. Create a new profile and use it as your development profile. Do this only once
 
    ```sh
-   cp ./scripts/zotero-cmd-template.json ./scripts/zotero-cmd.json
-   vim ./scripts/zotero-cmd.json
+   cp .env.example .env
+   vim .env
    ```
+
+   If you are developing more than one plugin, you can store the bin path and profile path in the system environment variables, which can be omitted here.
 
 3. Install dependencies with `npm install`
 
@@ -209,7 +206,6 @@ Start development server with `npm start`, it will:
 
 - Prebuild the plugin in development mode
 - Start Zotero with plugin loaded from `build/`
-- Open devtool
 - Watch `src/**` and `addon/**`.
   - If `src/**` changed, run esbuild and reload
   - If `addon/**` has changed, rebuild the plugin (in development mode) and reload
@@ -226,10 +222,7 @@ When file changes are detected in `src` or `addon`, the plugin will be automatic
 <details style="text-indent: 2em">
 <summary>💡 Steps to add this feature to an existing plugin</summary>
 
-1. Copy `scripts/**.mjs`
-2. Copy `server`, `build`, and `stop` commands in `package.json`
-3. Run `npm install --save-dev chokidar`
-4. Done.
+Please see [zotero-plugin-scaffold](https://github.com/northword/zotero-plugin-scaffold).
 
 </details>
 
@@ -246,7 +239,7 @@ You can also:
 
 Run `npm run build` to build the plugin in production mode, and the xpi for installation and the built code is under `build` folder.
 
-Steps in `scripts/build.mjs`:
+Steps of build:
 
 - Create/empty `build/`.
 - Copy `addon/**` to `build/addon/**`
@@ -254,7 +247,7 @@ Steps in `scripts/build.mjs`:
 - Prepare locale files to [avoid conflict](https://www.zotero.org/support/dev/zotero_7_for_developers#avoiding_localization_conflicts)
   - Rename `**/*.flt` to `**/${addonRef}-*.flt`
   - Prefix each fluent message with `addonRef-`
-- Use Esbuild to build `.ts` source code to `.js`, build `src/index.ts` to `./build/addon/chrome/content/scripts`.
+- Use ESBuild to build `.ts` source code to `.js`, build `src/index.ts` to `./build/addon/chrome/content/scripts`.
 - (Production mode only) Zip the `./build/addon` to `./build/*.xpi`
 - (Production mode only) Prepare `update.json` or `update-beta.json`
 
@@ -271,15 +264,14 @@ Steps in `scripts/build.mjs`:
 To build and release, use
 
 ```shell
-# A release-it command: version increase, npm run build, git push, and GitHub release
-# release-it: https://github.com/release-it/release-it
+# version increase, git add, commit and push
+# then on ci, npm run build, and release to GitHub
 npm run release
 ```
 
 > [!note]
 > In this template, release-it is configured to locally bump the version, build, and push commits and git.tags, subsequently GitHub Action will rebuild the plugin and publish the XPI to GitHub Release.
 >
-> If you need to release a locally built XPI, set `release-it.github.release` to `true` in `package.json` and remove `.github/workflows/release.yml`. Besides that, you need to set the environment variable `GITHUB_TOKEN`, get it in <https://github.com/settings/tokens>.
 
 #### About Prerelease
 

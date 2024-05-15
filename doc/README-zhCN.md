@@ -57,18 +57,15 @@
 - 事件驱动、函数式编程的可扩展框架；
 - 简单易用，开箱即用；
 - ⭐[新特性!]自动热重载！每当修改源码时，都会自动编译并重新加载插件；[详情请跳转→](#自动热重载)
-- `src/modules/examples.ts` 中有丰富的示例，涵盖了插件中常用的大部分API (使用的插件工具包 zotero-plugin-toolkit，仓库地址 https://github.com/windingwind/zotero-plugin-toolkit)；
+- `src/modules/examples.ts` 中有丰富的示例，涵盖了插件中常用的大部分API (使用 [zotero-plugin-toolkit](https://github.com/windingwind/zotero-plugin-toolkit)；
 - TypeScript 支持:
-  - 为使用 JavaScript 编写的Zotero源码提供全面的类型定义支持 (使用类型定义包 zotero-types，仓库地址 https://github.com/windingwind/zotero-types)；
+  - 为使用 JavaScript 编写的 Zotero 源码提供全面的类型定义支持 (使用 [zotero-types](https://github.com/windingwind/zotero-types))；
   - 全局变量和环境设置；
 - 插件开发/构建/发布工作流:
-  - 自动生成/更新插件id和版本、更新配置和设置环境变量 (`development`/`production`)；
+  - 自动生成/更新插件版本、更新配置和设置环境变量 (`development`/`production`)；
   - 自动在 Zotero 中构建和重新加载代码；
-  - 自动发布到GitHub (使用[release-it](https://github.com/release-it/release-it));
-- 集成Prettier和ES Lint;
-
-> [!warning]
-> Zotero本地化已升级(`dtd` 已弃用，我们将不再使用 `.properties`). 主分支将只支持 Zotero 7.0.0-beta.12 或更高版本. 如果需要支持 Zotero 6，你可能需要同时使用`dtd`、`properties` 和`ftl`. 请参考此库的 `zotero6-bootstrap` 分支.
+  - 自动发布到 GitHub ;
+- 集成 Prettier 和 ES Lint;
 
 ## Examples 示例
 
@@ -133,15 +130,15 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 
 - registerAlertPromptExample
 
-## Quick Start Guide 快速入门指南
+## 快速上手
 
-### 0 前置要求(Requirement)
+### 0 环境要求
 
-1. 安装测试版 Zotero：https://www.zotero.org/support/beta_builds
-2. 安装 Node.js（https://nodejs.org/en/）和 Git（https://git-scm.com/）
+1. 安装 [beta 版 Zotero](https://www.zotero.org/support/beta_builds)
+2. 安装 [Node.js](https://nodejs.org/en/) 和 [Git](https://git-scm.com/)
 
 > [!note]
-> 本指南假定你已经对 Zotero 插件的基本结构和工作原理有初步的了解. 如果你还不了解，请先参考官方文档（https://www.zotero.org/support/dev/zotero_7_for_developers）和官方插件样例 Make It Red（仓库地址 https://github.com/zotero/make-it-red）.
+> 本指南假定你已经对 Zotero 插件的基本结构和工作原理有初步的了解. 如果你还不了解，请先参考[官方文档](https://www.zotero.org/support/dev/zotero_7_for_developers) 和[官方插件样例 Make It Red](https://github.com/zotero/make-it-red)。
 
 ### 1 创建你的仓库(Create Your Repo)
 
@@ -167,18 +164,16 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 
    ```json5
    {
-     version: "", // to 0.0.0
+     version: "", // 修改为 0.0.0
      author: "",
      description: "",
      homepage: "",
      config: {
-       addonName: "", // name to be displayed in the plugin manager
-       addonID: "", // ID to avoid conflict. IMPORTANT!
-       addonRef: "", // e.g. Element ID prefix
-       addonInstance: "", // the plugin's root instance: Zotero.${addonInstance}
-       prefsPrefix: "extensions.zotero.${addonRef}", // the prefix of prefs
-       releasePage: "", // URL to releases
-       updateJSON: "", // URL to update.json
+       addonName: "", // 插件名称
+       addonID: "", // 插件 ID 【重要：防止冲突】
+       addonRef: "", // 插件命名空间：元素前缀等
+       addonInstance: "", // 注册在 Zotero 根下的实例名
+       prefsPrefix: "extensions.zotero.${addonRef}", // 首选项的前缀
      },
    }
    ```
@@ -186,23 +181,26 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
    > [!warning]
    > 注意设置 addonID 和 addonRef 以避免冲突.
 
-如果你需要在GitHub以外的地方托管你的 XPI 包，请删除 `releasePage` 并添加 `updateLink`，并将值设置为你的 XPI 下载地址.
+    如果你需要在 GitHub 以外的地方托管你的 XPI 包，请修改 `zotero-plugin.config.ts` 中的 `updateURL` 和 `xpiDownloadLink`。
 
 2. 复制 Zotero 启动配置，填入 Zotero 可执行文件路径和 profile 路径.
 
-   > (可选项) 此操作仅需执行一次: 使用 `/path/to/zotero -p` 启动 Zotero，创建一个新的配置文件并用作开发配置文件.
-   > 将配置文件的路径 `profilePath` 放入 `zotero-cmd.json` 中，以指定要使用的配置文件.
+   > (可选项) 创建开发用 profile 目录：
+   >
+   > 此操作仅需执行一次: 使用 `/path/to/zotero -p` 启动 Zotero，创建一个新的配置文件并用作开发配置文件。
 
    ```sh
-   cp ./scripts/zotero-cmd-template.json ./scripts/zotero-cmd.json
-   vim ./scripts/zotero-cmd.json
+   cp .env.example .env
+   vim .env
    ```
+
+   如果你维护了多个插件，可以将这些内容存入系统环境变量，以避免在每个插件中都需要重复设置。
 
 3. 运行 `npm install` 以安装相关依赖
 
-   > 如果你使用 `pnpm` 作为包管理器，你需要添加 `public-hoist-pattern[]=*@types/bluebird*` 到`.npmrc`, 详情请查看 zotero-types（https://github.com/windingwind/zotero-types?tab=readme-ov-file#usage）的文档.
+   > 如果你使用 `pnpm` 作为包管理器，你需要添加 `public-hoist-pattern[]=*@types/bluebird*` 到`.npmrc`, 详情请查看 zotero-types（<https://github.com/windingwind/zotero-types?tab=readme-ov-file#usage）的文档>.
 
-### 3 开始开发(Coding)
+### 3 开发插件
 
 使用 `npm start` 启动开发服务器，它将：
 
@@ -225,14 +223,11 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 <details style="text-indent: 2em">
 <summary>💡 将此功能添加到现有插件的步骤</summary>
 
-1. 复制 `scripts/**.mjs`
-2. 复制 `server` 、`build` 和 `stop` 命令到 `package.json`
-3. 运行 `npm install --save-dev chokidar`
-4. 结束.
+请参阅：[zotero-plugin-scaffold](https://github.com/northword/zotero-plugin-scaffold)。
 
 </details>
 
-#### 在 Zotero 中 Debug
+#### 调试代码
 
 你还可以:
 
@@ -244,16 +239,16 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 
   > XUL 文档: <http://www.devdoc.net/web/developer.mozilla.org/en-US/docs/XUL.html>
 
-### 4 构建(Build)
+### 4 构建插件
 
 运行 `npm run build` 在生产模式下构建插件，构建的结果位于 `build/` 目录中.
 
-`scripts/build.mjs` 的运行步骤:
+构建步骤:
 
 - 创建/清空 `build/`
 - 复制 `addon/**` 到 `build/addon/**`
 - 替换占位符：使用 `replace-in-file` 去替换在 `package.json` 中定义的关键字和配置 (`xhtml`、`.flt` 等)
-- 准备本地化文件以避免冲突，查看官方文档了解更多（https://www.zotero.org/support/dev/zotero_7_for_developers#avoiding_localization_conflicts）
+- 准备本地化文件以避免冲突，查看官方文档了解更多（<https://www.zotero.org/support/dev/zotero_7_for_developers#avoiding_localization_conflicts）>
   - 重命名`**/*.flt` 为 `**/${addonRef}-*.flt`
   - 在每个消息前加上 `addonRef-`
 - 使用 Esbuild 来将 `.ts` 源码构建为 `.js`，从 `src/index.ts` 构建到`./build/addon/chrome/content/scripts`
@@ -268,27 +263,25 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 > - 你可以根据此变量决定用户无法查看/使用的内容.
 > - 在生产模式下，构建脚本将自动打包插件并更新 `update.json`.
 
-### 5 发布(Release)
+### 5 发布
 
 如果要构建和发布插件，运行如下指令：
 
 ```shell
-# A release-it command: version increase, npm run build, git push, and GitHub release
-# release-it: https://github.com/release-it/release-it
+# version increase, git add, commit and push
+# then on ci, npm run build, and release to GitHub
 npm run release
 ```
 
 > [!note]
-> 在此模板中，release-it 被配置为在本地升级版本、构建、推送提交和 git 标签，随后GitHub Action 将重新构建插件并将 XPI 发布到 GitHub Release.
->
-> 如果你需要发布一个本地构建的 XPI，将 `package.json` 中的 `release-it.github.release` 设置为 `true`，然后移除 `.github/workflows/release.yml`. 此外，你还需要设置环境变量 `GITHUB_TOKEN`，获取 GitHub Token（https://github.com/settings/tokens）.
+> 在此模板中，release-it 被配置为在本地更新版本号、提交并推送标签，随后 GitHub Action 将重新构建插件并将 XPI 发布到 GitHub Release.
 
 #### 关于预发布
 
 该模板将 `prerelease` 定义为插件的测试版，当你在 release-it 中选择 `prerelease` 版本 (版本号中带有 `-` )，构建脚本将创建一个 `update-beta.json` 给预发布版本使用，这将确保常规版本的用户不会自动更新到测试版，只有手动下载并安装了测试版的用户才能自动更新到下一个测试版. 当下一个正式版本更新时，脚本将同步更新 `update.json` 和 `update-beta.json`，这将使正式版和测试版用户都可以更新到最新的正式版.
 
 > [!warning]
-> 严格来说，区分 Zotero 6 和 Zotero 7 兼容的插件版本应该通过 `update.json` 的 `addons.__addonID__.updates[]` 中分别配置 `applications.zotero.strict_min_version`，这样 Zotero 才能正确识别，详情在 Zotero 7 开发文档（https://www.zotero.org/support/dev/zotero_7_for_developers#updaterdf_updatesjson）获取.
+> 严格来说，区分 Zotero 6 和 Zotero 7 兼容的插件版本应该通过 `update.json` 的 `addons.__addonID__.updates[]` 中分别配置 `applications.zotero.strict_min_version`，这样 Zotero 才能正确识别，详情在 Zotero 7 开发文档（<https://www.zotero.org/support/dev/zotero_7_for_developers#updaterdf_updatesjson）获取>.
 
 ## Details 更多细节
 
@@ -333,7 +326,7 @@ createElement(document, "button", { namespace: "xul" }); // manually set namespa
 
 ### 关于 Zotero API(About Zotero API)
 
-Zotero 文档已过时且不完整，克隆 https://github.com/zotero/zotero 并全局搜索关键字.
+Zotero 文档已过时且不完整，克隆 <https://github.com/zotero/zotero> 并全局搜索关键字.
 
 > ⭐[zotero-types](https://github.com/windingwind/zotero-types) 提供了最常用的 Zotero API，在默认情况下它被包含在此模板中. 你的 IDE 将为大多数的 API 提供提醒.
 

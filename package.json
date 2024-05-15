@@ -7,47 +7,39 @@
     "addonID": "addontemplate@euclpts.com",
     "addonRef": "addontemplate",
     "addonInstance": "AddonTemplate",
-    "prefsPrefix": "extensions.zotero.addontemplate",
-    "releasePage": "https://github.com/windingwind/zotero-addon-template/releases",
-    "updateJSON": "https://raw.githubusercontent.com/windingwind/zotero-addon-template/main/update.json"
-  },
-  "main": "src/index.ts",
-  "scripts": {
-    "start": "node scripts/server.mjs",
-    "build": "tsc --noEmit && node scripts/build.mjs production",
-    "stop": "node scripts/stop.mjs",
-    "lint": "prettier --write . && eslint . --ext .ts --fix",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "release": "release-it --only-version --preReleaseId=beta",
-    "update-deps": "npm update --save"
+    "prefsPrefix": "extensions.zotero.addontemplate"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/windingwind/zotero-addon-template.git"
   },
   "author": "windingwind",
-  "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/windingwind/zotero-addon-template/issues"
   },
   "homepage": "https://github.com/windingwind/zotero-addon-template#readme",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "start": "zotero-plugin serve",
+    "build": "tsc --noEmit && zotero-plugin build",
+    "lint": "prettier --write . && eslint . --ext .ts --fix",
+    "release": "zotero-plugin release",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "update-deps": "npm update --save"
+  },
   "dependencies": {
-    "zotero-plugin-toolkit": "^2.3.30"
+    "zotero-plugin-toolkit": "^2.3.31"
   },
   "devDependencies": {
-    "@types/node": "^20.12.8",
-    "@typescript-eslint/eslint-plugin": "^7.8.0",
-    "@typescript-eslint/parser": "^7.8.0",
-    "chokidar": "^3.6.0",
-    "compressing": "^1.10.0",
-    "esbuild": "^0.20.2",
+    "@types/node": "^20.12.12",
+    "@typescript-eslint/eslint-plugin": "^7.9.0",
+    "@typescript-eslint/parser": "^7.9.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.2.5",
-    "release-it": "^17.2.1",
-    "replace-in-file": "^7.1.0",
     "typescript": "^5.4.5",
-    "zotero-types": "^2.0.0"
+    "zotero-plugin-scaffold": "^0.0.21",
+    "zotero-types": "^1.3.24"
   },
   "eslintConfig": {
     "env": {
@@ -113,23 +105,5 @@
         }
       }
     ]
-  },
-  "release-it": {
-    "git": {
-      "tagName": "v${version}"
-    },
-    "npm": {
-      "publish": false
-    },
-    "github": {
-      "release": false,
-      "assets": [
-        "build/*.xpi"
-      ]
-    },
-    "hooks": {
-      "before:init": "npm run lint",
-      "after:bump": "npm run build"
-    }
   }
 }
