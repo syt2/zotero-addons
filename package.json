@@ -1,9 +1,9 @@
 {
-  "name": "zotero-addon-template",
+  "name": "zotero-plugin-template",
   "version": "2.0.0",
-  "description": "Zotero Addon Template",
+  "description": "Zotero Plugin Template",
   "config": {
-    "addonName": "Zotero Addon Template",
+    "addonName": "Zotero Plugin Template",
     "addonID": "addontemplate@euclpts.com",
     "addonRef": "addontemplate",
     "addonInstance": "AddonTemplate",
@@ -11,13 +11,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/windingwind/zotero-addon-template.git"
+    "url": "git+https://github.com/windingwind/zotero-plugin-template.git"
   },
   "author": "windingwind",
   "bugs": {
-    "url": "https://github.com/windingwind/zotero-addon-template/issues"
+    "url": "https://github.com/windingwind/zotero-plugin-template/issues"
   },
-  "homepage": "https://github.com/windingwind/zotero-addon-template#readme",
+  "homepage": "https://github.com/windingwind/zotero-plugin-template#readme",
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "start": "zotero-plugin serve",
@@ -38,7 +38,7 @@
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5",
-    "zotero-plugin-scaffold": "^0.0.21",
+    "zotero-plugin-scaffold": "^0.0.22",
     "zotero-types": "^1.3.24"
   },
   "eslintConfig": {
