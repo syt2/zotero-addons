@@ -181,7 +181,7 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
    > [!warning]
    > 注意设置 addonID 和 addonRef 以避免冲突.
 
-    如果你需要在 GitHub 以外的地方托管你的 XPI 包，请修改 `zotero-plugin.config.ts` 中的 `updateURL` 和 `xpiDownloadLink`。
+   如果你需要在 GitHub 以外的地方托管你的 XPI 包，请修改 `zotero-plugin.config.ts` 中的 `updateURL` 和 `xpiDownloadLink`。
 
 2. 复制 Zotero 启动配置，填入 Zotero 可执行文件路径和 profile 路径.
 

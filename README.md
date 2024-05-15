@@ -271,7 +271,6 @@ npm run release
 
 > [!note]
 > In this template, release-it is configured to locally bump the version, build, and push commits and git.tags, subsequently GitHub Action will rebuild the plugin and publish the XPI to GitHub Release.
->
 
 #### About Prerelease
 
