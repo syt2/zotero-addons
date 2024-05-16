@@ -5,7 +5,7 @@ import { copyFileSync } from "fs";
 export default defineConfig({
   source: ["src", "addon"],
   dist: "build",
-  name: pkg.config.addonName,
+  // name: pkg.config.addonName,
   id: pkg.config.addonID,
   namespace: pkg.config.addonRef,
   updateURL: `https://github.com/{{owner}}/{{repo}}/releases/download/release/${pkg.version.includes("-") ? "update-beta.json" : "update.json"
@@ -56,4 +56,4 @@ export default defineConfig({
 
   // If you need to see a more detailed build log, uncomment the following line:
   // logLevel: "trace",
-});
+} as any);
