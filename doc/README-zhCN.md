@@ -151,7 +151,7 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 
    重复下列步骤，仅需三十秒即可开始构建你的第一个插件！
 
-   - 去 [homepage](https://github.com/windingwind/zotero-plugin-template)顶部，点击绿色按钮`Use this template`，点击 `Open in codespace`， 你需要登录你的GitHub账号.
+   - 点击首页 `Use this template` 按钮，随后点击 `Open in codespace`， 你需要登录你的 GitHub 账号.
    - 等待 codespace 加载.
 
    </details>
@@ -198,7 +198,9 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 
 3. 运行 `npm install` 以安装相关依赖
 
-   > 如果你使用 `pnpm` 作为包管理器，你需要添加 `public-hoist-pattern[]=*@types/bluebird*` 到`.npmrc`, 详情请查看 zotero-types（<https://github.com/windingwind/zotero-types?tab=readme-ov-file#usage）的文档>.
+   > 如果你使用 `pnpm` 作为包管理器，你需要添加 `public-hoist-pattern[]=*@types/bluebird*` 到`.npmrc`, 详情请查看 [zotero-types](https://github.com/windingwind/zotero-types?tab=readme-ov-file#usage) 的文档.
+
+   如果你使用 `npm install` 的过程中遇到了 `npm ERR! ERESOLVE unable to resolve dependency tree` ，这是由于上游依赖 typescript-eslint 导致的错误，请使用 `npm i -f` 命令进行安装。
 
 ### 3 开发插件
 
