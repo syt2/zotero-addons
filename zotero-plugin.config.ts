@@ -63,7 +63,7 @@ export default defineConfig({
       // execute: "npm run build",
       all: false,
       commit: "chore(publish): release v%s",
-      tag: "v%s",
+      tag: "V%s",
       push: true,
     }
   },
