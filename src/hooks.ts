@@ -16,13 +16,6 @@ async function onStartup() {
     Zotero.uiReadyPromise,
   ]);
 
-  // TODO: Remove this after zotero#3387 is merged
-  if (__env__ === "development") {
-    // Keep in sync with the scripts/startup.mjs
-    const loadDevToolWhen = `Plugin ${config.addonID} startup`;
-    ztoolkit.log(loadDevToolWhen);
-  }
-
   initLocale();
 
   // TODO: Remove after a few versions released. Not used after v1.4.4. Deleted pref in v1.4.6
@@ -44,7 +37,7 @@ async function onStartup() {
     // refresh table if AddonTable already displayed, so specific `force` to false
     AddonTable.refresh(false);
 
-    if (getPref('autoUpdate')) { 
+    if (getPref('autoUpdate')) {
       // update automatically if need
       AddonTable.updateExistAddons();
     }
