@@ -1,6 +1,6 @@
 {
   "name": "zotero-addons",
-  "version": "1.6.10",
+  "version": "1.6.11",
   "config": {
     "addonName": "Add-on Market for Zotero",
     "addonID": "zoteroAddons@ytshen.com",
