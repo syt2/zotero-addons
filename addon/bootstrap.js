@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 /**
  * Most of this code is from Zotero team's official Make It Red example[1]
  * or the Zotero 7 documentation[2].
