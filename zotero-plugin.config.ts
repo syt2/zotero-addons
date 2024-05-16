@@ -54,10 +54,17 @@ export default defineConfig({
   //   },
   // },
 
+
   release: {
     bumpp: {
-      commit: "chore(publish): release V%s",
-      tag: "V%s",
+      release: "prompt",
+      confirm: true,
+      preid: "beta",
+      // execute: "npm run build",
+      all: false,
+      commit: "chore(publish): release v%s",
+      tag: "v%s",
+      push: true,
     }
   },
   // If you need to see a more detailed build log, uncomment the following line:
