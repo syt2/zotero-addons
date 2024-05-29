@@ -25,7 +25,7 @@
     "lint": "prettier --write . && eslint . --fix",
     "release": "zotero-plugin release",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "update-deps": "npx taze minor -w -f -l -i"
+    "update-deps": "npm update --save"
   },
   "dependencies": {
     "zotero-plugin-toolkit": "^2.3.31"
