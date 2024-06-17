@@ -232,7 +232,7 @@ Please see [zotero-plugin-scaffold](https://github.com/northword/zotero-plugin-s
 
 You can also:
 
-- Test code snipastes in Tools -> Developer -> Run Javascript;
+- Test code snippets in Tools -> Developer -> Run Javascript;
 - Debug output with `Zotero.debug()`. Find the outputs in Help->Debug Output Logging->View Output;
 - Debug UI. Zotero is built on the Firefox XUL framework. Debug XUL UI with software like [XUL Explorer](https://udn.realityripple.com/docs/Archive/Mozilla/XUL_Explorer).
   > XUL Documentation: <http://www.devdoc.net/web/developer.mozilla.org/en-US/docs/XUL.html>
