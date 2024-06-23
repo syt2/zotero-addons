@@ -1,5 +1,5 @@
 import { config } from "../../package.json";
-import { getString } from "../utils/locale";
+import { getLocaleID, getString } from "../utils/locale";
 
 function example(
   target: any,
@@ -274,11 +274,11 @@ export class UIExampleFactory {
       paneID: "example",
       pluginID: config.addonID,
       header: {
-        l10nID: `${config.addonRef}-item-section-example1-head-text`,
+        l10nID: getLocaleID("item-section-example1-head-text"),
         icon: "chrome://zotero/skin/16/universal/book.svg",
       },
       sidenav: {
-        l10nID: `${config.addonRef}-item-section-example1-sidenav-tooltip`,
+        l10nID: getLocaleID("item-section-example1-sidenav-tooltip"),
         icon: "chrome://zotero/skin/20/universal/save.svg",
       },
       onRender: ({ body, item, editable, tabType }) => {
@@ -297,14 +297,14 @@ export class UIExampleFactory {
       paneID: "reader-example",
       pluginID: config.addonID,
       header: {
-        l10nID: `${config.addonRef}-item-section-example2-head-text`,
+        l10nID: getLocaleID("item-section-example2-head-text"),
         // Optional
         l10nArgs: `{"status": "Initialized"}`,
         // Can also have a optional dark icon
         icon: "chrome://zotero/skin/16/universal/book.svg",
       },
       sidenav: {
-        l10nID: `${config.addonRef}-item-section-example2-sidenav-tooltip`,
+        l10nID: getLocaleID("item-section-example2-sidenav-tooltip"),
         icon: "chrome://zotero/skin/20/universal/save.svg",
       },
       // Optional
@@ -366,7 +366,7 @@ export class UIExampleFactory {
         {
           type: "test",
           icon: "chrome://zotero/skin/16/universal/empty-trash.svg",
-          l10nID: "make-it-red-item-section-example2-button-tooltip",
+          l10nID: getLocaleID("item-section-example2-button-tooltip"),
           onClick: ({ item, paneID }) => {
             ztoolkit.log("Section clicked!", item?.id);
             Zotero.ItemPaneManager.unregisterSection(paneID);
