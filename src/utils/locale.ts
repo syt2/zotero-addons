@@ -1,6 +1,6 @@
 import { config } from "../../package.json";
 
-export { initLocale, getString };
+export { initLocale, getString, getLocaleID };
 
 /**
  * Initialize locale data
@@ -72,8 +72,17 @@ function _getString(
     return localStringWithPrefix;
   }
   if (branch && pattern.attributes) {
+    for (const attr of pattern.attributes) {
+      if (attr.name === branch) {
+        return attr.value;
+      }
+    }
     return pattern.attributes[branch] || localStringWithPrefix;
   } else {
     return pattern.value || localStringWithPrefix;
   }
+}
+
+function getLocaleID(id: string) {
+  return `${config.addonRef}-${id}`;
 }
