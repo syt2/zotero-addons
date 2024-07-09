@@ -8,6 +8,7 @@ import { compareVersion, installAddonFrom, undoUninstall, uninstall } from "../u
 import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
+import { Guide } from "./guide";
 const { XPIDatabase } = Components.utils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
@@ -187,6 +188,11 @@ export class AddonTable {
       const selected = (e.target as XUL.Checkbox).checked;
       setPref('hideToolbarEntrance', selected);
       this.registerInToolbar();
+    });
+
+    Zotero.Promise.delay(2000).then(() => {
+      if (this.addonInfos.length > 0 || !this.window) { return; }
+      Guide.showGuideInAddonTableIfNeed(this.window);
     });
     // win.open(); 
   }

@@ -77,3 +77,9 @@ source-kgithub = kGitHub
 source-others = Onbekend
 
 release-uncompatible-description = Deze versie is alleen toepasbaar voor ({ $minVersion })-({ $maxVersion }), en is niet compatibel met uw huidige versie van Zotero ({ $currentVersion }).
+
+guide-guide-done = Gereed
+guide-open-addons-table-title = Open de add-on markt
+guide-open-addons-table-message = Klik om de add-on markt te openen, zoek en installeer add-ons direct binnen Zotero.
+guide-addons-table-switch-source-title = Wissel bron
+guide-addons-table-switch-source-message = Wissel van add-on gegevensbron als de pagina leeg is, een fout tegenkomt of geen add-ons kan ophalen.

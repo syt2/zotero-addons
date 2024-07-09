@@ -1,5 +1,5 @@
 import { config } from "../package.json";
-import { initLocale } from "./utils/locale";
+import { getString, initLocale } from "./utils/locale";
 import { createZToolkit } from "./utils/ztoolkit";
 import { AddonTable } from "./modules/addonTable";
 import { AddonInfoManager } from "./modules/addonInfo";
@@ -8,6 +8,7 @@ import { AddonInfoDetail } from "./modules/addonDetail";
 import { AddonListenerManager } from "./modules/addonListenerManager";
 import { getPref } from "./utils/prefs";
 import { registerConfigScheme } from "./modules/registerScheme";
+import { Guide } from "./modules/guide";
 
 async function onStartup() {
   await Promise.all([
@@ -18,10 +19,8 @@ async function onStartup() {
 
   initLocale();
 
-  // TODO: Remove after a few versions released. Not used after v1.4.4. Deleted pref in v1.4.6
-  Zotero.Prefs.clear('extensions.zotero.zoteroaddons.addonIDMap', true);
-
   registerConfigScheme();
+  Guide.initPrefs();
 
   await onMainWindowLoad(window);
 
@@ -54,6 +53,8 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   addon.data.ztoolkit = createZToolkit();
   AddonTable.registerInToolbar();
   AddonTable.registerInMenuTool();
+
+  Guide.showGuideInMainWindowIfNeed(win);
 }
 
 async function onMainWindowUnload(win: Window): Promise<void> {
