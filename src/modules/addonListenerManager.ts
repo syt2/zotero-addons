@@ -57,6 +57,6 @@ export class AddonListenerManager {
    * Remove addon listener in Zotero
    */
   static removeListener() {
-    AddonManager.addAddonListener(this.addonEventListener);
+    AddonManager.removeAddonListener(this.addonEventListener);
   }
 }
