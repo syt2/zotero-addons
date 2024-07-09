@@ -2,7 +2,7 @@ import { ProgressWindowHelper } from "zotero-plugin-toolkit/dist/helpers/progres
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { xpiURLSourceName } from "../modules/addonInfo";
-const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 /**
  * Compare two version strings
@@ -46,7 +46,7 @@ export async function undoUninstall(addon: any) {
  */
 export async function uninstall(addon: any, options?: { popConfirmDialog?: boolean, canRestore?: boolean }) {
   if (options?.popConfirmDialog) {
-    const confirm = await Services.prompt.confirmEx(
+    const confirm = await (Services as any).prompt.confirmEx(
       null,
       getString('uninstall-confirm-title'),
       getString('uninstall-confirm-message', { args: { name: addon.name ?? "Unknown" } }),

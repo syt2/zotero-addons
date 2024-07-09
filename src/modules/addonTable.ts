@@ -8,8 +8,8 @@ import { compareVersion, installAddonFrom, undoUninstall, uninstall } from "../u
 import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
-const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
-const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+const { XPIDatabase } = Components.utils.import("resource://gre/modules/addons/XPIDatabase.jsm");
+const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 type TableMenuItemID =
   "menu-install" |
@@ -108,7 +108,7 @@ export class AddonTable {
     if (uncompatibleAddons.length <= 0) {
       return;
     }
-    const confirm = await Services.prompt.confirmEx(
+    const confirm = await (Services as any).prompt.confirmEx(
       null,
       getString('update-all-uncompatible-title'),
       getString('update-all-uncompatible-message'),
@@ -134,6 +134,7 @@ export class AddonTable {
    */
   static async showAddonsWindow(options?: { from?: "toolbar" | "menu" }) {
     if (isWindowAlive(this.window)) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       options?.from && this.updateHideToolbarEntranceInWindow(options.from === "toolbar");
       this.window?.focus();
       this.refresh();
@@ -157,6 +158,7 @@ export class AddonTable {
     }
     await windowArgs._initPromise.promise;
     this.window = win;
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     options?.from && this.updateHideToolbarEntranceInWindow(options.from === "toolbar");
 
     await this.createTable();
@@ -273,6 +275,7 @@ export class AddonTable {
     const hideToolbarCheckbox: any = this.window?.document.querySelector('#hide-toolbar-entrance');
     const autoUpdateCheckbox: any = this.window?.document.querySelector('#auto-update');
     hideToolbarCheckbox.hidden = hide;
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     hide ? autoUpdateCheckbox.style.marginLeft = 'auto' : autoUpdateCheckbox.style.removeProperty('margin-left');
   }
 
@@ -617,6 +620,7 @@ export class AddonTable {
   private static async enableAddons(addons: AddonInfo[], enable: boolean) {
     const relatedAddon = await relatedAddons(addons);
     for (const [addonInfo, addon] of relatedAddon) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       enable ? await addon.enable() : await addon.disable();
     }
   }

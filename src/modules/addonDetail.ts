@@ -3,8 +3,8 @@ import { getString } from "../utils/locale";
 import { compareVersion, installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { config } from "../../package.json";
 import { isWindowAlive } from "../utils/window";
-const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
-const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+const { XPIDatabase } = Components.utils.import("resource://gre/modules/addons/XPIDatabase.jsm");
+const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 export class AddonInfoDetail {
   private static window?: Window;
@@ -241,6 +241,7 @@ export class AddonInfoDetail {
       }
       const dbAddon = await XPIDatabase.getAddon((addon: any) => addon.id === relatedAddon[0][1].id);
       if (dbAddon) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         dbAddon.pendingUninstall ? this.uninstallUndoButton.hidden = false : this.uninstallButton.hidden = false;
         this.removeButton.hidden = !dbAddon.pendingUninstall;
       }
