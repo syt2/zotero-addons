@@ -36,7 +36,7 @@
     "prettier": "^3.3.3",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.0-alpha.48",
-    "zotero-plugin-scaffold": "^0.0.32",
+    "zotero-plugin-scaffold": "^0.0.33",
     "zotero-types": "^2.1.0"
   },
   "prettier": {
