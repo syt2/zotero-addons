@@ -6,6 +6,7 @@ export default defineConfig({
   source: ["src", "addon"],
   dist: "build",
   name: "__MSG_name__",
+  xpiName: pkg.name,
   id: pkg.config.addonID,
   namespace: pkg.config.addonRef,
   updateURL: `https://github.com/{{owner}}/{{repo}}/releases/download/release/${pkg.version.includes("-") ? "update-beta.json" : "update.json"
