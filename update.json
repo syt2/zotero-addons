@@ -13,7 +13,16 @@
         },
         {
           "version": "1.6.2",
-          "update_link": "https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi",
+          "update_link": "https://github.com/syt2/zotero-addons/releases/V1.6.2/download/zotero-addons.xpi",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999"
+            }
+          }
+        },
+        {
+          "version": "1.6.13",
+          "update_link": "https://github.com/syt2/zotero-addons/releases/V1.6.13/download/--MSG-name--.xpi",
           "applications": {
             "zotero": {
               "strict_min_version": "6.999"
