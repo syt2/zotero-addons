@@ -81,7 +81,7 @@ export function registerConfigScheme() {
         if ('source' in params && typeof params.source === "string") {
           const addonURL = decodeURIComponent(params.source);
           (async () => {
-            const install = await Services.prompt.confirmEx(
+            const install = await (Services.prompt.confirmEx as any)(
               null,
               getString('scheme-install-confirm-title'),
               getString('scheme-install-confirm-message') + '\n' + addonURL,
@@ -106,7 +106,7 @@ export function registerConfigScheme() {
     }
   };
   try {
-    Services.io.getProtocolHandler(ZOTERO_SCHEME).wrappedJSObject._extensions[customScheme] = CustomSchemeExtension
+    (Services.io.getProtocolHandler(ZOTERO_SCHEME) as any).wrappedJSObject._extensions[customScheme] = CustomSchemeExtension
   } catch (e) {
     ztoolkit.log(`register custom protocol failed: ${e}`);
   }
