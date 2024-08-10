@@ -12,8 +12,7 @@ export default defineConfig({
   updateURL: `https://github.com/{{owner}}/{{repo}}/releases/download/release/${pkg.version.includes("-") ? "update-beta.json" : "update.json"
     }`,
   xpiDownloadLink:
-    "https://github.com/{{owner}}/{{repo}}/releases/download/{{version}}/{{xpiName}}.xpi",
-
+    "https://github.com/{{owner}}/{{repo}}/releases/download/V{{version}}/{{xpiName}}.xpi",
   server: {
     asProxy: true,
   },
