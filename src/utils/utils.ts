@@ -5,27 +5,6 @@ import { xpiURLSourceName } from "../modules/addonInfo";
 const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 /**
- * Compare two version strings
- * `versionA` < `versionB` => -1
- * `versionA` > `versionB` => 1
- * `versionA` == `versionB` => 0
- * @param versionA Version string
- * @param versionB Another version string
- * @returns -1|1|0
- */
-export function compareVersion(versionA: string, versionB: string): 1 | -1 | 0 {
-  const partsA = versionA.split(/\D+/).filter(e => e).map(Number);
-  const partsB = versionB.split(/\D+/).filter(e => e).map(Number);
-
-  for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
-    const a = i < partsA.length ? partsA[i] : 0, b = i < partsB.length ? partsB[i] : 0;
-    if (a < b) { return -1; }
-    if (a > b) { return 1; }
-  }
-  return 0;
-}
-
-/**
  * Undo uninstall add-on
  * @param addon The add-on to undo uninstall 
  */

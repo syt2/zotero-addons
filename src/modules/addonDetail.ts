@@ -1,6 +1,6 @@
 import { AddonInfo, addonReleaseInfo, addonReleaseTime, relatedAddons, xpiDownloadUrls } from "./addonInfo";
 import { getString } from "../utils/locale";
-import { compareVersion, installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
+import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { config } from "../../package.json";
 import { isWindowAlive } from "../utils/window";
 const { XPIDatabase } = Components.utils.import("resource://gre/modules/addons/XPIDatabase.jsm");
@@ -205,7 +205,7 @@ export class AddonInfoDetail {
 
     this.uncompatibleDescription.hidden = true;
     if (releaseInfo?.minZoteroVersion && releaseInfo.maxZoteroVersion) {
-      if (compareVersion(Zotero.version, releaseInfo.minZoteroVersion.replace('*', '0')) < 0 || compareVersion(Zotero.version, releaseInfo.maxZoteroVersion.replace('*', '999')) > 0) {
+      if (Services.vc.compare(Zotero.version, releaseInfo.minZoteroVersion.replace('*', '0')) < 0 || Services.vc.compare(Zotero.version, releaseInfo.maxZoteroVersion.replace('*', '999')) > 0) {
         this.uncompatibleDescription.hidden = false;
         this.uncompatibleDescription.textContent = getString('release-uncompatible-description', { args: { 
           minVersion: releaseInfo.minZoteroVersion,
@@ -229,7 +229,7 @@ export class AddonInfoDetail {
     const addonCanUpdate = (addonInfo: AddonInfo, addon: any) => {
       const version = addonReleaseInfo(addonInfo)?.xpiVersion;
       if (!version || !addon.version) { return false; }
-      return compareVersion(addon.version, version) < 0;
+      return Services.vc.compare(addon.version, version) < 0;
     }
     if (relatedAddon.length > 0) {
       if (relatedAddon[0][1].appDisabled) {

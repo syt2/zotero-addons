@@ -1,5 +1,4 @@
 import { Sources, autoSource, currentSource, setAutoSource } from "../utils/configuration";
-import { compareVersion } from "../utils/utils";
 const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
 const { XPIDatabase } = Components.utils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 
@@ -248,7 +247,7 @@ export async function addonInstallStatus(addonInfo: AddonInfo, relateAddon?: [Ad
 export function addonCanUpdate(addonInfo: AddonInfo, addon: any) {
   const version = addonReleaseInfo(addonInfo)?.xpiVersion;
   if (!version || !addon.version) { return false; }
-  return compareVersion(addon.version, version) < 0;
+  return Services.vc.compare(addon.version, version) < 0;
 }
 
 

@@ -1,7 +1,6 @@
 
 import { getPref, setPref } from "../utils/prefs";
 import { version } from "../../package.json";
-import { compareVersion } from "../utils/utils";
 import { getString } from "../utils/locale";
 import { AddonTable } from "./addonTable";
 
@@ -56,7 +55,7 @@ export class Guide {
   private static checkNeedGuide(guideStatus: GuideStatus) {
     const firstInstalledVersion = getPref('firstInstalledVersion') as string;
     if (!firstInstalledVersion) { return false; }
-    if (compareVersion(firstInstalledVersion, version) < 0) { return false; }
+    if (Services.vc.compare(firstInstalledVersion, version) < 0) { return false; }
     const alreadyGuideStatus = getPref('guideStatus') as number;
     if (alreadyGuideStatus & guideStatus) { return false; }
     return true;
