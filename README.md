@@ -7,17 +7,15 @@ This is a plugin template for [Zotero](https://www.zotero.org/).
 
 [English](README.md) | [简体中文](doc/README-zhCN.md)
 
-[📖 Plugin Development Documentation](https://zotero.yuque.com/books/share/8d230829-6004-4934-b4c6-685a7001bfa0/vec88d) (Chinese, outdated)
-
-[📖 Plugin Development Documentation for Zotero 7](https://www.zotero.org/support/dev/zotero_7_for_developers)
-
-[🛠️ Zotero Plugin Toolkit](https://github.com/windingwind/zotero-plugin-toolkit) | [API Documentation](https://github.com/windingwind/zotero-plugin-toolkit/blob/master/docs/zotero-plugin-toolkit.md)
-
-[ℹ️ Zotero Type Definitions](https://github.com/windingwind/zotero-types)
-
-[📜 Zotero Source Code](https://github.com/zotero/zotero)
-
-[📌 Zotero Plugin Template](https://github.com/windingwind/zotero-plugin-template) (This repo)
+- Documentation for plugins development
+  - [📖 Plugin Development Documentation](https://zotero-chinese.com/plugin-dev-guide/) (Chinese, not yet complete)
+  - [📖 Plugin Development Documentation for Zotero 7](https://www.zotero.org/support/dev/zotero_7_for_developers)
+- Tools for plugins development
+  - [🛠️ Zotero Plugin Toolkit](https://github.com/windingwind/zotero-plugin-toolkit) | [API Documentation](https://github.com/windingwind/zotero-plugin-toolkit/blob/master/docs/zotero-plugin-toolkit.md)
+  - [🛠️ Zotero Plugin Scaffold](https://github.com/northword/zotero-plugin-scaffold)
+  - [ℹ️ Zotero Type Definitions](https://github.com/windingwind/zotero-types)
+  - [📜 Zotero Source Code](https://github.com/zotero/zotero)
+  - [📌 Zotero Plugin Template](https://github.com/windingwind/zotero-plugin-template) (This repo)
 
 > [!tip]
 > 👁 Watch this repo so that you can be notified whenever there are fixes & updates.

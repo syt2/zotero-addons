@@ -68,8 +68,6 @@ async function onMainWindowLoad(win: Window): Promise<void> {
 
   UIExampleFactory.registerWindowMenuWithSeparator();
 
-  await UIExampleFactory.registerCustomItemBoxRow();
-
   PromptExampleFactory.registerNormalCommandExample();
 
   PromptExampleFactory.registerAnonymousCommandExample();

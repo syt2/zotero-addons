@@ -7,17 +7,15 @@
 
 [English](../README.md) | [简体中文](./README-zhCN.md)
 
-📖 [插件开发文档](https://zotero.yuque.com/books/share/8d230829-6004-4934-b4c6-685a7001bfa0/vec88d) (中文版，已过时)
-
-[📖 Zotero 7 插件开发文档](https://www.zotero.org/support/dev/zotero_7_for_developers)
-
-🛠️ [Zotero 插件工具包](https://github.com/windingwind/zotero-plugin-toolkit) | [API 文档](https://github.com/windingwind/zotero-plugin-toolkit/blob/master/docs/zotero-plugin-toolkit.md)
-
-ℹ️ [Zotero 类型定义](https://github.com/windingwind/zotero-types)
-
-📜 [Zotero 源代码](https://github.com/zotero/zotero)
-
-📌 [Zotero 插件模板](https://github.com/windingwind/zotero-plugin-template) (即本仓库)
+- 开发指南
+  - [📖 插件开发文档](https://zotero-chinese.com/plugin-dev-guide/) (中文版，尚不完善)
+  - [📖 Zotero 7 插件开发文档](https://www.zotero.org/support/dev/zotero_7_for_developers)
+- 开发工具参考
+  - [🛠️ Zotero 插件工具包](https://github.com/windingwind/zotero-plugin-toolkit) | [API 文档](https://github.com/windingwind/zotero-plugin-toolkit/blob/master/docs/zotero-plugin-toolkit.md)
+  - [🛠️ Zotero 插件开发脚手架](https://github.com/northword/zotero-plugin-scaffold)
+  - [📜 Zotero 源代码](https://github.com/zotero/zotero)
+  - [ℹ️ Zotero 类型定义](https://github.com/windingwind/zotero-types)
+  - [📌 Zotero 插件模板](https://github.com/windingwind/zotero-plugin-template) (即本仓库)
 
 > [!tip]
 > 👁 Watch 本仓库，以及时收到修复或更新的通知.
