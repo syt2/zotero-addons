@@ -9,6 +9,7 @@ import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
 import { Guide } from "./guide";
+import { StringMatchUtils } from "../utils/stringMatchUtils";
 const { XPIDatabase } = Components.utils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
@@ -165,6 +166,9 @@ export class AddonTable {
     await this.createTable();
 
     await this.replaceSourceSelectList(win.document.querySelector("#sourceContainerPlaceholder"));
+
+    const searchInput = win.document.getElementById("search") as HTMLInputElement;
+    this.listenSearchInput(searchInput);
 
     const refreshButton = win.document.querySelector("#refresh") as HTMLButtonElement;
     refreshButton.addEventListener("click", async e => {
@@ -562,6 +566,13 @@ export class AddonTable {
     }, oldNode);
   }
 
+  private static listenSearchInput(searchInput: HTMLInputElement) {
+    searchInput.addEventListener('input', async function () {
+      await AddonTable.updateAddonInfos();
+      AddonTable.updateTable();
+    });
+  }
+
   private static async onSelectMenuItem(item: TableMenuItemID) {
     const selectAddons: AssociatedAddonInfo[] = [];
     for (const select of this.tableHelper?.treeInstance.selection.selected ?? new Set()) {
@@ -706,7 +717,7 @@ export class AddonTable {
     const sortColumn = this.columns.find(column => 'sortDirection' in column);
     if (sortColumn) {
       const sortOrder = (sortColumn as any).sortDirection;
-      this.addonInfos = this.addonInfos.sort((infoA, infoB) => {
+      this.addonInfos = this.addonInfos.filter(e => this.matchSearchInput(e)).sort((infoA, infoB) => {
         const [a, b] = [infoA[0], infoB[0]];
         let l, r;
         switch (sortColumn.dataKey) {
@@ -765,6 +776,28 @@ export class AddonTable {
       case InstallStatus.pendingUninstall:
         return getString('state-pendingUninstall');
     }
+  }
+
+  private static matchSearchInput(addonInfo: AssociatedAddonInfo): boolean {
+    const searchInput = this.window?.document.getElementById("search") as HTMLInputElement;
+    const searchText = searchInput.value.toLowerCase().trim();
+    if (searchText.length == 0) { return true; }
+    if (StringMatchUtils.checkMatch(searchText, addonInfo[0].name.toLowerCase())) {
+      return true;
+    }
+    if (addonInfo[0].description && StringMatchUtils.checkMatch(searchText, addonInfo[0].description.toLowerCase())) {
+      return true;
+    }
+    if (addonInfo[0].author?.name && StringMatchUtils.checkMatch(searchText, addonInfo[0].author.name.toLowerCase())) {
+      return true;
+    }
+    if (addonInfo[1]["menu-desc"] && StringMatchUtils.checkMatch(searchText, addonInfo[1]["menu-desc"].toLowerCase())) {
+      return true;
+    }
+    if (addonInfo[1]["menu-name"] && StringMatchUtils.checkMatch(searchText, addonInfo[1]["menu-name"].toLowerCase())) {
+      return true;
+    }
+    return false;
   }
 
   private static largePrefHelper = new LargePrefHelper("zotero.addons.ui", config.prefsPrefix, "parser");

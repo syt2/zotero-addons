@@ -83,12 +83,14 @@
   <div class="footer-container"
     style="display: flex; justify-content: space-between; align-items: center; padding: 10px"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <span class="input-icon">&#128269;</span>
+    <html:input type="text" id="search" placeholder="Search..."></html:input>
     <button id="refresh" data-l10n-id="refresh" style="cursor: pointer;"></button>
     <groupbox>
       <div style="display: flex;">
         <label data-l10n-id="selectSource" style="margin-top: 5px;"></label>
         <div id="sourceContainerPlaceholder"></div>
-    </div>
+      </div>
     </groupbox>
     <groupbox id="customSource-container">
       <div style="display: flex;">
@@ -96,7 +98,8 @@
         <html:input type="text" id="customSourceInput"></html:input>
       </div>
     </groupbox>
-    <checkbox id="hide-toolbar-entrance" style="padding-left: 2px; margin-left: auto;" hidden="true" data-l10n-id="hideToolbarEntrance">
+    <checkbox id="hide-toolbar-entrance" style="padding-left: 2px; margin-left: auto;" hidden="true"
+      data-l10n-id="hideToolbarEntrance">
     </checkbox>
     <checkbox id="auto-update" style="padding-left: 24px; margin-left: auto;" data-l10n-id="autoUpdate">
     </checkbox>
