@@ -44,14 +44,11 @@ export class BasicExampleFactory {
       "file",
     ]);
 
-    // Unregister callback when the window closes (important to avoid a memory leak)
-    window.addEventListener(
-      "unload",
-      (e: Event) => {
+    Zotero.Plugins.addObserver({
+      shutdown: ({ id: pluginID }) => {
         this.unregisterNotifier(notifierID);
       },
-      false,
-    );
+    });
   }
 
   @example
@@ -126,18 +123,17 @@ export class KeyExampleFactory {
 
 export class UIExampleFactory {
   @example
-  static registerStyleSheet() {
-    const styles = ztoolkit.UI.createElement(document, "link", {
+  static registerStyleSheet(win: Window) {
+    const doc = win.document;
+    const styles = ztoolkit.UI.createElement(doc, "link", {
       properties: {
         type: "text/css",
         rel: "stylesheet",
         href: `chrome://${config.addonRef}/content/zoteroPane.css`,
       },
     });
-    document.documentElement.appendChild(styles);
-    document
-      .getElementById("zotero-item-pane-content")
-      ?.classList.add("makeItRed");
+    doc.documentElement.appendChild(styles);
+    doc.getElementById("zotero-item-pane-content")?.classList.add("makeItRed");
   }
 
   @example
@@ -154,7 +150,7 @@ export class UIExampleFactory {
   }
 
   @example
-  static registerRightClickMenuPopup() {
+  static registerRightClickMenuPopup(win: Window) {
     ztoolkit.Menu.register(
       "item",
       {
@@ -169,7 +165,7 @@ export class UIExampleFactory {
         ],
       },
       "before",
-      document.querySelector(
+      win.document.querySelector(
         "#zotero-itemmenu-addontemplate-test",
       ) as XUL.MenuItem,
     );
@@ -214,7 +210,7 @@ export class UIExampleFactory {
       },
       renderCell(index, data, column) {
         ztoolkit.log("Custom column cell is rendered!");
-        const span = document.createElementNS(
+        const span = Zotero.getMainWindow().document.createElementNS(
           "http://www.w3.org/1999/xhtml",
           "span",
         );
@@ -406,7 +402,8 @@ export class PromptExampleFactory {
               if (i != 0) str += ", ";
 
               if (typeof node === "object") {
-                const label = document.createElement("label");
+                const label =
+                  Zotero.getMainWindow().document.createElement("label");
                 label.setAttribute("value", str);
                 label.setAttribute("crop", "end");
                 str = "";
@@ -500,8 +497,8 @@ export class PromptExampleFactory {
                     type: "click",
                     listener: () => {
                       prompt.promptNode.style.display = "none";
-                      Zotero_Tabs.select("zotero-pane");
-                      ZoteroPane.selectItem(item.id);
+                      ztoolkit.getGlobal("Zotero_Tabs").select("zotero-pane");
+                      ztoolkit.getGlobal("ZoteroPane").selectItem(item.id);
                     },
                   },
                 ],
@@ -556,12 +553,12 @@ export class PromptExampleFactory {
         label: "Plugin Template",
         // The when function is executed when Prompt UI is woken up by `Shift + P`, and this command does not display when false is returned.
         when: () => {
-          const items = ZoteroPane.getSelectedItems();
+          const items = ztoolkit.getGlobal("ZoteroPane").getSelectedItems();
           return items.length > 0;
         },
         callback(prompt) {
           prompt.inputNode.placeholder = "Hello World!";
-          const items = ZoteroPane.getSelectedItems();
+          const items = ztoolkit.getGlobal("ZoteroPane").getSelectedItems();
           ztoolkit.getGlobal("alert")(
             `You select ${items.length} items!\n\n${items
               .map(

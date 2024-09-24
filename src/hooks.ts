@@ -33,7 +33,9 @@ async function onStartup() {
 
   UIExampleFactory.registerReaderItemPaneSection();
 
-  await onMainWindowLoad(window);
+  await Promise.all(
+    Zotero.getMainWindows().map((win) => onMainWindowLoad(win)),
+  );
 }
 
 async function onMainWindowLoad(win: Window): Promise<void> {
@@ -41,7 +43,7 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   addon.data.ztoolkit = createZToolkit();
 
   // @ts-ignore This is a moz feature
-  window.MozXULElement.insertFTLIfNeeded(`${config.addonRef}-mainWindow.ftl`);
+  win.MozXULElement.insertFTLIfNeeded(`${config.addonRef}-mainWindow.ftl`);
 
   const popupWin = new ztoolkit.ProgressWindow(config.addonName, {
     closeOnClick: true,
@@ -60,11 +62,11 @@ async function onMainWindowLoad(win: Window): Promise<void> {
     text: `[30%] ${getString("startup-begin")}`,
   });
 
-  UIExampleFactory.registerStyleSheet();
+  UIExampleFactory.registerStyleSheet(win);
 
   UIExampleFactory.registerRightClickMenuItem();
 
-  UIExampleFactory.registerRightClickMenuPopup();
+  UIExampleFactory.registerRightClickMenuPopup(win);
 
   UIExampleFactory.registerWindowMenuWithSeparator();
 

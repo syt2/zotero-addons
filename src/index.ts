@@ -5,10 +5,6 @@ import { config } from "../package.json";
 const basicTool = new BasicTool();
 
 if (!basicTool.getGlobal("Zotero")[config.addonInstance]) {
-  defineGlobal("window");
-  defineGlobal("document");
-  defineGlobal("ZoteroPane");
-  defineGlobal("Zotero_Tabs");
   _globalThis.addon = new Addon();
   defineGlobal("ztoolkit", () => {
     return _globalThis.addon.data.ztoolkit;
