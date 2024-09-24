@@ -346,7 +346,7 @@ export class PromptExampleFactory {
   }
 
   @example
-  static registerAnonymousCommandExample() {
+  static registerAnonymousCommandExample(window: Window) {
     ztoolkit.Prompt.register([
       {
         id: "search",
@@ -411,7 +411,7 @@ export class PromptExampleFactory {
                 str += node;
               }
             }
-            str.length && (str += ".");
+            if (str.length) str += ".";
             return str;
           }
           function filter(ids: number[]) {
@@ -482,7 +482,7 @@ export class PromptExampleFactory {
             ids.forEach((id: number) => {
               const item = Zotero.Items.get(id);
               const title = item.getField("title");
-              const ele = ztoolkit.UI.createElement(document, "div", {
+              const ele = ztoolkit.UI.createElement(window.document, "div", {
                 namespace: "html",
                 classList: ["command"],
                 listeners: [
@@ -795,7 +795,7 @@ export class HelperExampleFactory {
     addon.data.dialog = dialogHelper;
     await dialogData.unloadLock.promise;
     addon.data.dialog = undefined;
-    addon.data.alive &&
+    if (addon.data.alive)
       ztoolkit.getGlobal("alert")(
         `Close dialog with ${dialogData._lastButtonId}.\nCheckbox: ${dialogData.checkboxValue}\nInput: ${dialogData.inputValue}.`,
       );

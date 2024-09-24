@@ -72,7 +72,7 @@ async function onMainWindowLoad(win: Window): Promise<void> {
 
   PromptExampleFactory.registerNormalCommandExample();
 
-  PromptExampleFactory.registerAnonymousCommandExample();
+  PromptExampleFactory.registerAnonymousCommandExample(win);
 
   PromptExampleFactory.registerConditionalCommandExample();
 
