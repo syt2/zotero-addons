@@ -12,9 +12,15 @@ export default tseslint.config(
     rules: {
       "no-restricted-globals": [
         "error",
-        "window",
-        "document",
-        "ZoteroPane",
+        { message: "Use `Zotero.getMainWindow()` instead.", name: "window" },
+        {
+          message: "Use `Zotero.getMainWindow().document` instead.",
+          name: "document",
+        },
+        {
+          message: "Use `Zotero.getActiveZoteroPane()` instead.",
+          name: "ZoteroPane",
+        },
         "Zotero_Tabs",
       ],
 
