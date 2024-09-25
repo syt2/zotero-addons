@@ -7,20 +7,15 @@
 [![Release](https://img.shields.io/github/v/release/syt2/zotero-addons?style=flat-square&logo=github&color=red)](https://github.com/syt2/zotero-addons/releases/latest)
 ![Downloads@all](https://img.shields.io/github/downloads/syt2/zotero-addons/total?style=flat-square&logo=github&label=downloads@all)
 ![Downloads@z7](https://img.shields.io/github/downloads/syt2/zotero-addons/latest/total?style=flat-square&logo=github&label=downloads@z7)
-![Downloads@z6](https://img.shields.io/github/downloads/syt2/zotero-addons/0.6.0-6/total?style=flat-square&logo=github&label=downloads@z6)
 
 [English](README.md) | [简体中文](README-CN.md)
 
 ## Introduction
-This is a Zotero add-on that allows for the direct installation of other add-ons in [Zotero7](https://www.zotero.org).
-
-> For Zotero 6, see [here](https://github.com/syt2/zotero-addons/tree/z6#readme).
+This is a Zotero add-on that allows for the direct installation of other add-ons in [Zotero](https://www.zotero.org).
 
 ## Install
 
-1. Download the [latest release xpi file](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi) (only for **Zotero 7**)
-
-   > For Zotero 6, download this [xpi file](https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi).
+1. Download the [latest release xpi file](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi)
 
 2. Install in Zotero `(Tools) -> (Add-ons)`
 
@@ -45,20 +40,6 @@ Switch the source to `(addon-scraper)` in Add-on Market to use this source.
 ### Custom Source
 
 You can also use other custom data sources, as long as the data source format is consistent with the format in the [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
-
-## Develop
-
-### Scheme
-
-- Custom Data Source
-
-  `zotero://zoteroaddoncollection/configSource?source=source-custom&customURL={encodeURIComponent(SOME URL)}`
-  can change add-on data source automatically to a custom url.
-
-- Install Add-on from URL
-
-  `zotero://zoteroaddoncollection/install?source={encodeURIComponent(SOME URL)}`
-  can install add-on from the custom url.
 
 ## Star History
 

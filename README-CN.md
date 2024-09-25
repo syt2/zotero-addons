@@ -7,21 +7,16 @@
 [![Release](https://img.shields.io/github/v/release/syt2/zotero-addons?style=flat-square&logo=github&color=red)](https://github.com/syt2/zotero-addons/releases/latest)
 ![Downloads@all](https://img.shields.io/github/downloads/syt2/zotero-addons/total?style=flat-square&logo=github&label=downloads@all)
 ![Downloads@z7](https://img.shields.io/github/downloads/syt2/zotero-addons/latest/total?style=flat-square&logo=github&label=downloads@z7)
-![Downloads@z6](https://img.shields.io/github/downloads/syt2/zotero-addons/0.6.0-6/total?style=flat-square&logo=github&label=downloads@z6)
 
 [English](README.md) | [简体中文](README-CN.md)
 
 ## 简介
 
-这是一个用于在 [Zotero 7](https://www.zotero.org) 内浏览和安装插件的 [Zotero 7](https://www.zotero.org) 插件
-
-> 对于 Zotero 6, 请[点击此处查看](https://github.com/syt2/zotero-addons/tree/z6#readme).
+这是一个用于在 [Zotero](https://www.zotero.org) 内浏览和安装插件的 [Zotero](https://www.zotero.org) 插件
 
 ## 安装
 
-1. 下载[最新版xpi安装包](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi) (仅支持 **Zotero 7**)
-
-   > 对于 Zotero 6, 请下载此[xpi安装包](https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi).
+1. 下载[最新版xpi安装包](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi)
 
 2. 在 Zotero 内安装 `(工具) -> (附加组件)`
 
@@ -49,20 +44,6 @@
 ### 自定义源
 
 任何符合 [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins) 格式的数据源都可用作本插件的数据源，你可以在插件内选择`自定义源`并提供数据源URL即可
-
-## 开发
-
-### Scheme
-
-- 自定义数据源Scheme
-
-  `zotero://zoteroaddoncollection/configSource?source=source-custom&customURL={encodeURIComponent(SOME URL)}`
-  将自动切换到指定的URL作为自定义数据源使用
-
-- 从URL安装插件Scheme
-
-  `zotero://zoteroaddoncollection/install?source={encodeURIComponent(SOME URL)}`
-  将从指定的URL安装插件
 
 ## Star 历史
 
