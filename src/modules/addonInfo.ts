@@ -146,7 +146,7 @@ export function xpiURLSourceName(url: string) {
  * @returns AddonInfo.releases (Adapted to current Zotero version)
  */
 export function addonReleaseInfo(addonInfo: AddonInfo) {
-  const release = addonInfo.releases.find(release => release.targetZoteroVersion === (ztoolkit.isZotero7() ? "7" : "6"));
+  const release = addonInfo.releases.find(release => release.targetZoteroVersion === "7");
   if ((release?.xpiDownloadUrl?.github?.length ?? 0) === 0) { return; }
   return release
 }

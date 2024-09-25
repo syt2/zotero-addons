@@ -1,6 +1,5 @@
 import { defineConfig } from "zotero-plugin-scaffold";
 import pkg from "./package.json";
-import { copyFileSync } from "fs";
 
 export default defineConfig({
   source: ["src", "addon"],
@@ -37,16 +36,6 @@ export default defineConfig({
         outfile: `build/addon/chrome/content/scripts/${pkg.config.addonRef}.js`,
       },
     ],
-    // If you want to checkout update.json into the repository, uncomment the following lines:
-    // makeUpdateJson: {
-    //   hash: false,
-    // },
-    // hooks: {
-    //   "build:makeUpdateJSON": (ctx) => {
-    //     copyFileSync("build/update.json", "update.json");
-    //     copyFileSync("build/update-beta.json", "update-beta.json");
-    //   },
-    // },
   },
   release: {
     bumpp: {
@@ -54,6 +43,6 @@ export default defineConfig({
       tag: "V%s",
     }
   },
-  // If you need to see a more detailed build log, uncomment the following line:
+  // If you need to see a more detailed log, uncomment the following line:
   // logLevel: "trace",
 });

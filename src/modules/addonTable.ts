@@ -5,11 +5,11 @@ import { AddonInfo, AddonInfoManager, InstallStatus, addonCanUpdate, addonInstal
 import { isWindowAlive } from "../utils/window";
 import { Sources, currentSource, customSourceApi, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
 import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
-import { LargePrefHelper } from "zotero-plugin-toolkit/dist/helpers/largePref";
 import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
 import { Guide } from "./guide";
 import { StringMatchUtils } from "../utils/stringMatchUtils";
+import { LargePrefHelper } from "zotero-plugin-toolkit";
 const { XPIDatabase } = Components.utils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
@@ -70,7 +70,7 @@ export class AddonTable {
    * Register or unregister entrance in toolbar
    */
   static registerInToolbar() {
-    const toolbar = document.querySelector("#zotero-items-toolbar")!;
+    const toolbar = Zotero.getMainWindow().document.querySelector("#zotero-items-toolbar")!;
     if (getPref('hideToolbarEntrance')) {
       toolbar.querySelectorAll("#zotero-toolbaritem-addons").forEach(e => e.remove());
       return;
@@ -93,7 +93,7 @@ export class AddonTable {
   }
 
   static unregisterAll() {
-    document.querySelector("#zotero-toolbaritem-addons")?.remove();
+    Zotero.getMainWindow().document.querySelector("#zotero-toolbaritem-addons")?.remove();
     ztoolkit.Menu.unregister("addon-table-menuseparator");
     ztoolkit.Menu.unregister("addon-table-entrance");
   }
@@ -102,7 +102,7 @@ export class AddonTable {
    * Check for incompatible plugins when launching for the first time on a new Zotero version
    */
   static async checkUncompatibleAtFirstTime() {
-    const key = 'checkUncompatibleAddonsIn' + (ztoolkit.isZotero7() ? "7" : "6");
+    const key = 'checkUncompatibleAddonsIn' + "7";
     if (getPref(key)) { return; }
     const relateAddon = await relatedAddons(this.addonInfos.map(infos => infos[0]));
     setPref(key, true);
@@ -128,27 +128,28 @@ export class AddonTable {
   }
 
   private static addonInfos: AssociatedAddonInfo[] = [];
-  private static window?: Window;
+  private static window: Window | null;
   private static tableHelper?: VirtualizedTableHelper;
 
   /**
    * Display addon table window
    */
   static async showAddonsWindow(options?: { from?: "toolbar" | "menu" }) {
-    if (isWindowAlive(this.window)) {
+    if (this.window && isWindowAlive(this.window)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       options?.from && this.updateHideToolbarEntranceInWindow(options.from === "toolbar");
-      this.window?.focus();
+      this.window.focus();
       this.refresh();
       return;
     }
     const windowArgs = { _initPromise: Zotero.Promise.defer() };
-    const win = (window as any).openDialog(
+    const win = Zotero.getMainWindow().openDialog(
       `chrome://${config.addonRef}/content/addons.xhtml`,
       `${config.addonRef}-addons`,
       `chrome,centerscreen,resizable,status,width=960,height=480,dialog=no`,
       windowArgs,
     );
+    if (!win) { return; }
     win.addEventListener('keypress', (e: KeyboardEvent) => {
       if (((Zotero.isMac && e.metaKey && !e.ctrlKey) || (!Zotero.isMac && e.ctrlKey)) && !e.altKey && e.key === 'w') {
         this.close();
@@ -165,7 +166,7 @@ export class AddonTable {
 
     await this.createTable();
 
-    await this.replaceSourceSelectList(win.document.querySelector("#sourceContainerPlaceholder"));
+    await this.replaceSourceSelectList(win.document.querySelector("#sourceContainerPlaceholder")!);
 
     const searchInput = win.document.getElementById("search") as HTMLInputElement;
     this.listenSearchInput(searchInput);
@@ -177,8 +178,8 @@ export class AddonTable {
       await this.refresh(true);
       refreshButton.disabled = false;
     });
-    const autoUpdateCheckbox = win.document.querySelector('#auto-update');
-    autoUpdateCheckbox.checked = getPref('autoUpdate');
+    const autoUpdateCheckbox = win.document.querySelector('#auto-update')! as XUL.Checkbox;
+    autoUpdateCheckbox.checked = getPref('autoUpdate') as boolean;
     autoUpdateCheckbox?.addEventListener('command', (e: any) => {
       const selected = (e.target as XUL.Checkbox).checked;
       setPref('autoUpdate', selected);
@@ -186,8 +187,8 @@ export class AddonTable {
         this.updateExistAddons();
       }
     });
-    const hideToolbarCheckbox = win.document.querySelector('#hide-toolbar-entrance');
-    hideToolbarCheckbox.checked = getPref('hideToolbarEntrance');
+    const hideToolbarCheckbox = win.document.querySelector('#hide-toolbar-entrance') as XUL.Checkbox;
+    hideToolbarCheckbox.checked = getPref('hideToolbarEntrance') as boolean;
     hideToolbarCheckbox?.addEventListener('command', (e: any) => {
       const selected = (e.target as XUL.Checkbox).checked;
       setPref('hideToolbarEntrance', selected);
@@ -213,7 +214,7 @@ export class AddonTable {
    * @returns bool
    */
   static isShown() {
-    return isWindowAlive(this.window);
+    return this.window && isWindowAlive(this.window);
   }
 
   /**
@@ -626,7 +627,7 @@ export class AddonTable {
         break;
       case "menu-systemAddon":
         // see in https://github.com/zotero/zotero/blob/c27bac2ad629b2ff216462515c220e2d5ce148ba/chrome/content/zotero/zoteroPane.xhtml#L559
-        (document.getElementById("menu_addons") as any).doCommand();
+        (Zotero.getMainWindow().document.getElementById("menu_addons") as any).doCommand();
         break;
       case "menu-updateAllIfNeed":
         this.updateExistAddons();

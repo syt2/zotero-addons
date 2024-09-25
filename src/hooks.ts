@@ -22,7 +22,9 @@ async function onStartup() {
   registerConfigScheme();
   Guide.initPrefs();
 
-  await onMainWindowLoad(window);
+  await Promise.all(
+    Zotero.getMainWindows().map((win) => onMainWindowLoad(win)),
+  );
 
   (async () => {
     if (currentSource().id === "source-auto") {

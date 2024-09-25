@@ -13,7 +13,7 @@ export enum GuideStatus {
 
 export class Guide {
   static initPrefs() {
-    if (getPref('checkUncompatibleAddonsIn' + (ztoolkit.isZotero7() ? "7" : "6"))) {
+    if (getPref('checkUncompatibleAddonsIn' + "7")) {
       setPref('firstInstalledVersion', '1.0.0');
     } else if (!getPref('firstInstalledVersion')) {
       setPref('firstInstalledVersion', version);

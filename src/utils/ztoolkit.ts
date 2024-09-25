@@ -1,4 +1,3 @@
-import ZoteroToolkit from "zotero-plugin-toolkit";
 import { config } from "../../package.json";
 
 export { createZToolkit };
@@ -29,12 +28,7 @@ function initZToolkit(_ztoolkit: ReturnType<typeof createZToolkit>) {
   );
 }
 
-import { BasicTool, unregister } from "zotero-plugin-toolkit/dist/basic";
-import { UITool } from "zotero-plugin-toolkit/dist/tools/ui";
-import { ProgressWindowHelper } from "zotero-plugin-toolkit/dist/helpers/progressWindow";
-import { VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
-import { MenuManager } from "zotero-plugin-toolkit/dist/managers/menu";
-import { GuideHelper } from "zotero-plugin-toolkit/dist/helpers/guide";
+import { VirtualizedTableHelper, ProgressWindowHelper, MenuManager, GuideHelper, UITool, BasicTool, unregister } from "zotero-plugin-toolkit";
 
 class MyToolkit extends BasicTool {
 

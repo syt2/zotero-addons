@@ -7,7 +7,7 @@ const { XPIDatabase } = Components.utils.import("resource://gre/modules/addons/X
 const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 export class AddonInfoDetail {
-  private static window?: Window;
+  private static window: Window | null;
   private static addonInfo?: AddonInfo;
 
   /**
@@ -25,7 +25,7 @@ export class AddonInfoDetail {
     this.window?.close();
     this.addonInfo = addonInfo;
     const windowArgs = { _initPromise: Zotero.Promise.defer() };
-    const win = (window as any).openDialog(
+    const win = Zotero.getMainWindow().openDialog(
       `chrome://${config.addonRef}/content/addonDetail.xhtml`,
       `${config.addonRef}-addonDetail`,
       `chrome,centerscreen,resizable,status,dialog=no,width=520,height=240`,
@@ -33,7 +33,7 @@ export class AddonInfoDetail {
     );
     await windowArgs._initPromise.promise;
     this.window = win;
-    win.addEventListener('keypress', (e: KeyboardEvent) => {
+    win?.addEventListener('keypress', (e: KeyboardEvent) => {
       if (((Zotero.isMac && e.metaKey && !e.ctrlKey) || (!Zotero.isMac && e.ctrlKey)) && !e.altKey && e.key === 'w') {
         this.close();
       }
