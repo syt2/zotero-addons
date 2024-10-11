@@ -266,7 +266,7 @@ export class AddonTable {
     let num = 0;
     for (const addon of addons) {
       progressWin.changeLine({
-        text: `${addonReleaseInfo(addon[0])?.name ?? addon[0].name} ${addon[1].version} => ${addon[0].releases[0].xpiVersion}`,
+        text: `${addonReleaseInfo(addon[0])?.name ?? addon[0].name} ${addon[1].version} => ${addon[0].releases?.[0].xpiVersion}`,
         progress: num++ / addons.length,
       });
       await this.installAddons([addon[0]]);
@@ -723,7 +723,7 @@ export class AddonTable {
         let l, r;
         switch (sortColumn.dataKey) {
           case "menu-name":
-            [l, r] = [(addonReleaseInfo(a)?.name ?? a.name).toLowerCase(), (addonReleaseInfo(b)?.name ?? b.name).toLowerCase()];
+            [l, r] = [(addonReleaseInfo(a)?.name ?? a.name ?? '').toLowerCase(), (addonReleaseInfo(b)?.name ?? b.name ?? '').toLowerCase()];
             if (l == r) { break; }
             return l > r ? sortOrder : -sortOrder;
           case "menu-star":
@@ -783,7 +783,7 @@ export class AddonTable {
     const searchInput = this.window?.document.getElementById("search") as HTMLInputElement;
     const searchText = searchInput.value.toLowerCase().trim();
     if (searchText.length == 0) { return true; }
-    if (StringMatchUtils.checkMatch(searchText, addonInfo[0].name.toLowerCase())) {
+    if (addonInfo[0].name && StringMatchUtils.checkMatch(searchText, addonInfo[0].name.toLowerCase())) {
       return true;
     }
     if (addonInfo[0].description && StringMatchUtils.checkMatch(searchText, addonInfo[0].description.toLowerCase())) {

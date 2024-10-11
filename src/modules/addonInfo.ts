@@ -11,7 +11,7 @@ export interface AddonInfo {
   /**
    * 插件名称
    */
-  name: string;
+  name?: string;
   /**
    * 插件仓库
    *
@@ -23,7 +23,7 @@ export interface AddonInfo {
   /**
    * 插件的发布地址信息
    */
-  releases: Array<{
+  releases?: Array<{
     /**
      * 当前发布版对应的 Zotero 版本
      */
@@ -146,7 +146,7 @@ export function xpiURLSourceName(url: string) {
  * @returns AddonInfo.releases (Adapted to current Zotero version)
  */
 export function addonReleaseInfo(addonInfo: AddonInfo) {
-  const release = addonInfo.releases.find(release => release.targetZoteroVersion === "7");
+  const release = addonInfo.releases?.find(release => release.targetZoteroVersion === "7");
   if ((release?.xpiDownloadUrl?.github?.length ?? 0) === 0) { return; }
   return release
 }
