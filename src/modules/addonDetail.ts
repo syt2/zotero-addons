@@ -178,11 +178,11 @@ export class AddonInfoDetail {
     const localAddon = await this.localAddon();
 
     const windowTitle = win.document.querySelector("#win-title") as HTMLTitleElement;
-    windowTitle.textContent = releaseInfo?.name ?? addonInfo.name;
+    windowTitle.textContent = releaseInfo?.name ?? addonInfo.name ?? '';
 
     this.addonIcon.src = localAddon ? AddonManager.getPreferredIconURL(localAddon) : "";
     this.addonIcon.hidden = !localAddon;
-    this.addonName.textContent = releaseInfo?.name ?? addonInfo.name;
+    this.addonName.textContent = releaseInfo?.name ?? addonInfo.name ?? '';
 
     this.authorIcon.src = addonInfo.author?.avatar ?? "";
     this.authorName.textContent = addonInfo.author?.name ?? "Unknown";
