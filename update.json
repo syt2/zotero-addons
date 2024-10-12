@@ -16,6 +16,16 @@
           "update_link": "https://github.com/syt2/zotero-addons/releases/download/0.6.0-6/zotero-addons.xpi",
           "applications": {
             "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "6.9999"
+            }
+          }
+        },
+        {
+          "version": "1.7.2",
+          "update_link": "https://github.com/syt2/zotero-addons/releases/download/V1.7.2/zotero-addons.xpi",
+          "applications": {
+            "zotero": {
               "strict_min_version": "6.999"
             }
           }
