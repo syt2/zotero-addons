@@ -8,7 +8,7 @@
 ![Downloads@all](https://img.shields.io/github/downloads/syt2/zotero-addons/total?style=flat-square&logo=github&label=downloads@all)
 ![Downloads@z7](https://img.shields.io/github/downloads/syt2/zotero-addons/latest/total?style=flat-square&logo=github&label=downloads@z7)
 
-[English](README.md) | [简体中文](README-CN.md)
+[English](README.md) | [简体中文](doc/README-CN.md)
 
 ## Introduction
 This is a Zotero add-on that allows for the direct installation of other add-ons in [Zotero](https://www.zotero.org).
@@ -22,6 +22,7 @@ This is a Zotero add-on that allows for the direct installation of other add-ons
 ## Usage
 
 After install this add-on in Zotero, click <img align="center" src="addon/chrome/content/icons/favicon.svg" width=20/> in Toolbar, or click `Add-on market` in `Tools` menu.
+<img align="center" src="doc/screenshot.png" width=600/>
 
 ## Add-on Data Source
 

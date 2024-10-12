@@ -1,4 +1,4 @@
-# <img align="center" src="addon/chrome/content/icons/favicon.svg" width=60/> Zotero 插件市场
+# <img align="center" src="../addon/chrome/content/icons/favicon.svg" width=60/> Zotero 插件市场
 
 [![zotero target version](https://img.shields.io/badge/Zotero-7-green?style=flat-square&logo=zotero&logoColor=CC2936)](https://www.zotero.org)
 [![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)
@@ -8,7 +8,7 @@
 ![Downloads@all](https://img.shields.io/github/downloads/syt2/zotero-addons/total?style=flat-square&logo=github&label=downloads@all)
 ![Downloads@z7](https://img.shields.io/github/downloads/syt2/zotero-addons/latest/total?style=flat-square&logo=github&label=downloads@z7)
 
-[English](README.md) | [简体中文](README-CN.md)
+[English](../README.md) | [简体中文](README-CN.md)
 
 ## 简介
 
@@ -22,7 +22,9 @@
 
 ## 使用方法
 
-安装完成后，点击工具栏的 <img align="center" src="addon/chrome/content/icons/favicon.svg" width=20/> 按钮，或者在`工具`菜单内点击`插件市场`
+安装完成后，点击工具栏的 <img align="center" src="../addon/chrome/content/icons/favicon.svg" width=20/> 按钮，或者在`工具`菜单内点击`插件市场`
+
+<img align="center" src="screenshot.png" width=600/>
 
 ## 插件数据源
 
