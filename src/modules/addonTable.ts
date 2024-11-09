@@ -168,7 +168,7 @@ export class AddonTable {
 
     await this.replaceSourceSelectList(win.document.querySelector("#sourceContainerPlaceholder")!);
 
-    const searchInput = win.document.getElementById("search") as HTMLInputElement;
+    const searchInput = win.document.querySelector("#search") as HTMLInputElement;
     this.listenSearchInput(searchInput);
 
     const refreshButton = win.document.querySelector("#refresh") as HTMLButtonElement;
@@ -780,7 +780,8 @@ export class AddonTable {
   }
 
   private static matchSearchInput(addonInfo: AssociatedAddonInfo): boolean {
-    const searchInput = this.window?.document.getElementById("search") as HTMLInputElement;
+    const searchInput = this.window?.document.querySelector("#search") as HTMLInputElement;
+    if (searchInput == null) { return true; }
     const searchText = searchInput.value.toLowerCase().trim();
     if (searchText.length == 0) { return true; }
     if (addonInfo[0].name && StringMatchUtils.checkMatch(searchText, addonInfo[0].name.toLowerCase())) {
