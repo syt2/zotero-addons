@@ -247,7 +247,7 @@ Steps of build:
 - Prepare locale files to [avoid conflict](https://www.zotero.org/support/dev/zotero_7_for_developers#avoiding_localization_conflicts)
   - Rename `**/*.flt` to `**/${addonRef}-*.flt`
   - Prefix each fluent message with `addonRef-`
-- Use ESBuild to build `.ts` source code to `.js`, build `src/index.ts` to `./build/addon/chrome/content/scripts`.
+- Use ESBuild to build `.ts` source code to `.js`, build `src/index.ts` to `./build/addon/content/scripts`.
 - (Production mode only) Zip the `./build/addon` to `./build/*.xpi`
 - (Production mode only) Prepare `update.json` or `update-beta.json`
 
@@ -271,7 +271,7 @@ npm run release
 
 > [!note]
 > This will use [Bumpp](https://github.com/antfu-collective/bumpp) to prompt for the new version number, locally bump the version, run any (pre/post)version scripts defined in `package.json`, commit, build (optional), tag the commit with the version number and push commits and git.tags. Bumpp can be configured in `zotero-plugin-config.ts`; for example, add `release: { bumpp: { execute: "npm run build" } }` to also build before committing.
-> 
+>
 > Subsequently GitHub Action will rebuild the plugin and use `zotero-plugin-scaffold`'s `release` script to publish the XPI to GitHub Release. In addition, a separate release (tag: `release`) will be created or updated that includes update manifests `update.json` and `update-beta.json` as assets. These will be available at `https://github.com/{{owner}}/{{repo}}/releases/download/release/update*.json`.
 
 #### About Prerelease
@@ -340,70 +340,63 @@ This section shows the directory structure of a template.
 
 - All `.js/.ts` code files are in `./src`;
 - Addon config files: `./addon/manifest.json`;
-- UI files: `./addon/chrome/content/*.xhtml`.
+- UI files: `./addon/content/*.xhtml`.
 - Locale files: `./addon/locale/**/*.flt`;
 - Preferences file: `./addon/prefs.js`;
-  > Don't break the lines in the `prefs.js`
 
 ```shell
 .
-|-- .eslintrc.json            # eslint conf
-|-- .gitattributes            # git conf
 |-- .github/                  # github conf
-|-- .gitignore                # git conf
-|-- .prettierrc               # prettier conf
-|-- .release-it.json          # release-it conf
-|-- .vscode                   # vs code conf
-|   |-- extensions.json
-|   |-- launch.json
-|   |-- setting.json
-|   `-- toolkit.code-snippets
-|-- package-lock.json         # npm conf
-|-- package.json              # npm conf
-|-- LICENSE
-|-- README.md
-|-- addon
-|   |-- bootstrap.js               # addon load/unload script, like a main.c
-|   |-- chrome
-|   |   `-- content
-|   |       |-- icons/
-|   |       |-- preferences.xhtml  # preference panel
-|   |       `-- zoteroPane.css
-|   |-- locale                     # locale
+|-- .vscode/                  # vscode conf
+|-- addon                     # static files
+|   |-- bootstrap.js
+|   |-- content
+|   |   |-- icons
+|   |   |   |-- favicon.png
+|   |   |   `-- favicon@0.5x.png
+|   |   |-- preferences.xhtml
+|   |   `-- zoteroPane.css
+|   |-- locale
 |   |   |-- en-US
 |   |   |   |-- addon.ftl
+|   |   |   |-- mainWindow.ftl
 |   |   |   `-- preferences.ftl
 |   |   `-- zh-CN
 |   |       |-- addon.ftl
+|   |       |-- mainWindow.ftl
 |   |       `-- preferences.ftl
-|   |-- manifest.json              # addon config
+|   |-- manifest.json
 |   `-- prefs.js
-|-- build/                         # build dir
-|-- scripts                        # scripts for dev
-|   |-- build.mjs                      # script to build plugin
-|   |-- scripts.mjs                    # scripts send to Zotero, such as reload, openDevTool, etc
-|   |-- server.mjs                     # script to start a development server
-|   |-- start.mjs                      # script to start Zotero process
-|   |-- stop.mjs                       # script to kill Zotero process
-|   |-- utils.mjs                      # utils functions for dev scripts
-|   |-- update-template.json      # template of `update.json`
-|   `-- zotero-cmd-template.json  # template of local env
-|-- src                           # source code
+|-- build                         # build dir
+|-- node_modules
+|-- src                           # source code of scripts
 |   |-- addon.ts                  # base class
 |   |-- hooks.ts                  # lifecycle hooks
 |   |-- index.ts                  # main entry
 |   |-- modules                   # sub modules
 |   |   |-- examples.ts
 |   |   `-- preferenceScript.ts
-|   `-- utils                     # utilities
+|   `-- utils                 # utilities
 |       |-- locale.ts
 |       |-- prefs.ts
 |       |-- wait.ts
-|       `-- window.ts
-|-- tsconfig.json                 # https://code.visualstudio.com/docs/languages/jsconfig
-|-- typings                       # ts typings
+|       |-- window.ts
+|       `-- ztoolkit.ts
+|-- typings                   # ts typings
 |   `-- global.d.ts
-`-- update.json
+
+|-- .env                      # enviroment config (do not check into repo)
+|-- .env.example              # template of enviroment config, https://github.com/northword/zotero-plugin-scaffold
+|-- .gitignore                # git conf
+|-- .gitattributes            # git conf
+|-- .prettierrc               # prettier conf, https://prettier.io/
+|-- eslint.config.mjs         # eslint conf, https://eslint.org/
+|-- LICENSE
+|-- package-lock.json
+|-- package.json
+|-- tsconfig.json             # typescript conf, https://code.visualstudio.com/docs/languages/jsconfig
+|-- README.md
+`-- zotero-plugin.config.ts   # scaffold conf, https://github.com/northword/zotero-plugin-scaffold
 ```
 
 ## Disclaimer

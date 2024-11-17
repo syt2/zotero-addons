@@ -71,7 +71,7 @@ export class BasicExampleFactory {
   static registerPrefs() {
     Zotero.PreferencePanes.register({
       pluginID: config.addonID,
-      src: rootURI + "chrome/content/preferences.xhtml",
+      src: rootURI + "content/preferences.xhtml",
       label: getString("prefs-title"),
       image: `chrome://${config.addonRef}/content/icons/favicon.png`,
     });

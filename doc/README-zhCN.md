@@ -251,7 +251,7 @@ Obsidian风格的指令输入模块，它通过接受文本来运行插件，并
 - 准备本地化文件以避免冲突，查看官方文档了解更多（<https://www.zotero.org/support/dev/zotero_7_for_developers#avoiding_localization_conflicts）>
   - 重命名`**/*.flt` 为 `**/${addonRef}-*.flt`
   - 在每个消息前加上 `addonRef-`
-- 使用 Esbuild 来将 `.ts` 源码构建为 `.js`，从 `src/index.ts` 构建到`./build/addon/chrome/content/scripts`
+- 使用 Esbuild 来将 `.ts` 源码构建为 `.js`，从 `src/index.ts` 构建到`./build/addon/content/scripts`
 - (仅在生产模式下工作) 压缩 `./build/addon` 目录为 `./build/*.xpi`
 - (仅在生产模式下工作) 准备 `update.json` 或 `update-beta.json`
 
@@ -340,70 +340,63 @@ Zotero 文档已过时且不完整，克隆 <https://github.com/zotero/zotero> �
 
 - 所有的 `.js/.ts` 代码都在 `./src`;
 - 插件配置文件：`./addon/manifest.json`;
-- UI 文件: `./addon/chrome/content/*.xhtml`.
+- UI 文件: `./addon/content/*.xhtml`.
 - 区域设置文件: `./addon/locale/**/*.flt`;
 - 首选项文件: `./addon/prefs.js`;
-  > 不要在 `prefs.js` 中换行
 
 ```shell
 .
-|-- .eslintrc.json            # eslint conf
-|-- .gitattributes            # git conf
 |-- .github/                  # github conf
-|-- .gitignore                # git conf
-|-- .prettierrc               # prettier conf
-|-- .release-it.json          # release-it conf
-|-- .vscode                   # vs code conf
-|   |-- extensions.json
-|   |-- launch.json
-|   |-- setting.json
-|   `-- toolkit.code-snippets
-|-- package-lock.json         # npm conf
-|-- package.json              # npm conf
-|-- LICENSE
-|-- README.md
-|-- addon
-|   |-- bootstrap.js               # addon load/unload script, like a main.c
-|   |-- chrome
-|   |   `-- content
-|   |       |-- icons/
-|   |       |-- preferences.xhtml  # preference panel
-|   |       `-- zoteroPane.css
-|   |-- locale                     # locale
+|-- .vscode/                  # vscode conf
+|-- addon                     # static files
+|   |-- bootstrap.js
+|   |-- content
+|   |   |-- icons
+|   |   |   |-- favicon.png
+|   |   |   `-- favicon@0.5x.png
+|   |   |-- preferences.xhtml
+|   |   `-- zoteroPane.css
+|   |-- locale
 |   |   |-- en-US
 |   |   |   |-- addon.ftl
+|   |   |   |-- mainWindow.ftl
 |   |   |   `-- preferences.ftl
 |   |   `-- zh-CN
 |   |       |-- addon.ftl
+|   |       |-- mainWindow.ftl
 |   |       `-- preferences.ftl
-|   |-- manifest.json              # addon config
+|   |-- manifest.json
 |   `-- prefs.js
-|-- build/                         # build dir
-|-- scripts                        # scripts for dev
-|   |-- build.mjs                      # script to build plugin
-|   |-- scripts.mjs                    # scripts send to Zotero, such as reload, openDevTool, etc
-|   |-- server.mjs                     # script to start a development server
-|   |-- start.mjs                      # script to start Zotero process
-|   |-- stop.mjs                       # script to kill Zotero process
-|   |-- utils.mjs                      # utils functions for dev scripts
-|   |-- update-template.json      # template of `update.json`
-|   `-- zotero-cmd-template.json  # template of local env
-|-- src                           # source code
+|-- build                         # build dir
+|-- node_modules
+|-- src                           # source code of scripts
 |   |-- addon.ts                  # base class
 |   |-- hooks.ts                  # lifecycle hooks
 |   |-- index.ts                  # main entry
 |   |-- modules                   # sub modules
 |   |   |-- examples.ts
 |   |   `-- preferenceScript.ts
-|   `-- utils                     # utilities
+|   `-- utils                 # utilities
 |       |-- locale.ts
 |       |-- prefs.ts
 |       |-- wait.ts
-|       `-- window.ts
-|-- tsconfig.json                 # https://code.visualstudio.com/docs/languages/jsconfig
-|-- typings                       # ts typings
+|       |-- window.ts
+|       `-- ztoolkit.ts
+|-- typings                   # ts typings
 |   `-- global.d.ts
-`-- update.json
+
+|-- .env                      # enviroment config (do not check into repo)
+|-- .env.example              # template of enviroment config, https://github.com/northword/zotero-plugin-scaffold
+|-- .gitignore                # git conf
+|-- .gitattributes            # git conf
+|-- .prettierrc               # prettier conf, https://prettier.io/
+|-- eslint.config.mjs         # eslint conf, https://eslint.org/
+|-- LICENSE
+|-- package-lock.json
+|-- package.json
+|-- tsconfig.json             # typescript conf, https://code.visualstudio.com/docs/languages/jsconfig
+|-- README.md
+`-- zotero-plugin.config.ts   # scaffold conf, https://github.com/northword/zotero-plugin-scaffold
 ```
 
 ## Disclaimer 免责声明

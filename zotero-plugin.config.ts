@@ -31,7 +31,7 @@ export default defineConfig({
         },
         bundle: true,
         target: "firefox115",
-        outfile: `build/addon/chrome/content/scripts/${pkg.config.addonRef}.js`,
+        outfile: `build/addon/content/scripts/${pkg.config.addonRef}.js`,
       },
     ],
   },
