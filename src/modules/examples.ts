@@ -222,6 +222,25 @@ export class UIExampleFactory {
   }
 
   @example
+  static registerItemPaneCustomInfoRow() {
+    Zotero.ItemPaneManager.registerInfoRow({
+      rowID: "example",
+      pluginID: addon.data.config.addonID,
+      editable: true,
+      label: {
+        l10nID: getLocaleID("item-info-row-example-label"),
+      },
+      position: "afterCreators",
+      onGetData: ({ item }) => {
+        return item.getField("title");
+      },
+      onSetData: ({ item, value }) => {
+        item.setField("title", value);
+      },
+    });
+  }
+
+  @example
   static registerItemPaneSection() {
     Zotero.ItemPaneManager.registerSection({
       paneID: "example",

@@ -8,3 +8,4 @@ item-section-example2-sidenav-tooltip =
     .tooltiptext = This is Plugin Template section (reader)
 item-section-example2-button-tooltip =
     .tooltiptext = Unregister this section
+item-info-row-example-label = Example Row
