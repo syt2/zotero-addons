@@ -5,7 +5,6 @@ import {
   PromptExampleFactory,
   UIExampleFactory,
 } from "./modules/examples";
-import { config } from "../package.json";
 import { getString, initLocale } from "./utils/locale";
 import { registerPrefsScripts } from "./modules/preferenceScript";
 import { createZToolkit } from "./utils/ztoolkit";
@@ -43,9 +42,11 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   addon.data.ztoolkit = createZToolkit();
 
   // @ts-ignore This is a moz feature
-  win.MozXULElement.insertFTLIfNeeded(`${config.addonRef}-mainWindow.ftl`);
+  win.MozXULElement.insertFTLIfNeeded(
+    `${addon.data.config.addonRef}-mainWindow.ftl`,
+  );
 
-  const popupWin = new ztoolkit.ProgressWindow(config.addonName, {
+  const popupWin = new ztoolkit.ProgressWindow(addon.data.config.addonName, {
     closeOnClick: true,
     closeTime: -1,
   })
@@ -97,7 +98,7 @@ function onShutdown(): void {
   addon.data.dialog?.window?.close();
   // Remove addon object
   addon.data.alive = false;
-  delete Zotero[config.addonInstance];
+  delete Zotero[addon.data.config.addonInstance];
 }
 
 /**

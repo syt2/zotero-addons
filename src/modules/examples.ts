@@ -1,4 +1,3 @@
-import { config } from "../../package.json";
 import { getLocaleID, getString } from "../utils/locale";
 
 function example(
@@ -53,7 +52,7 @@ export class BasicExampleFactory {
 
   @example
   static exampleNotifierCallback() {
-    new ztoolkit.ProgressWindow(config.addonName)
+    new ztoolkit.ProgressWindow(addon.data.config.addonName)
       .createLine({
         text: "Open Tab Detected!",
         type: "success",
@@ -70,10 +69,10 @@ export class BasicExampleFactory {
   @example
   static registerPrefs() {
     Zotero.PreferencePanes.register({
-      pluginID: config.addonID,
+      pluginID: addon.data.config.addonID,
       src: rootURI + "content/preferences.xhtml",
       label: getString("prefs-title"),
-      image: `chrome://${config.addonRef}/content/icons/favicon.png`,
+      image: `chrome://${addon.data.config.addonRef}/content/icons/favicon.png`,
     });
   }
 }
@@ -92,7 +91,7 @@ export class KeyExampleFactory {
       }
     });
 
-    new ztoolkit.ProgressWindow(config.addonName)
+    new ztoolkit.ProgressWindow(addon.data.config.addonName)
       .createLine({
         text: "Example Shortcuts: Alt+L/S/C",
         type: "success",
@@ -102,7 +101,7 @@ export class KeyExampleFactory {
 
   @example
   static exampleShortcutLargerCallback() {
-    new ztoolkit.ProgressWindow(config.addonName)
+    new ztoolkit.ProgressWindow(addon.data.config.addonName)
       .createLine({
         text: "Larger!",
         type: "default",
@@ -112,7 +111,7 @@ export class KeyExampleFactory {
 
   @example
   static exampleShortcutSmallerCallback() {
-    new ztoolkit.ProgressWindow(config.addonName)
+    new ztoolkit.ProgressWindow(addon.data.config.addonName)
       .createLine({
         text: "Smaller!",
         type: "default",
@@ -129,7 +128,7 @@ export class UIExampleFactory {
       properties: {
         type: "text/css",
         rel: "stylesheet",
-        href: `chrome://${config.addonRef}/content/zoteroPane.css`,
+        href: `chrome://${addon.data.config.addonRef}/content/zoteroPane.css`,
       },
     });
     doc.documentElement.appendChild(styles);
@@ -138,7 +137,7 @@ export class UIExampleFactory {
 
   @example
   static registerRightClickMenuItem() {
-    const menuIcon = `chrome://${config.addonRef}/content/icons/favicon@0.5x.png`;
+    const menuIcon = `chrome://${addon.data.config.addonRef}/content/icons/favicon@0.5x.png`;
     // item menuitem with icon
     ztoolkit.Menu.register("item", {
       tag: "menuitem",
@@ -188,7 +187,7 @@ export class UIExampleFactory {
   static async registerExtraColumn() {
     const field = "test1";
     await Zotero.ItemTreeManager.registerColumns({
-      pluginID: config.addonID,
+      pluginID: addon.data.config.addonID,
       dataKey: field,
       label: "text column",
       dataProvider: (item: Zotero.Item, dataKey: string) => {
@@ -202,7 +201,7 @@ export class UIExampleFactory {
   static async registerExtraColumnWithCustomCell() {
     const field = "test2";
     await Zotero.ItemTreeManager.registerColumns({
-      pluginID: config.addonID,
+      pluginID: addon.data.config.addonID,
       dataKey: field,
       label: "custom column",
       dataProvider: (item: Zotero.Item, dataKey: string) => {
@@ -226,7 +225,7 @@ export class UIExampleFactory {
   static registerItemPaneSection() {
     Zotero.ItemPaneManager.registerSection({
       paneID: "example",
-      pluginID: config.addonID,
+      pluginID: addon.data.config.addonID,
       header: {
         l10nID: getLocaleID("item-section-example1-head-text"),
         icon: "chrome://zotero/skin/16/universal/book.svg",
@@ -249,7 +248,7 @@ export class UIExampleFactory {
   static async registerReaderItemPaneSection() {
     Zotero.ItemPaneManager.registerSection({
       paneID: "reader-example",
-      pluginID: config.addonID,
+      pluginID: addon.data.config.addonID,
       header: {
         l10nID: getLocaleID("item-section-example2-head-text"),
         // Optional
@@ -833,7 +832,7 @@ export class HelperExampleFactory {
 
   @example
   static progressWindowExample() {
-    new ztoolkit.ProgressWindow(config.addonName)
+    new ztoolkit.ProgressWindow(addon.data.config.addonName)
       .createLine({
         text: "ProgressWindow Example!",
         type: "success",
