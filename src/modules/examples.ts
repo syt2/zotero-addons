@@ -44,8 +44,9 @@ export class BasicExampleFactory {
     ]);
 
     Zotero.Plugins.addObserver({
-      shutdown: ({ id: pluginID }) => {
-        this.unregisterNotifier(notifierID);
+      shutdown: ({ id }) => {
+        if (id === addon.data.config.addonID)
+          this.unregisterNotifier(notifierID);
       },
     });
   }
