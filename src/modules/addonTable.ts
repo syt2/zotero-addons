@@ -694,7 +694,14 @@ export class AddonTable {
       if (releaseTime) {
         result["menu-remote-update-time"] = releaseTime;
       }
-      const relateAddon = relateAddons.find(addonPair => { return addonInfo.repo === addonPair[0].repo; });
+      const relateAddon = relateAddons.find(addonPair => {
+        const addonID = addonReleaseInfo(addonInfo)?.id;
+        if (addonID) {
+          return addonID == addonPair[1].id;
+        } else {
+          return addonInfo.repo === addonPair[0].repo;
+        }
+      });
       result["menu-local-version"] = relateAddon?.[1].version ?? "";
       const installState = await addonInstallStatus(addonInfo, relateAddon);
       result["menu-install-state"] = this.installStatusDescription(installState);
