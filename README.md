@@ -1,4 +1,4 @@
-# <img align="center" src="addon/chrome/content/icons/favicon.svg" width=60/> Add-on Market for Zotero
+# <img align="center" src="addon/content/icons/favicon.svg" width=60/> Add-on Market for Zotero
 
 [![zotero target version](https://img.shields.io/badge/Zotero-7-green?style=flat-square&logo=zotero&logoColor=CC2936)](https://www.zotero.org)
 [![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)
@@ -21,7 +21,7 @@ This is a Zotero add-on that allows for the direct installation of other add-ons
 
 ## Usage
 
-After install this add-on in Zotero, click <img align="center" src="addon/chrome/content/icons/favicon.svg" width=20/> in Toolbar, or click `Add-on market` in `Tools` menu.
+After install this add-on in Zotero, click <img align="center" src="addon/content/icons/favicon.svg" width=20/> in Toolbar, or click `Add-on market` in `Tools` menu.
 <img align="center" src="doc/screenshot.png" width=600/>
 
 ## Add-on Data Source
