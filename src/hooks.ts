@@ -57,6 +57,10 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   AddonTable.registerInMenuTool();
 
   Guide.showGuideInMainWindowIfNeed(win);
+  // @ts-ignore This is a moz feature
+  // win.MozXULElement.insertFTLIfNeeded(
+  //   `${addon.data.config.addonRef}-mainWindow.ftl`,
+  // );
 }
 
 async function onMainWindowUnload(win: Window): Promise<void> {
@@ -71,7 +75,7 @@ function onShutdown(): void {
   AddonTable.unregisterAll();
   // Remove addon object
   addon.data.alive = false;
-  delete Zotero[config.addonInstance];
+  delete Zotero[addon.data.config.addonInstance];
 }
 
 export default {

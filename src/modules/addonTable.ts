@@ -169,6 +169,7 @@ export class AddonTable {
     await this.replaceSourceSelectList(win.document.querySelector("#sourceContainerPlaceholder")!);
 
     const searchInput = win.document.querySelector("#search") as HTMLInputElement;
+    searchInput.placeholder = getString('keyword-search');
     this.listenSearchInput(searchInput);
 
     const refreshButton = win.document.querySelector("#refresh") as HTMLButtonElement;
