@@ -5,7 +5,7 @@
 
 This is a plugin template for [Zotero](https://www.zotero.org/).
 
-[English](README.md) | [简体中文](doc/README-zhCN.md)
+[English](README.md) | [简体中文](doc/README-zhCN.md) | [Français](doc/README-frFR.md)
 
 - Documentation for plugins development
   - [📖 Plugin Development Documentation](https://zotero-chinese.com/plugin-dev-guide/) (Chinese, not yet complete)
@@ -157,7 +157,7 @@ Activate with `Shift+P`.
 
 3. Enter the repo folder
 
-### 2 Config Template Settings and Enviroment
+### 2 Config Template Settings and Environment
 
 1. Modify the settings in `./package.json`, including:
 
@@ -180,7 +180,7 @@ Activate with `Shift+P`.
    > [!warning]
    > Be careful to set the addonID and addonRef to avoid conflict.
 
-   If you need to host your XPI packages outside of GitHub, moidify `updateURL` and add `xpiDownloadLink` in `zotero-plugin.config.ts`.
+   If you need to host your XPI packages outside of GitHub, modify `updateURL` and add `xpiDownloadLink` in `zotero-plugin.config.ts`.
 
 2. Copy the environment variable file. Modify the commands that starts your installation of the beta Zotero.
 
@@ -270,7 +270,7 @@ npm run release
 ```
 
 > [!note]
-> This will use [Bumpp](https://github.com/antfu-collective/bumpp) to prompt for the new version number, locally bump the version, run any (pre/post)version scripts defined in `package.json`, commit, build (optional), tag the commit with the version number and push commits and git.tags. Bumpp can be configured in `zotero-plugin-config.ts`; for example, add `release: { bumpp: { execute: "npm run build" } }` to also build before committing.
+> This will use [Bumpp](https://github.com/antfu-collective/bumpp) to prompt for the new version number, locally bump the version, run any (pre/post)version scripts defined in `package.json`, commit, build (optional), tag the commit with the version number and push commits and git tags. Bumpp can be configured in `zotero-plugin-config.ts`; for example, add `release: { bumpp: { execute: "npm run build" } }` to also build before committing.
 >
 > Subsequently GitHub Action will rebuild the plugin and use `zotero-plugin-scaffold`'s `release` script to publish the XPI to GitHub Release. In addition, a separate release (tag: `release`) will be created or updated that includes update manifests `update.json` and `update-beta.json` as assets. These will be available at `https://github.com/{{owner}}/{{repo}}/releases/download/release/update*.json`.
 

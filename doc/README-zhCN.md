@@ -5,7 +5,8 @@
 
 这是 [Zotero](https://www.zotero.org/) 的插件模板.
 
-[English](../README.md) | [简体中文](./README-zhCN.md)
+[English](../README.md) | [简体中文](./README-zhCN.md) | [Français](./README-frFR.md)
+
 
 - 开发指南
   - [📖 插件开发文档](https://zotero-chinese.com/plugin-dev-guide/) (中文版，尚不完善)
