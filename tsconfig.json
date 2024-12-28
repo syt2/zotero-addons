@@ -4,7 +4,7 @@
     "module": "commonjs",
     "target": "ES2016",
     "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "strict": true
   },
   "include": ["src", "typings", "node_modules/zotero-types"],

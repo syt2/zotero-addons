@@ -100,6 +100,7 @@ function onShutdown(): void {
   addon.data.dialog?.window?.close();
   // Remove addon object
   addon.data.alive = false;
+  // @ts-ignore - Plugin instance is not typed
   delete Zotero[addon.data.config.addonInstance];
 }
 
