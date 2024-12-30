@@ -481,12 +481,12 @@ export class PromptExampleFactory {
                 hasValidCondition = true;
                 s.addCondition(
                   "joinMode",
-                  joinMode as Zotero.Search.Operator,
+                  joinMode as _ZoteroTypes.Search.Operator,
                   "",
                 );
                 s.addCondition(
                   conditions[0] as string,
-                  conditions[1] as Zotero.Search.Operator,
+                  conditions[1] as _ZoteroTypes.Search.Operator,
                   conditions[2] as string,
                 );
               }
