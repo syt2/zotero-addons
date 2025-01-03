@@ -85,4 +85,3 @@ guide-addons-table-switch-source-title = Wissel bron
 guide-addons-table-switch-source-message = Wissel van add-on gegevensbron als de pagina leeg is, een fout tegenkomt of geen add-ons kan ophalen.
 
 keyword-search = Zoeken
-·
