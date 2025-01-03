@@ -31,7 +31,7 @@ export function registerConfigScheme() {
       const params = {
         action: ""
       };
-      const router = new Zotero.Router(params);
+      const router = new (Zotero as any).Router(params);
       router.add('configSource', () => {
         params.action = "configSource";
       });
@@ -39,7 +39,7 @@ export function registerConfigScheme() {
         params.action = "install";
       });
       router.run(path);
-      Zotero.API.parseParams(params);
+      (Zotero as any).API.parseParams(params);
 
       if (params.action == "configSource") {
         let success = false;
