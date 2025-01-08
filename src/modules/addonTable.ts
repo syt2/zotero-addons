@@ -684,11 +684,11 @@ export class AddonTable {
       result['menu-star'] = addonInfo.stars === 0 ? "0" : addonInfo.stars ? String(addonInfo.stars) : "?"
       const remoteVersion = releaseInfo?.xpiVersion?.toLowerCase().replace('v', '') ?? "";
       result["menu-remote-version"] = remoteVersion;
-      if (remoteVersion && releaseInfo?.minZoteroVersion && releaseInfo.maxZoteroVersion) {
-        if (Services.vc.compare(Zotero.version, releaseInfo.minZoteroVersion.replace('*', '0')) < 0 || Services.vc.compare(Zotero.version, releaseInfo.maxZoteroVersion.replace('*', '999')) > 0) {
-          result["menu-remote-version"] = `❌ ${remoteVersion}`
-        }
-      }
+      // if (remoteVersion && releaseInfo?.minZoteroVersion && releaseInfo.maxZoteroVersion) {
+      //   if (Services.vc.compare(Zotero.version, releaseInfo.minZoteroVersion.replace('*', '0')) < 0 || Services.vc.compare(Zotero.version, releaseInfo.maxZoteroVersion.replace('*', '999')) > 0) {
+      //     result["menu-remote-version"] = `❌ ${remoteVersion}`
+      //   }
+      // }
       result["menu-local-version"] = "";
       const releaseTime = addonReleaseTime(addonInfo);
       if (releaseTime) {
