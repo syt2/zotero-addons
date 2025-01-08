@@ -1,6 +1,6 @@
 import { Sources, autoSource, currentSource, setAutoSource } from "../utils/configuration";
-const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
-const { XPIDatabase } = Components.utils.import("resource://gre/modules/addons/XPIDatabase.jsm");
+const { AddonManager } = (ChromeUtils as any).import("resource://gre/modules/AddonManager.jsm");
+const { XPIDatabase } = (ChromeUtils as any).import("resource://gre/modules/addons/XPIDatabase.jsm");
 
 
 /**

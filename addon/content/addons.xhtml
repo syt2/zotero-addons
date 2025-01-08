@@ -14,10 +14,6 @@
   <meta charset="utf-8" />
   <script>
     document.addEventListener("DOMContentLoaded", (ev) => {
-      const { Services } = ChromeUtils.import(
-        "resource://gre/modules/Services.jsm",
-      );
-
       Services.scriptloader.loadSubScript(
         "chrome://zotero/content/include.js",
         this,

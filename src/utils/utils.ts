@@ -2,7 +2,7 @@ import { ProgressWindowHelper } from "zotero-plugin-toolkit/dist/helpers/progres
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { xpiURLSourceName } from "../modules/addonInfo";
-const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
+const { AddonManager } = (ChromeUtils as any).import("resource://gre/modules/AddonManager.jsm");
 
 /**
  * Undo uninstall add-on

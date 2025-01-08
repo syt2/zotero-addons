@@ -1,6 +1,6 @@
 import { AddonInfoDetail } from "./addonDetail";
 import { AddonTable } from "./addonTable";
-const { AddonManager } = Components.utils.import("resource://gre/modules/AddonManager.jsm");
+const { AddonManager } = (ChromeUtils as any).import("resource://gre/modules/AddonManager.jsm");
 
 export class AddonListenerManager {
   private static addonEventListener = {
