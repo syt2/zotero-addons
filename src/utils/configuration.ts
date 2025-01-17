@@ -3,7 +3,7 @@ import { getPref, setPref } from "./prefs";
 /**
  * Add-on Source ID
  */
-type SourceID =
+export type SourceID =
   "source-auto" |
   "source-zotero-chinese-github" |
   "source-zotero-chinese-gitee" |
@@ -20,7 +20,7 @@ type SourceID =
  * id: Source ID
  * api: Retrieve the JSON of addonInfo through this URL
  */
-interface Source {
+export interface Source {
   id: SourceID;
   api?: string;
 };

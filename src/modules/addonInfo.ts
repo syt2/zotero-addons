@@ -1,4 +1,4 @@
-import { Sources, autoSource, currentSource, setAutoSource } from "../utils/configuration";
+import { Source, Sources, autoSource, currentSource, setAutoSource } from "../utils/configuration";
 // @ts-ignore
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 // @ts-ignore
@@ -334,18 +334,52 @@ export class AddonInfoManager {
    * @returns AddonInfos from automatic source
    */
   static async autoSwitchAvaliableApi(timeout = 3000) {
-    for (const source of Sources) {
-      if (!source.api) { continue; }
-      const infos = await AddonInfoAPI.fetchAddonInfos(source.api, timeout, () => {
-        ztoolkit.log(`check source from ${source.api} timeout!`);
-      });
-      if (infos.length > 0) {
-        this.shared.sourceInfos[source.api] = [new Date(), infos];
-        setAutoSource(source);
-        ztoolkit.log(`switch to ${source.id} automatically`);
-        return infos;
-      }
+    interface ApiResult {
+      source: Source & { api: string };
+      infos: AddonInfo[];
     }
-    return [];
+    const sourcesWithApi = Sources.filter((source): source is Source & { api: string } => !!source.api);
+    const sourcePromises: Promise<ApiResult>[] = sourcesWithApi.map((source): Promise<ApiResult> => {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const infos = await AddonInfoAPI.fetchAddonInfos(source.api, timeout, () => {
+            ztoolkit.log(`check source from ${source.api} timeout!`);
+          });
+
+          if (infos.length > 0) {
+            resolve({ source, infos });
+          } else {
+            reject(new Error('No infos'));
+          }
+        } catch (error) {
+          ztoolkit.log(`Error fetching from ${source.api}: ${error}`);
+          reject(error);
+        }
+      });
+    });
+    try {
+      const result: ApiResult = await Promise.any(sourcePromises);
+      const { source, infos } = result;
+      this.shared.sourceInfos[source.api] = [new Date(), infos];
+      setAutoSource(source);
+      ztoolkit.log(`switch to ${source.id} automatically`);
+      return infos;
+    } catch (error) {
+      return [];
+    }
+
+    // for (const source of Sources) {
+    //   if (!source.api) { continue; }
+    //   const infos = await AddonInfoAPI.fetchAddonInfos(source.api, timeout, () => {
+    //     ztoolkit.log(`check source from ${source.api} timeout!`);
+    //   });
+    //   if (infos.length > 0) {
+    //     this.shared.sourceInfos[source.api] = [new Date(), infos];
+    //     setAutoSource(source);
+    //     ztoolkit.log(`switch to ${source.id} automatically`);
+    //     return infos;
+    //   }
+    // }
+    // return [];
   }
 }
