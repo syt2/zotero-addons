@@ -10,6 +10,7 @@ type SourceID =
   "source-zotero-chinese-jsdelivr" |
   "source-zotero-chinese-ghproxy" |
   "source-zotero-scraper-github" |
+  "source-zotero-scraper-gitee" |
   "source-zotero-scraper-ghproxy" |
   "source-zotero-scraper-jsdelivr" |
   "source-custom";
@@ -50,6 +51,10 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
   {
     id: "source-zotero-scraper-github",
     api: "https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
+  },
+  {
+    id: "source-zotero-scraper-gitee",
+    api: "https://gitee.com/ytshen/zotero-addon-scraper/raw/publish/addon_infos.json",
   },
   {
     id: "source-zotero-scraper-jsdelivr",

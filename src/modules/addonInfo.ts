@@ -109,6 +109,7 @@ export function xpiDownloadUrls(addonInfo: AddonInfo) {
       firstElement = downloadsURLs.jsdeliver;
       break;
     case "source-zotero-chinese-gitee":
+    case "source-zotero-scraper-gitee":
       firstElement = downloadsURLs.gitee;
       break;
   }
