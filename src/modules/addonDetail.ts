@@ -193,8 +193,6 @@ export class AddonInfoDetail {
     starIcon.src = `https://img.shields.io/github/stars/${addonInfo.repo}?label=${getString('menu-star')}`;
     const downloadLatestCountIcon = win.document.querySelector("#download-latest-count-icon") as HTMLImageElement;
     downloadLatestCountIcon.src = tagName ? `https://img.shields.io/github/downloads/${addonInfo.repo}/${tagName!}/total?label=${getString('menu-download-latest-count')}` : "";
-    const downloadAllCountIcon = win.document.querySelector("#download-all-count-icon") as HTMLImageElement;
-    downloadAllCountIcon.src = tagName ? `https://img.shields.io/github/downloads/${addonInfo.repo}/total?label=${getString('menu-download-all-count')}` : "";
     const remoteVersionIcon = win.document.querySelector("#remote-version-icon") as HTMLImageElement;
     remoteVersionIcon.src = `https://img.shields.io/badge/${getString('menu-remote-version')}-${version?.replace('-', '--') ?? getString('unknown')}-orange`;
     const localVersionIcon = win.document.querySelector("#local-version-icon") as HTMLImageElement;
@@ -209,11 +207,13 @@ export class AddonInfoDetail {
     if (releaseInfo?.minZoteroVersion && releaseInfo.maxZoteroVersion) {
       if (Services.vc.compare(Zotero.version, releaseInfo.minZoteroVersion.replace('*', '0')) < 0 || Services.vc.compare(Zotero.version, releaseInfo.maxZoteroVersion.replace('*', '999')) > 0) {
         this.uncompatibleDescription.hidden = false;
-        this.uncompatibleDescription.textContent = getString('release-uncompatible-description', { args: { 
-          minVersion: releaseInfo.minZoteroVersion,
-          maxVersion: releaseInfo.maxZoteroVersion,
-          currentVersion: Zotero.version,
-        }});
+        this.uncompatibleDescription.textContent = getString('release-uncompatible-description', {
+          args: {
+            minVersion: releaseInfo.minZoteroVersion,
+            maxVersion: releaseInfo.maxZoteroVersion,
+            currentVersion: Zotero.version,
+          }
+        });
       }
     }
 
