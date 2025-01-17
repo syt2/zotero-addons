@@ -3,8 +3,10 @@ import { getString } from "../utils/locale";
 import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { config } from "../../package.json";
 import { isWindowAlive } from "../utils/window";
-const { XPIDatabase } = (ChromeUtils as any).import("resource://gre/modules/addons/XPIDatabase.jsm");
-const { AddonManager } = (ChromeUtils as any).import("resource://gre/modules/AddonManager.jsm");
+// @ts-ignore
+const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
+// @ts-ignore
+const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 export class AddonInfoDetail {
   private static window: Window | null;

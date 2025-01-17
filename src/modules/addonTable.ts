@@ -10,8 +10,10 @@ import { AddonInfoDetail } from "./addonDetail";
 import { Guide } from "./guide";
 import { StringMatchUtils } from "../utils/stringMatchUtils";
 import { LargePrefHelper } from "zotero-plugin-toolkit";
-const { XPIDatabase } = (ChromeUtils as any).import("resource://gre/modules/addons/XPIDatabase.jsm");
-const { AddonManager } = (ChromeUtils as any).import("resource://gre/modules/AddonManager.jsm");
+// @ts-ignore
+const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
+// @ts-ignore
+const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 type TableMenuItemID =
   "menu-install" |
