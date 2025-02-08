@@ -42,9 +42,6 @@ async function onStartup() {
       // update automatically if need
       AddonTable.updateExistAddons();
     }
-
-    // Check incompatible plugins if need
-    AddonTable.checkUncompatibleAtFirstTime();
   })();
 
   AddonListenerManager.addListener();

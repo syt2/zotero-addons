@@ -75,7 +75,7 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
  * @returns selected source
  */
 export function currentSource(): Readonly<Source> {
-  const curSource = getPref('source') as string;
+  const curSource = getPref('source');
   const match = Sources.find(source => {
     return source.id === curSource;
   });
@@ -93,7 +93,7 @@ export function currentSource(): Readonly<Source> {
       if (getPref('customSource')) {
         return {
           id: "source-custom",
-          api: getPref('customSource') as string,
+          api: getPref('customSource'),
         }
       }
       return match;
@@ -137,7 +137,7 @@ export function setAutoSource(source: Readonly<Source>) {
  * @returns Custom source's api url string
  */
 export function customSourceApi() {
-  return getPref('customSource') as string;
+  return getPref('customSource');
 }
 
 /**

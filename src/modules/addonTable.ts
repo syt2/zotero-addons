@@ -100,35 +100,6 @@ export class AddonTable {
     ztoolkit.Menu.unregister("addon-table-entrance");
   }
 
-  /**
-   * Check for incompatible plugins when launching for the first time on a new Zotero version
-   */
-  static async checkUncompatibleAtFirstTime() {
-    const key = 'checkUncompatibleAddonsIn' + "7";
-    if (getPref(key)) { return; }
-    const relateAddon = await relatedAddons(this.addonInfos.map(infos => infos[0]));
-    setPref(key, true);
-    const uncompatibleAddons = relateAddon.filter(e => e[1].appDisabled || !e[1].isCompatible || !e[1].isPlatformCompatible);
-    if (uncompatibleAddons.length <= 0) {
-      return;
-    }
-    const confirm = await (Services as any).prompt.confirmEx(
-      null,
-      getString('update-all-uncompatible-title'),
-      getString('update-all-uncompatible-message'),
-      Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING + Services.prompt.BUTTON_POS_1 * Services.prompt.BUTTON_TITLE_CANCEL,
-      getString('update-all-uncompatible-confirm'),
-      null,
-      null,
-      "",
-      {}
-    );
-    if (confirm !== 0) {
-      return;
-    }
-    await this.installAddons(uncompatibleAddons.map(e => e[0]), { popWin: true });
-  }
-
   private static addonInfos: AssociatedAddonInfo[] = [];
   private static window: Window | null;
   private static tableHelper?: VirtualizedTableHelper;
@@ -182,7 +153,7 @@ export class AddonTable {
       refreshButton.disabled = false;
     });
     const autoUpdateCheckbox = win.document.querySelector('#auto-update')! as XUL.Checkbox;
-    autoUpdateCheckbox.checked = getPref('autoUpdate') as boolean;
+    autoUpdateCheckbox.checked = getPref('autoUpdate');
     autoUpdateCheckbox?.addEventListener('command', (e: any) => {
       const selected = (e.target as XUL.Checkbox).checked;
       setPref('autoUpdate', selected);
@@ -191,7 +162,7 @@ export class AddonTable {
       }
     });
     const hideToolbarCheckbox = win.document.querySelector('#hide-toolbar-entrance') as XUL.Checkbox;
-    hideToolbarCheckbox.checked = getPref('hideToolbarEntrance') as boolean;
+    hideToolbarCheckbox.checked = getPref('hideToolbarEntrance');
     hideToolbarCheckbox?.addEventListener('command', (e: any) => {
       const selected = (e.target as XUL.Checkbox).checked;
       setPref('hideToolbarEntrance', selected);

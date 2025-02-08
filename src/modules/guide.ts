@@ -13,12 +13,9 @@ export enum GuideStatus {
 
 export class Guide {
   static initPrefs() {
-    if (getPref('checkUncompatibleAddonsIn' + "7")) {
-      setPref('firstInstalledVersion', '1.0.0');
-    } else if (!getPref('firstInstalledVersion')) {
+    if (!getPref('firstInstalledVersion')) {
       setPref('firstInstalledVersion', version);
     }
-
   }
 
   static showGuideInMainWindowIfNeed(win: Window) {
@@ -35,8 +32,8 @@ export class Guide {
         AddonTable.showAddonsWindow();
       },
     })
-    .show(win.document);
-    setPref('guideStatus', ((getPref('guideStatus') ?? 0) as number) | GuideStatus.openAddonTable);
+      .show(win.document);
+    setPref('guideStatus', (getPref('guideStatus') ?? 0) | GuideStatus.openAddonTable);
   }
 
   static showGuideInAddonTableIfNeed(win: Window) {
@@ -48,15 +45,15 @@ export class Guide {
       element: win.document.querySelector('#sources')!,
       position: "before_start",
     })
-    .show(win.document);
-    setPref('guideStatus', ((getPref('guideStatus') ?? 0) as number) | GuideStatus.switchDataSourceHint);
+      .show(win.document);
+    setPref('guideStatus', (getPref('guideStatus') ?? 0) | GuideStatus.switchDataSourceHint);
   }
 
   private static checkNeedGuide(guideStatus: GuideStatus) {
-    const firstInstalledVersion = getPref('firstInstalledVersion') as string;
+    const firstInstalledVersion = getPref('firstInstalledVersion');
     if (!firstInstalledVersion) { return false; }
     if (Services.vc.compare(firstInstalledVersion, version) < 0) { return false; }
-    const alreadyGuideStatus = getPref('guideStatus') as number;
+    const alreadyGuideStatus = getPref('guideStatus');
     if (alreadyGuideStatus & guideStatus) { return false; }
     return true;
   }

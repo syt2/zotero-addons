@@ -7,8 +7,12 @@
 declare namespace _ZoteroTypes {
   interface Prefs {
     PluginPrefsMap: {
-      "enable": boolean;
-      "input": string;
+      'autoUpdate': boolean;
+      'source': string;
+      'customSource': string;
+      'hideToolbarEntrance': boolean;
+      'guideStatus': number;
+      'firstInstalledVersion': string;
     };
   }
 }
