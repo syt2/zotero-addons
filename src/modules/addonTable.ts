@@ -697,9 +697,10 @@ export class AddonTable {
     installStates.forEach((status, idx) => stateMap[this.installStatusDescription(status)] = idx);
 
     const sortColumn = this.columns.find(column => 'sortDirection' in column);
+    this.addonInfos = this.addonInfos.filter(e => this.matchSearchInput(e));
     if (sortColumn) {
       const sortOrder = (sortColumn as any).sortDirection;
-      this.addonInfos = this.addonInfos.filter(e => this.matchSearchInput(e)).sort((infoA, infoB) => {
+      this.addonInfos = this.addonInfos.sort((infoA, infoB) => {
         const [a, b] = [infoA[0], infoB[0]];
         let l, r;
         switch (sortColumn.dataKey) {
