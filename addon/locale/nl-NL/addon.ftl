@@ -77,7 +77,7 @@ source-ghproxy = gh-proxy
 source-kgithub = kGitHub
 source-others = Onbekend
 
-release-uncompatible-description = Deze versie is alleen toepasbaar voor ({ $minVersion })-({ $maxVersion }), en is niet compatibel met uw huidige versie van Zotero ({ $currentVersion }).
+release-uncompatible-description = Deze versie is geschikt voor ({ $minVersion })-({ $maxVersion }), het is mogelijk niet compatibel met uw huidige Zotero-versie ({ $currentVersion }).
 
 guide-guide-done = Gereed
 guide-open-addons-table-title = Open de add-on markt

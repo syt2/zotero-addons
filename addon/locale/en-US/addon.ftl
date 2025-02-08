@@ -77,7 +77,7 @@ source-ghproxy = gh-proxy
 source-kgithub = kGitHub
 source-others = Unknown
 
-release-uncompatible-description = This version only works for ({ $minVersion })-({ $maxVersion }), and is not compatible with your current version of Zotero ({ $currentVersion }).
+release-uncompatible-description = This version is suitable for ({ $minVersion })-({ $maxVersion }), it may not be compatible with your current version of Zotero ({ $currentVersion }).
 
 guide-guide-done = Done
 guide-open-addons-table-title = Open add-on market

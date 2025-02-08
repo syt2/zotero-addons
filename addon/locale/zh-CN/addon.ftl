@@ -77,7 +77,7 @@ source-ghproxy = gh-proxy
 source-kgithub = kGitHub
 source-others = 未知
 
-release-uncompatible-description = 此版本仅适用于({ $minVersion })-({ $maxVersion }), 不适配您当前的Zotero版本({ $currentVersion })。
+release-uncompatible-description = 此版本适用于({ $minVersion })-({ $maxVersion }), 可能不适配您当前的Zotero版本({ $currentVersion })。
 
 guide-guide-done = 完成
 guide-open-addons-table-title = 打开插件市场
