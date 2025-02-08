@@ -1,8 +1,14 @@
-build
-logs
+# dot files
+.DS_Store
+
+# Node.js
 node_modules
 builds
 pnpm-lock.yaml
 yarn.lock
-.DS_Store
+
+# Scaffold
 .env
+.scaffold
+build
+logs

@@ -1,12 +1,16 @@
 import { config } from "../../package.json";
 
+type PluginPrefsMap = _ZoteroTypes.Prefs["PluginPrefsMap"];
+
+const PREFS_PREFIX = config.prefsPrefix;
+
 /**
  * Get preference value.
  * Wrapper of `Zotero.Prefs.get`.
  * @param key
  */
-export function getPref(key: string) {
-  return Zotero.Prefs.get(`${config.prefsPrefix}.${key}`, true);
+export function getPref<K extends keyof PluginPrefsMap>(key: K) {
+  return Zotero.Prefs.get(`${PREFS_PREFIX}.${key}`, true) as PluginPrefsMap[K];
 }
 
 /**
@@ -15,8 +19,11 @@ export function getPref(key: string) {
  * @param key
  * @param value
  */
-export function setPref(key: string, value: string | number | boolean) {
-  return Zotero.Prefs.set(`${config.prefsPrefix}.${key}`, value, true);
+export function setPref<K extends keyof PluginPrefsMap>(
+  key: K,
+  value: PluginPrefsMap[K],
+) {
+  return Zotero.Prefs.set(`${PREFS_PREFIX}.${key}`, value, true);
 }
 
 /**
@@ -25,5 +32,5 @@ export function setPref(key: string, value: string | number | boolean) {
  * @param key
  */
 export function clearPref(key: string) {
-  return Zotero.Prefs.clear(`${config.prefsPrefix}.${key}`, true);
+  return Zotero.Prefs.clear(`${PREFS_PREFIX}.${key}`, true);
 }

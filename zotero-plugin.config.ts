@@ -3,7 +3,7 @@ import pkg from "./package.json";
 
 export default defineConfig({
   source: ["src", "addon"],
-  dist: "build",
+  dist: ".scaffold/build",
   name: "__MSG_name__",
   xpiName: pkg.name,
   id: pkg.config.addonID,
@@ -25,6 +25,9 @@ export default defineConfig({
       buildVersion: pkg.version,
       buildTime: "{{buildTime}}",
     },
+    // prefs: {
+    //   prefix: pkg.config.prefsPrefix,
+    // },
     esbuildOptions: [
       {
         entryPoints: ["src/index.ts"],
@@ -33,7 +36,7 @@ export default defineConfig({
         },
         bundle: true,
         target: "firefox115",
-        outfile: `build/addon/content/scripts/${pkg.config.addonRef}.js`,
+        outfile: `.scaffold/build/addon/content/scripts/${pkg.config.addonRef}.js`,
       },
     ],
   },
