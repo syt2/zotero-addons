@@ -78,7 +78,8 @@ export class AddonTable {
       return;
     }
     const lookupNode = toolbar.querySelector("#zotero-tb-lookup")!;
-    const newNode = lookupNode?.cloneNode(true) as XUL.ToolBarButton;
+    const newNode = lookupNode?.cloneNode(true) as XULToolBarButtonElement;
+
     // const newNode = ztoolkit.UI.createXULElement(document, "toolbarbutton");
     newNode.setAttribute("id", "zotero-toolbaritem-addons");
     newNode.setAttribute("tooltiptext", getString("menuitem-addons"));
@@ -138,36 +139,8 @@ export class AddonTable {
     options?.from && this.updateHideToolbarEntranceInWindow(options.from === "toolbar");
 
     await this.createTable();
-
     await this.replaceSourceSelectList(win.document.querySelector("#sourceContainerPlaceholder")!);
-
-    const searchInput = win.document.querySelector("#search") as HTMLInputElement;
-    searchInput.placeholder = getString('keyword-search');
-    this.listenSearchInput(searchInput);
-
-    const refreshButton = win.document.querySelector("#refresh") as HTMLButtonElement;
-    refreshButton.addEventListener("click", async e => {
-      if (refreshButton.disabled) { return; }
-      refreshButton.disabled = true;
-      await this.refresh(true);
-      refreshButton.disabled = false;
-    });
-    const autoUpdateCheckbox = win.document.querySelector('#auto-update')! as XUL.Checkbox;
-    autoUpdateCheckbox.checked = getPref('autoUpdate');
-    autoUpdateCheckbox?.addEventListener('command', (e: any) => {
-      const selected = (e.target as XUL.Checkbox).checked;
-      setPref('autoUpdate', selected);
-      if (selected) {
-        this.updateExistAddons();
-      }
-    });
-    const hideToolbarCheckbox = win.document.querySelector('#hide-toolbar-entrance') as XUL.Checkbox;
-    hideToolbarCheckbox.checked = getPref('hideToolbarEntrance');
-    hideToolbarCheckbox?.addEventListener('command', (e: any) => {
-      const selected = (e.target as XUL.Checkbox).checked;
-      setPref('hideToolbarEntrance', selected);
-      this.registerInToolbar();
-    });
+    await this.initFooterContainer(win);
 
     Zotero.Promise.delay(2000).then(() => {
       if (this.addonInfos.length > 0 || !this.window) { return; }
@@ -482,7 +455,7 @@ export class AddonTable {
       listeners: [{
         type: "command",
         listener: ev => {
-          const selectSource = (this.window?.document.querySelector("#sources") as XUL.MenuList).getAttribute("value");
+          const selectSource = (this.window?.document.querySelector("#sources") as XULMenuListElement).getAttribute("value");
           const oldSource = currentSource();
           setCurrentSource(selectSource ?? undefined);
           const newSource = currentSource();
@@ -541,12 +514,100 @@ export class AddonTable {
     }, oldNode);
   }
 
-  private static listenSearchInput(searchInput: HTMLInputElement) {
-    searchInput.addEventListener('input', async function () {
+  private static async initFooterContainer(win: Window) {
+    this.initSearch(win);
+    this.initRefreshButton(win);
+    this.initAutoUpdate(win);
+    this.initHideEntrance(win);
+  }
+
+  private static initSearch(win: Window) {
+    const searchButton = win.document.querySelector('#search-button') as HTMLElement;
+    const searchField = win.document.querySelector('#search-field') as XULTextBoxElement;
+    searchField.style.visibility = 'hidden';
+    searchField.addEventListener("blur", () => AddonTable.hideSearch());
+    searchButton.addEventListener('click', (_) => {
+      if (!searchField.classList.contains("visible")) {
+        searchButton.style.display = 'none';
+        // If the collectionPane is narrow, set smaller max-width
+        let maxWidth = searchField.getAttribute("data-expanded-width");
+        if (maxWidth) {
+          searchField.style.maxWidth = `${maxWidth}px`;
+        }
+        searchField.style.visibility = 'visible';
+        searchField.classList.add("visible", "expanding");
+        // Enable and focus the field only after it was revealed to prevent the cursor
+        // from changing between 'text' and 'pointer' back and forth as the input field expands
+        setTimeout(() => {
+          searchField.removeAttribute("disabled");
+          searchField.classList.remove("expanding");
+          searchField.focus();
+        }, 250);
+        return;
+      }
+      searchField.focus();
+    });
+    searchField.addEventListener('command', async function (e) {
       await AddonTable.updateAddonInfos();
       AddonTable.updateTable();
     });
   }
+
+  private static hideSearch() {
+    let searchField = this.window?.document.getElementById("search-field") as HTMLInputElement;
+    let searchButton = this.window?.document.getElementById("search-button") as HTMLElement;
+    if (!searchField.value.length && searchField.classList.contains("visible")) {
+      searchField.classList.remove("visible");
+      searchField.setAttribute("disabled", 'true');
+      setTimeout(() => {
+        searchButton.style.display = '';
+        searchField.style.visibility = 'hidden';
+        searchField.style.removeProperty('max-width');
+      }, 50);
+    }
+  }
+
+  private static initRefreshButton(win: Window) {
+    const refreshButton = win.document.querySelector("#refresh") as XULToolBarButtonElement;
+    refreshButton.addEventListener("click", async e => {
+      if (refreshButton.disabled) { return; }
+      refreshButton.disabled = true;
+      refreshButton.setAttribute("status", "animate");
+
+      const refresh = this.refresh(true);
+      const delay = new Promise((resolve) => setTimeout(resolve, 1000));
+      await Promise.all([
+        refresh,
+        delay,
+      ]);
+
+      refreshButton.removeAttribute("status");
+      refreshButton.disabled = false;
+    });
+  }
+
+  private static initAutoUpdate(win: Window) {
+    const autoUpdateCheckbox = win.document.querySelector('#auto-update')! as XULCheckboxElement;
+    autoUpdateCheckbox.checked = getPref('autoUpdate');
+    autoUpdateCheckbox?.addEventListener('command', (e: any) => {
+      const selected = (e.target as XULCheckboxElement).checked;
+      setPref('autoUpdate', selected);
+      if (selected) {
+        this.updateExistAddons();
+      }
+    });
+  }
+
+  private static initHideEntrance(win: Window) {
+    const hideToolbarCheckbox = win.document.querySelector('#hide-toolbar-entrance') as XULCheckboxElement;
+    hideToolbarCheckbox.checked = getPref('hideToolbarEntrance');
+    hideToolbarCheckbox?.addEventListener('command', (e: any) => {
+      const selected = (e.target as XULCheckboxElement).checked;
+      setPref('hideToolbarEntrance', selected);
+      this.registerInToolbar();
+    });
+  }
+
 
   private static async onSelectMenuItem(item: TableMenuItemID) {
     const selectAddons: AssociatedAddonInfo[] = [];
@@ -762,7 +823,7 @@ export class AddonTable {
   }
 
   private static matchSearchInput(addonInfo: AssociatedAddonInfo): boolean {
-    const searchInput = this.window?.document.querySelector("#search") as HTMLInputElement;
+    const searchInput = this.window?.document.querySelector('#search-field') as HTMLInputElement;
     if (searchInput == null) { return true; }
     const searchText = searchInput.value.toLowerCase().trim();
     if (searchText.length == 0) { return true; }

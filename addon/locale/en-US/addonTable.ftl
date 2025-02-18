@@ -7,3 +7,5 @@ autoUpdate =
     .label = Automatic update add-ons
 hideToolbarEntrance =
     .label = Hide toolbar entrance
+search-field =
+    .placeholder = Search...

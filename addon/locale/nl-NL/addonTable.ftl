@@ -7,3 +7,5 @@ autoUpdate =
     .label = Automatische add-ons bijwerken
 hideToolbarEntrance =
     .label = Werkbalkingang verbergen
+search-field =
+    .placeholder = Zoeken

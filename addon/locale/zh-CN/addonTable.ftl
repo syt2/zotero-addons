@@ -7,3 +7,5 @@ autoUpdate =
     .label = 自动更新插件
 hideToolbarEntrance =
     .label = 隐藏工具栏入口
+search-field =
+    .placeholder = 关键字搜索
