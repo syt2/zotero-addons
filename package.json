@@ -28,6 +28,7 @@
     "update-deps": "npm update --save"
   },
   "dependencies": {
+    "fuse.js": "^7.1.0",
     "zotero-plugin-toolkit": "^4.1.1"
   },
   "devDependencies": {

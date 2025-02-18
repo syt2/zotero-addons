@@ -8,8 +8,8 @@ import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
 import { Guide } from "./guide";
-import { StringMatchUtils } from "../utils/stringMatchUtils";
 import { LargePrefHelper } from "zotero-plugin-toolkit";
+import Fuse from "fuse.js";
 // @ts-ignore
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
 // @ts-ignore
@@ -45,6 +45,8 @@ type TableColumnID =
  * AddonInfo with its table column value 
  */
 type AssociatedAddonInfo = [AddonInfo, Partial<Record<TableColumnID, string>>];
+
+
 
 export class AddonTable {
   /**
@@ -102,6 +104,7 @@ export class AddonTable {
   }
 
   private static addonInfos: AssociatedAddonInfo[] = [];
+
   private static window: Window | null;
   private static tableHelper?: VirtualizedTableHelper;
 
@@ -758,7 +761,7 @@ export class AddonTable {
     installStates.forEach((status, idx) => stateMap[this.installStatusDescription(status)] = idx);
 
     const sortColumn = this.columns.find(column => 'sortDirection' in column);
-    this.addonInfos = this.addonInfos.filter(e => this.matchSearchInput(e));
+    this.addonInfos = this.filterAddonsBySearch(this.addonInfos);
     if (sortColumn) {
       const sortOrder = (sortColumn as any).sortDirection;
       this.addonInfos = this.addonInfos.sort((infoA, infoB) => {
@@ -822,27 +825,44 @@ export class AddonTable {
     }
   }
 
-  private static matchSearchInput(addonInfo: AssociatedAddonInfo): boolean {
+  private static filterAddonsBySearch(addonInfos: AssociatedAddonInfo[]) {
     const searchInput = this.window?.document.querySelector('#search-field') as HTMLInputElement;
-    if (searchInput == null) { return true; }
+    if (searchInput == null) { return addonInfos; }
     const searchText = searchInput.value.toLowerCase().trim();
-    if (searchText.length == 0) { return true; }
-    if (addonInfo[0].name && StringMatchUtils.checkMatch(searchText, addonInfo[0].name.toLowerCase())) {
-      return true;
-    }
-    if (addonInfo[0].description && StringMatchUtils.checkMatch(searchText, addonInfo[0].description.toLowerCase())) {
-      return true;
-    }
-    if (addonInfo[0].author?.name && StringMatchUtils.checkMatch(searchText, addonInfo[0].author.name.toLowerCase())) {
-      return true;
-    }
-    if (addonInfo[1]["menu-desc"] && StringMatchUtils.checkMatch(searchText, addonInfo[1]["menu-desc"].toLowerCase())) {
-      return true;
-    }
-    if (addonInfo[1]["menu-name"] && StringMatchUtils.checkMatch(searchText, addonInfo[1]["menu-name"].toLowerCase())) {
-      return true;
-    }
-    return false;
+    if (searchText.length == 0) { return addonInfos; }
+
+    const fuse = new Fuse(addonInfos, {
+      keys: [
+        {
+          name: 'addonInfoName',
+          weight: 0.3,
+          getFn: (e) => e[0].name || '',
+        },
+        {
+          name: 'addonName',
+          weight: 0.3,
+          getFn: (e) => e[1]['menu-name'] || '',
+        },
+        {
+          name: 'addonInfoDescription',
+          weight: 0.2,
+          getFn: (e) => e[0].description || '',
+        },
+        {
+          name: 'addonDescription',
+          weight: 0.2,
+          getFn: (e) => e[1]["menu-desc"] || '',
+        }
+      ],
+      includeScore: true,
+      threshold: 0.3,
+      ignoreLocation: true,
+      // minMatchCharLength: 2,
+      shouldSort: true,
+      isCaseSensitive: false,
+    });
+    const result = fuse.search(searchText);
+    return result.map(e => e.item);
   }
 
   private static largePrefHelper = new LargePrefHelper("zotero.addons.ui", config.prefsPrefix, "parser");
