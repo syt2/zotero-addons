@@ -175,7 +175,11 @@ export class AddonTable {
     if (!this.isShown) { return; }
     const selectIndics = this.tableHelper?.treeInstance.selection.selected;
     const selectAddons = this.addonInfos.filter((e, idx) => selectIndics?.has(idx));
-    await this.updateAddonInfos(force);
+    const actions = [this.updateAddonInfos(force)];
+    if (force) {
+      actions.push(new Promise((resolve) => setTimeout(resolve, 1000)));
+    }
+    await this.actionWithRefreshAnimate(actions);
     this.updateTable();
     selectAddons.forEach(oldAddon => {
       const newIdx = this.addonInfos.findIndex((newAddon) => oldAddon[0].repo === newAddon[0].repo || (addonReleaseInfo(newAddon[0])?.id && addonReleaseInfo(newAddon[0])?.id === addonReleaseInfo(oldAddon[0])?.id));
@@ -574,19 +578,20 @@ export class AddonTable {
     const refreshButton = win.document.querySelector("#refresh") as XULToolBarButtonElement;
     refreshButton.addEventListener("click", async e => {
       if (refreshButton.disabled) { return; }
+      await this.refresh(true);
+    });
+  }
+  private static async actionWithRefreshAnimate(actions: Promise<void>[]) {
+    const refreshButton = this.window?.document.querySelector<XULToolBarButtonElement>("#refresh");
+    if (refreshButton) {
       refreshButton.disabled = true;
       refreshButton.setAttribute("status", "animate");
-
-      const refresh = this.refresh(true);
-      const delay = new Promise((resolve) => setTimeout(resolve, 1000));
-      await Promise.all([
-        refresh,
-        delay,
-      ]);
-
+    }
+    await Promise.all(actions);
+    if (refreshButton) {
       refreshButton.removeAttribute("status");
       refreshButton.disabled = false;
-    });
+    }
   }
 
   private static initAutoUpdate(win: Window) {
