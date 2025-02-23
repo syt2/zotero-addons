@@ -281,7 +281,8 @@ export class UIExampleFactory {
         icon: "chrome://zotero/skin/20/universal/save.svg",
       },
       // Optional
-      bodyXHTML: '<html:h1 id="test">THIS IS TEST</html:h1>',
+      bodyXHTML:
+        '<html:h1 id="test">THIS IS TEST</html:h1><browser disableglobalhistory="true" remote="true" maychangeremoteness="true" type="content" flex="1" id="browser" style="width: 180%; height: 280px"/>',
       // Optional, Called when the section is first created, must be synchronous
       onInit: ({ item }) => {
         ztoolkit.log("Section init!", item?.id);
