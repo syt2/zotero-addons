@@ -1,5 +1,6 @@
 {
   "name": "zotero-plugin-template",
+  "type": "module",
   "version": "3.0.3",
   "description": "Zotero Plugin Template",
   "config": {
