@@ -1,6 +1,8 @@
 import { Source, Sources, autoSource, currentSource, setAutoSource } from "../utils/configuration";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
@@ -339,23 +341,21 @@ export class AddonInfoManager {
       infos: AddonInfo[];
     }
     const sourcesWithApi = Sources.filter((source): source is Source & { api: string } => !!source.api);
-    const sourcePromises: Promise<ApiResult>[] = sourcesWithApi.map((source): Promise<ApiResult> => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const infos = await AddonInfoAPI.fetchAddonInfos(source.api, timeout, () => {
-            ztoolkit.log(`check source from ${source.api} timeout!`);
-          });
+    const sourcePromises: Promise<ApiResult>[] = sourcesWithApi.map(async (source): Promise<ApiResult> => {
+      try {
+        const infos = await AddonInfoAPI.fetchAddonInfos(source.api, timeout, () => {
+          ztoolkit.log(`check source from ${source.api} timeout!`);
+        });
 
-          if (infos.length > 0) {
-            resolve({ source, infos });
-          } else {
-            reject(new Error('No infos'));
-          }
-        } catch (error) {
-          ztoolkit.log(`Error fetching from ${source.api}: ${error}`);
-          reject(error);
+        if (infos.length > 0) {
+          return { source, infos };
+        } else {
+          throw new Error('No infos');
         }
-      });
+      } catch (error) {
+        ztoolkit.log(`Error fetching from ${source.api}: ${error}`);
+        throw error;
+      }
     });
     try {
       const result: ApiResult = await Promise.any(sourcePromises);

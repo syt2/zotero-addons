@@ -1,4 +1,4 @@
-import { ColumnOptions, VirtualizedTableHelper } from "zotero-plugin-toolkit/dist/helpers/virtualizedTable";
+import { ColumnOptions, VirtualizedTableHelper } from "zotero-plugin-toolkit";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { AddonInfo, AddonInfoManager, InstallStatus, addonCanUpdate, addonInstallStatus, addonReleaseInfo, addonReleaseTime, relatedAddons, xpiDownloadUrls } from "./addonInfo";
@@ -10,8 +10,10 @@ import { AddonInfoDetail } from "./addonDetail";
 import { Guide } from "./guide";
 import { LargePrefHelper } from "zotero-plugin-toolkit";
 import Fuse from "fuse.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
@@ -537,7 +539,7 @@ export class AddonTable {
       if (!searchField.classList.contains("visible")) {
         searchButton.style.display = 'none';
         // If the collectionPane is narrow, set smaller max-width
-        let maxWidth = searchField.getAttribute("data-expanded-width");
+        const maxWidth = searchField.getAttribute("data-expanded-width");
         if (maxWidth) {
           searchField.style.maxWidth = `${maxWidth}px`;
         }
@@ -561,8 +563,8 @@ export class AddonTable {
   }
 
   private static hideSearch() {
-    let searchField = this.window?.document.getElementById("search-field") as HTMLInputElement;
-    let searchButton = this.window?.document.getElementById("search-button") as HTMLElement;
+    const searchField = this.window?.document.getElementById("search-field") as HTMLInputElement;
+    const searchButton = this.window?.document.getElementById("search-button") as HTMLElement;
     if (!searchField.value.length && searchField.classList.contains("visible")) {
       searchField.classList.remove("visible");
       searchField.setAttribute("disabled", 'true');

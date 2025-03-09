@@ -1,12 +1,16 @@
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
-    "module": "commonjs",
     "target": "ES2016",
+    "lib": ["ESNext"],
+    "experimentalDecorators": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "skipDefaultLibCheck": true,
-    "strict": true
+    "types": ["zotero-types"],
+    "strict": true,
+    "outDir": "build/dist/",
+    "skipLibCheck": true
   },
-  "include": ["src", "typings", "node_modules/zotero-types"],
+  "include": ["src", "typings"],
   "exclude": ["build", "addon"]
 }

@@ -1,8 +1,10 @@
-import { ProgressWindowHelper } from "zotero-plugin-toolkit/dist/helpers/progressWindow";
+import { ProgressWindowHelper } from "zotero-plugin-toolkit";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { xpiURLSourceName } from "../modules/addonInfo";
-const { AddonManager } = (ChromeUtils as any).import("resource://gre/modules/AddonManager.jsm");
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
 /**
  * Undo uninstall add-on

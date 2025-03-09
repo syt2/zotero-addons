@@ -3,8 +3,10 @@ import { getString } from "../utils/locale";
 import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { config } from "../../package.json";
 import { isWindowAlive } from "../utils/window";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 
