@@ -10,6 +10,7 @@
 [English](README.md) | [简体中文](doc/README-CN.md)
 
 ## Introduction
+
 This is a Zotero add-on that allows for the direct installation of other add-ons in [Zotero](https://www.zotero.org).
 
 ## Install

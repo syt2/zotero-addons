@@ -38,7 +38,7 @@ async function onStartup() {
     // refresh table if AddonTable already displayed, so specific `force` to false
     AddonTable.refresh(false);
 
-    if (getPref('autoUpdate')) {
+    if (getPref("autoUpdate")) {
       // update automatically if need
       AddonTable.updateExistAddons();
     }

@@ -1,9 +1,13 @@
 import { getString } from "../utils/locale";
 import { AddonTable } from "../modules/addonTable";
 import { AddonInfoManager } from "../modules/addonInfo";
-import { Sources, currentSource, setCurrentSource, setCustomSourceApi } from "../utils/configuration";
+import {
+  Sources,
+  currentSource,
+  setCurrentSource,
+  setCustomSourceApi,
+} from "../utils/configuration";
 import { installAddonFrom } from "../utils/utils";
-
 
 /**
  * register custom scheme in Zotero
@@ -14,7 +18,7 @@ import { installAddonFrom } from "../utils/utils";
  */
 export function registerConfigScheme() {
   const ZOTERO_SCHEME = "zotero";
-  const customScheme = ZOTERO_SCHEME + "://zoteroaddoncollection"
+  const customScheme = ZOTERO_SCHEME + "://zoteroaddoncollection";
   const CustomSchemeExtension = {
     noContent: true,
     loadAsChrome: false,
@@ -23,19 +27,19 @@ export function registerConfigScheme() {
     doAction: (Zotero.Promise as any).coroutine(function* (uri: any) {
       let path = uri.pathQueryRef;
       if (!path) {
-        ztoolkit.log('invalid scheme URL');
-        return 'Invalid URL';
+        ztoolkit.log("invalid scheme URL");
+        return "Invalid URL";
       }
-      path = path.substr('//zoteroaddoncollection/'.length);
+      path = path.substr("//zoteroaddoncollection/".length);
 
       const params = {
-        action: ""
+        action: "",
       };
       const router = new (Zotero as any).Router(params);
-      router.add('configSource', () => {
+      router.add("configSource", () => {
         params.action = "configSource";
       });
-      router.add('install', () => {
+      router.add("install", () => {
         params.action = "install";
       });
       router.run(path);
@@ -43,10 +47,14 @@ export function registerConfigScheme() {
 
       if (params.action == "configSource") {
         let success = false;
-        if ('source' in params && typeof params.source === 'string' && Sources.find(source => source.id === params.source)) {
+        if (
+          "source" in params &&
+          typeof params.source === "string" &&
+          Sources.find((source) => source.id === params.source)
+        ) {
           ztoolkit.log(`receive source from scheme ${params.source}`);
           if (params.source === "source-custom") {
-            if ('customURL' in params && typeof params.customURL === 'string') {
+            if ("customURL" in params && typeof params.customURL === "string") {
               const customURL = decodeURIComponent(params.customURL);
               ztoolkit.log(`receive custom url from scheme ${customURL}`);
               setCurrentSource(params.source);
@@ -57,7 +65,10 @@ export function registerConfigScheme() {
             }
           } else {
             setCurrentSource(params.source);
-            if (params.source === "source-auto" && currentSource().id !== "source-auto") {
+            if (
+              params.source === "source-auto" &&
+              currentSource().id !== "source-auto"
+            ) {
               (async () => {
                 await AddonInfoManager.autoSwitchAvaliableApi();
                 AddonTable.refresh(false);
@@ -69,28 +80,33 @@ export function registerConfigScheme() {
         if (success) {
           AddonTable.close();
           AddonTable.showAddonsWindow();
-          new ztoolkit.ProgressWindow(getString('addon-name'), {
+          new ztoolkit.ProgressWindow(getString("addon-name"), {
             closeOnClick: true,
             closeTime: 3000,
-          }).createLine({
-            text: getString('scheme-config-success'),
-            type: "success",
-          }).show(3000);
+          })
+            .createLine({
+              text: getString("scheme-config-success"),
+              type: "success",
+            })
+            .show(3000);
         }
       } else if (params.action == "install") {
-        if ('source' in params && typeof params.source === "string") {
+        if ("source" in params && typeof params.source === "string") {
           const addonURL = decodeURIComponent(params.source);
           (async () => {
             const install = await (Services.prompt.confirmEx as any)(
               null,
-              getString('scheme-install-confirm-title'),
-              getString('scheme-install-confirm-message') + '\n' + addonURL,
-              Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING + Services.prompt.BUTTON_POS_1 * Services.prompt.BUTTON_TITLE_CANCEL,
-              getString('scheme-install-confirm-confirm'),
+              getString("scheme-install-confirm-title"),
+              getString("scheme-install-confirm-message") + "\n" + addonURL,
+              Services.prompt.BUTTON_POS_0 *
+                Services.prompt.BUTTON_TITLE_IS_STRING +
+                Services.prompt.BUTTON_POS_1 *
+                  Services.prompt.BUTTON_TITLE_CANCEL,
+              getString("scheme-install-confirm-confirm"),
               null,
               null,
               "",
-              {}
+              {},
             );
             if (install === 0) {
               installAddonFrom(addonURL, { popWin: true });
@@ -103,10 +119,12 @@ export function registerConfigScheme() {
     newChannel: function (uri: any) {
       ztoolkit.log(uri);
       this.doAction(uri);
-    }
+    },
   };
   try {
-    (Services.io.getProtocolHandler(ZOTERO_SCHEME) as any).wrappedJSObject._extensions[customScheme] = CustomSchemeExtension
+    (
+      Services.io.getProtocolHandler(ZOTERO_SCHEME) as any
+    ).wrappedJSObject._extensions[customScheme] = CustomSchemeExtension;
   } catch (e) {
     ztoolkit.log(`register custom protocol failed: ${e}`);
   }

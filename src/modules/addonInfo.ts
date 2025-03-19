@@ -1,11 +1,20 @@
-import { Source, Sources, autoSource, currentSource, setAutoSource } from "../utils/configuration";
+import {
+  Source,
+  Sources,
+  autoSource,
+  currentSource,
+  setAutoSource,
+} from "../utils/configuration";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-const { XPIDatabase } = ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm");
+const { XPIDatabase } = ChromeUtils.import(
+  "resource://gre/modules/addons/XPIDatabase.jsm",
+);
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
-
+const { AddonManager } = ChromeUtils.import(
+  "resource://gre/modules/AddonManager.jsm",
+);
 
 /**
  * Datastruct of Remote AddonInfo
@@ -87,15 +96,20 @@ export interface AddonInfo {
 }
 
 /**
- * Extract download urls of xpi file from AddonInfo 
+ * Extract download urls of xpi file from AddonInfo
  * @param addonInfo AddonInfo specified
  * @returns Download urls (Adapted to current Zotero version)
  */
 export function xpiDownloadUrls(addonInfo: AddonInfo) {
   const downloadsURLs = addonReleaseInfo(addonInfo)?.xpiDownloadUrl;
-  if (!downloadsURLs) { return []; }
-  const sourceID = currentSource().id === "source-auto" ? autoSource()?.id : currentSource().id;
-  const result = Object.values(downloadsURLs).filter(e => !!e);
+  if (!downloadsURLs) {
+    return [];
+  }
+  const sourceID =
+    currentSource().id === "source-auto"
+      ? autoSource()?.id
+      : currentSource().id;
+  const result = Object.values(downloadsURLs).filter((e) => !!e);
   let firstElement: string | undefined = undefined;
   switch (sourceID) {
     case "source-zotero-chinese-github":
@@ -121,11 +135,11 @@ export function xpiDownloadUrls(addonInfo: AddonInfo) {
       result.unshift(result.splice(index, 1)[0]);
     }
   }
-  return result.filter(e => e);
+  return result.filter((e) => e);
 }
 
 /**
- * 
+ *
  * @param url Source name of the xpi url
  * @returns source name key
  */
@@ -151,13 +165,17 @@ export function xpiURLSourceName(url: string) {
  * @returns AddonInfo.releases (Adapted to current Zotero version)
  */
 export function addonReleaseInfo(addonInfo: AddonInfo) {
-  const release = addonInfo.releases?.find(release => release.targetZoteroVersion === "7");
-  if ((release?.xpiDownloadUrl?.github?.length ?? 0) === 0) { return; }
-  return release
+  const release = addonInfo.releases?.find(
+    (release) => release.targetZoteroVersion === "7",
+  );
+  if ((release?.xpiDownloadUrl?.github?.length ?? 0) === 0) {
+    return;
+  }
+  return release;
 }
 
 /**
- * Extract add-on xpi release time from AddonInfo 
+ * Extract add-on xpi release time from AddonInfo
  * @param addonInfo AddonInfo
  * @returns AddonInfo.releases.releaseDate string with yyyy/MM/dd hh:mm:ss format (Adapted to current Zotero version)
  */
@@ -165,16 +183,15 @@ export function addonReleaseTime(addonInfo: AddonInfo) {
   const inputDate = new Date(addonReleaseInfo(addonInfo)?.releaseDate ?? "");
   if (inputDate) {
     const year = inputDate.getFullYear();
-    const month = String(inputDate.getMonth() + 1).padStart(2, '0');
-    const day = String(inputDate.getDate()).padStart(2, '0');
-    const hours = String(inputDate.getHours()).padStart(2, '0');
-    const minutes = String(inputDate.getMinutes()).padStart(2, '0');
-    const seconds = String(inputDate.getSeconds()).padStart(2, '0');
+    const month = String(inputDate.getMonth() + 1).padStart(2, "0");
+    const day = String(inputDate.getDate()).padStart(2, "0");
+    const hours = String(inputDate.getHours()).padStart(2, "0");
+    const minutes = String(inputDate.getMinutes()).padStart(2, "0");
+    const seconds = String(inputDate.getSeconds()).padStart(2, "0");
     const formattedDate = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
     return formattedDate;
   }
 }
-
 
 /**
  * Extract and filter local addon obj from AddonInfo
@@ -183,15 +200,31 @@ export function addonReleaseTime(addonInfo: AddonInfo) {
  */
 export async function relatedAddons(addonInfos: AddonInfo[]) {
   const addons: [AddonInfo, any][] = [];
-  const localAddons: any[] = (await AddonManager.getAllAddons()).filter((e: any) => e.id);
+  const localAddons: any[] = (await AddonManager.getAllAddons()).filter(
+    (e: any) => e.id,
+  );
 
   for (const addonInfo of addonInfos) {
-    const relateAddon: any = localAddons.find((addon: any) => addonReleaseInfo(addonInfo)?.id === addon.id) ?? localAddons.find((addon: any) => {
-      if (addon.name && (addonReleaseInfo(addonInfo)?.name === addon.name || addonInfo.name === addon.name)) { return true; }
-      if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) { return true; }
-      if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) { return true; }
-      return false;
-    });
+    const relateAddon: any =
+      localAddons.find(
+        (addon: any) => addonReleaseInfo(addonInfo)?.id === addon.id,
+      ) ??
+      localAddons.find((addon: any) => {
+        if (
+          addon.name &&
+          (addonReleaseInfo(addonInfo)?.name === addon.name ||
+            addonInfo.name === addon.name)
+        ) {
+          return true;
+        }
+        if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) {
+          return true;
+        }
+        if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) {
+          return true;
+        }
+        return false;
+      });
     if (relateAddon) {
       addons.push([addonInfo, relateAddon]);
     }
@@ -218,14 +251,26 @@ export enum InstallStatus {
  * @param relateAddon AddonInfo and its related local addon. If passed undefined, InstallStatus.unknown will return
  * @returns InstallStatus
  */
-export async function addonInstallStatus(addonInfo: AddonInfo, relateAddon?: [AddonInfo, any]) {
-  if (relateAddon) { // has local addon
+export async function addonInstallStatus(
+  addonInfo: AddonInfo,
+  relateAddon?: [AddonInfo, any],
+) {
+  if (relateAddon) {
+    // has local addon
     if (relateAddon[1]) {
-      const dbAddon = await XPIDatabase.getAddon((addon: any) => addon.id === relateAddon[1].id);
-      if (dbAddon && dbAddon.pendingUninstall) { // deleted
+      const dbAddon = await XPIDatabase.getAddon(
+        (addon: any) => addon.id === relateAddon[1].id,
+      );
+      if (dbAddon && dbAddon.pendingUninstall) {
+        // deleted
         return InstallStatus.pendingUninstall;
-      } else { // exist
-        if (relateAddon[1].appDisabled || !relateAddon[1].isCompatible || !relateAddon[1].isPlatformCompatible) {
+      } else {
+        // exist
+        if (
+          relateAddon[1].appDisabled ||
+          !relateAddon[1].isCompatible ||
+          !relateAddon[1].isPlatformCompatible
+        ) {
           return InstallStatus.incompatible;
         } else if (relateAddon[1].userDisabled) {
           return InstallStatus.disabled;
@@ -235,11 +280,15 @@ export async function addonInstallStatus(addonInfo: AddonInfo, relateAddon?: [Ad
           return InstallStatus.normal;
         }
       }
-    } else { // incompatible
+    } else {
+      // incompatible
       return InstallStatus.incompatible;
     }
-  } else { // not found
-    return addonReleaseInfo(addonInfo)?.id ? InstallStatus.notInstalled : InstallStatus.unknown;
+  } else {
+    // not found
+    return addonReleaseInfo(addonInfo)?.id
+      ? InstallStatus.notInstalled
+      : InstallStatus.unknown;
   }
 }
 
@@ -251,10 +300,11 @@ export async function addonInstallStatus(addonInfo: AddonInfo, relateAddon?: [Ad
  */
 export function addonCanUpdate(addonInfo: AddonInfo, addon: any) {
   const version = addonReleaseInfo(addonInfo)?.xpiVersion;
-  if (!version || !addon.version) { return false; }
+  if (!version || !addon.version) {
+    return false;
+  }
   return Services.vc.compare(addon.version, version) < 0;
 }
-
 
 class AddonInfoAPI {
   /**
@@ -264,7 +314,11 @@ class AddonInfoAPI {
    * @param onTimeoutCallback timeout callback if specified timeout
    * @returns AddonInfo[]
    */
-  static async fetchAddonInfos(url: string, timeout?: number, onTimeoutCallback?: VoidFunction): Promise<AddonInfo[]> {
+  static async fetchAddonInfos(
+    url: string,
+    timeout?: number,
+    onTimeoutCallback?: VoidFunction,
+  ): Promise<AddonInfo[]> {
     ztoolkit.log(`fetch addon infos from ${url}`);
     try {
       const options: { timeout?: number } = {};
@@ -273,7 +327,7 @@ class AddonInfoAPI {
       }
       const response = await Zotero.HTTP.request("GET", url, options);
       const addons = JSON.parse(response.response) as AddonInfo[];
-      const validAddons = addons.filter(addon => addonReleaseInfo(addon));
+      const validAddons = addons.filter((addon) => addonReleaseInfo(addon));
       return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
         return (b.stars ?? 0) - (a.stars ?? 0);
       });
@@ -299,8 +353,14 @@ export class AddonInfoManager {
    */
   get addonInfos() {
     const url = currentSource().api;
-    if (!url) { return []; }
-    if (url in this.sourceInfos && (new Date().getTime() - this.sourceInfos[url][0].getTime()) < 12 * 60 * 60 * 1000) {
+    if (!url) {
+      return [];
+    }
+    if (
+      url in this.sourceInfos &&
+      new Date().getTime() - this.sourceInfos[url][0].getTime() <
+        12 * 60 * 60 * 1000
+    ) {
       return this.sourceInfos[url][1];
     }
     return [];
@@ -318,7 +378,9 @@ export class AddonInfoManager {
       return await AddonInfoManager.autoSwitchAvaliableApi();
     }
     const url = source.api;
-    if (!url) { return []; }
+    if (!url) {
+      return [];
+    }
     // 不在刷新，且不需要强制刷新
     if (!forceRefresh && this.addonInfos) {
       return this.addonInfos;
@@ -332,7 +394,7 @@ export class AddonInfoManager {
 
   /**
    * Switch to a connectable source
-   * @param timeout Check next source if current source exceed timeout 
+   * @param timeout Check next source if current source exceed timeout
    * @returns AddonInfos from automatic source
    */
   static async autoSwitchAvaliableApi(timeout = 3000) {
@@ -340,23 +402,31 @@ export class AddonInfoManager {
       source: Source & { api: string };
       infos: AddonInfo[];
     }
-    const sourcesWithApi = Sources.filter((source): source is Source & { api: string } => !!source.api);
-    const sourcePromises: Promise<ApiResult>[] = sourcesWithApi.map(async (source): Promise<ApiResult> => {
-      try {
-        const infos = await AddonInfoAPI.fetchAddonInfos(source.api, timeout, () => {
-          ztoolkit.log(`check source from ${source.api} timeout!`);
-        });
+    const sourcesWithApi = Sources.filter(
+      (source): source is Source & { api: string } => !!source.api,
+    );
+    const sourcePromises: Promise<ApiResult>[] = sourcesWithApi.map(
+      async (source): Promise<ApiResult> => {
+        try {
+          const infos = await AddonInfoAPI.fetchAddonInfos(
+            source.api,
+            timeout,
+            () => {
+              ztoolkit.log(`check source from ${source.api} timeout!`);
+            },
+          );
 
-        if (infos.length > 0) {
-          return { source, infos };
-        } else {
-          throw new Error('No infos');
+          if (infos.length > 0) {
+            return { source, infos };
+          } else {
+            throw new Error("No infos");
+          }
+        } catch (error) {
+          ztoolkit.log(`Error fetching from ${source.api}: ${error}`);
+          throw error;
         }
-      } catch (error) {
-        ztoolkit.log(`Error fetching from ${source.api}: ${error}`);
-        throw error;
-      }
-    });
+      },
+    );
     try {
       const result: ApiResult = await Promise.any(sourcePromises);
       const { source, infos } = result;

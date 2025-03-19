@@ -30,10 +30,17 @@ function initZToolkit(_ztoolkit: ReturnType<typeof createZToolkit>) {
   );
 }
 
-import { VirtualizedTableHelper, ProgressWindowHelper, MenuManager, GuideHelper, UITool, BasicTool, unregister } from "zotero-plugin-toolkit";
+import {
+  VirtualizedTableHelper,
+  ProgressWindowHelper,
+  MenuManager,
+  GuideHelper,
+  UITool,
+  BasicTool,
+  unregister,
+} from "zotero-plugin-toolkit";
 
 class MyToolkit extends BasicTool {
-
   UI: UITool;
   VirtualizedTable: typeof VirtualizedTableHelper;
   ProgressWindow: typeof ProgressWindowHelper;

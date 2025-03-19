@@ -2,7 +2,9 @@ import { AddonInfoDetail } from "./addonDetail";
 import { AddonTable } from "./addonTable";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+const { AddonManager } = ChromeUtils.import(
+  "resource://gre/modules/AddonManager.jsm",
+);
 
 export class AddonListenerManager {
   private static addonEventListener = {
@@ -46,7 +48,7 @@ export class AddonListenerManager {
       AddonTable.refresh();
       AddonInfoDetail.refresh();
     },
-  }
+  };
 
   /**
    * Add addon listener in Zotero

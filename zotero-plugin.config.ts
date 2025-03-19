@@ -8,8 +8,9 @@ export default defineConfig({
   xpiName: pkg.name,
   id: pkg.config.addonID,
   namespace: pkg.config.addonRef,
-  updateURL: `https://github.com/{{owner}}/{{repo}}/releases/download/release/${pkg.version.includes("-") ? "update-beta.json" : "update.json"
-    }`,
+  updateURL: `https://github.com/{{owner}}/{{repo}}/releases/download/release/${
+    pkg.version.includes("-") ? "update-beta.json" : "update.json"
+  }`,
   xpiDownloadLink:
     "https://github.com/{{owner}}/{{repo}}/releases/download/V{{version}}/{{xpiName}}.xpi",
   server: {
@@ -44,7 +45,7 @@ export default defineConfig({
     bumpp: {
       commit: "chore(publish): release V%s",
       tag: "V%s",
-    }
+    },
   },
   // If you need to see a more detailed log, uncomment the following line:
   // logLevel: "trace",

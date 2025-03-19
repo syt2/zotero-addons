@@ -4,16 +4,16 @@ import { getPref, setPref } from "./prefs";
  * Add-on Source ID
  */
 export type SourceID =
-  "source-auto" |
-  "source-zotero-chinese-github" |
-  "source-zotero-chinese-gitee" |
-  "source-zotero-chinese-jsdelivr" |
-  "source-zotero-chinese-ghproxy" |
-  "source-zotero-scraper-github" |
-  "source-zotero-scraper-gitee" |
-  "source-zotero-scraper-ghproxy" |
-  "source-zotero-scraper-jsdelivr" |
-  "source-custom";
+  | "source-auto"
+  | "source-zotero-chinese-github"
+  | "source-zotero-chinese-gitee"
+  | "source-zotero-chinese-jsdelivr"
+  | "source-zotero-chinese-ghproxy"
+  | "source-zotero-scraper-github"
+  | "source-zotero-scraper-gitee"
+  | "source-zotero-scraper-ghproxy"
+  | "source-zotero-scraper-jsdelivr"
+  | "source-custom";
 
 /**
  * Add-on Source
@@ -23,7 +23,7 @@ export type SourceID =
 export interface Source {
   id: SourceID;
   api?: string;
-};
+}
 
 /**
  * Support sources
@@ -46,7 +46,7 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
   },
   {
     id: "source-zotero-chinese-ghproxy",
-    api: "https://gh-proxy.com/https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json"
+    api: "https://gh-proxy.com/https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json",
   },
   {
     id: "source-zotero-scraper-github",
@@ -62,21 +62,20 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
   },
   {
     id: "source-zotero-scraper-ghproxy",
-    api: "https://gh-proxy.com/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json"
+    api: "https://gh-proxy.com/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
   },
   {
     id: "source-custom",
   },
 ];
 
-
 /**
  * Get selected source
  * @returns selected source
  */
 export function currentSource(): Readonly<Source> {
-  const curSource = getPref('source');
-  const match = Sources.find(source => {
+  const curSource = getPref("source");
+  const match = Sources.find((source) => {
     return source.id === curSource;
   });
   if (match) {
@@ -85,16 +84,16 @@ export function currentSource(): Readonly<Source> {
         return {
           id: "source-auto",
           api: autoSource()?.api,
-        }
+        };
       }
       return match;
     }
     if (match.id === "source-custom") {
-      if (getPref('customSource')) {
+      if (getPref("customSource")) {
         return {
           id: "source-custom",
-          api: getPref('customSource'),
-        }
+          api: getPref("customSource"),
+        };
       }
       return match;
     }
@@ -108,10 +107,10 @@ export function currentSource(): Readonly<Source> {
  * @param source Selected source
  */
 export function setCurrentSource(source?: string) {
-  if (source && Sources.find(e => e.id === source)) {
-    setPref('source', source);
+  if (source && Sources.find((e) => e.id === source)) {
+    setPref("source", source);
   } else {
-    setPref('source', 'source-auto');
+    setPref("source", "source-auto");
   }
 }
 
@@ -137,13 +136,13 @@ export function setAutoSource(source: Readonly<Source>) {
  * @returns Custom source's api url string
  */
 export function customSourceApi() {
-  return getPref('customSource');
+  return getPref("customSource");
 }
 
 /**
  * Set custom source's api
- * @param api custom source's api url string 
+ * @param api custom source's api url string
  */
 export function setCustomSourceApi(api: string) {
-  setPref('customSource', api);
+  setPref("customSource", api);
 }

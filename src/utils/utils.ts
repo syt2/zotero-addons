@@ -4,11 +4,13 @@ import { getString } from "../utils/locale";
 import { xpiURLSourceName } from "../modules/addonInfo";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-const { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+const { AddonManager } = ChromeUtils.import(
+  "resource://gre/modules/AddonManager.jsm",
+);
 
 /**
  * Undo uninstall add-on
- * @param addon The add-on to undo uninstall 
+ * @param addon The add-on to undo uninstall
  */
 export async function undoUninstall(addon: any) {
   try {
@@ -25,46 +27,57 @@ export async function undoUninstall(addon: any) {
  * @param options.popConfirmDialog Present a comfirm dialog berfore install
  * @param options.canRestore Enable undo uninstall after uninstall
  */
-export async function uninstall(addon: any, options?: { popConfirmDialog?: boolean, canRestore?: boolean }) {
+export async function uninstall(
+  addon: any,
+  options?: { popConfirmDialog?: boolean; canRestore?: boolean },
+) {
   if (options?.popConfirmDialog) {
     const confirm = await (Services as any).prompt.confirmEx(
       null,
-      getString('uninstall-confirm-title'),
-      getString('uninstall-confirm-message', { args: { name: addon.name ?? "Unknown" } }),
-      Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING + Services.prompt.BUTTON_POS_1 * Services.prompt.BUTTON_TITLE_CANCEL,
-      getString('uninstall-confirm-confirm'),
+      getString("uninstall-confirm-title"),
+      getString("uninstall-confirm-message", {
+        args: { name: addon.name ?? "Unknown" },
+      }),
+      Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING +
+        Services.prompt.BUTTON_POS_1 * Services.prompt.BUTTON_TITLE_CANCEL,
+      getString("uninstall-confirm-confirm"),
       null,
       null,
       "",
-      {}
+      {},
     );
     if (confirm !== 0) {
       return;
     }
   }
 
-  const popWin = new ztoolkit.ProgressWindow(getString('addon-name'), {
+  const popWin = new ztoolkit.ProgressWindow(getString("addon-name"), {
     closeOnClick: true,
     closeTime: 3000,
   });
   try {
     await addon.uninstall(options?.canRestore);
     popWin.createLine({
-      text: getString('uninstall-succeed', { args: { name: addon.name ?? "Unknown" } }),
+      text: getString("uninstall-succeed", {
+        args: { name: addon.name ?? "Unknown" },
+      }),
       type: `success`,
       progress: 0,
     });
   } catch (error) {
     ztoolkit.log(`uninstall ${addon.name} failed: ${error}`);
-    popWin.createLine({
-      text: getString('uninstall-failed', { args: { name: addon.name ?? "Unknown" } }),
-      type: `fail`,
-      progress: 0,
-    }).addDescription(`${error}`.slice(0, 45));
+    popWin
+      .createLine({
+        text: getString("uninstall-failed", {
+          args: { name: addon.name ?? "Unknown" },
+        }),
+        type: `fail`,
+        progress: 0,
+      })
+      .addDescription(`${error}`.slice(0, 45));
   }
   popWin.show(3000);
 }
-
 
 /**
  * install add-on from url
@@ -74,14 +87,21 @@ export async function uninstall(addon: any, options?: { popConfirmDialog?: boole
  * @param options.popWin Present a progress window during downloading and installing
  * @param options.startIndex Specify which URL to use for recursion, usually not necessary to specify when calling
  */
-export async function installAddonFrom(url: string | string[], options?: {
-  name?: string,
-  popWin?: boolean,
-  startIndex?: number,
-}) {
-  if (!Array.isArray(url)) { url = [url]; }
+export async function installAddonFrom(
+  url: string | string[],
+  options?: {
+    name?: string;
+    popWin?: boolean;
+    startIndex?: number;
+  },
+) {
+  if (!Array.isArray(url)) {
+    url = [url];
+  }
   const startIndex = options?.startIndex ?? 0;
-  if (startIndex >= url.length || startIndex < 0) { return; }
+  if (startIndex >= url.length || startIndex < 0) {
+    return;
+  }
   const xpiUrl = url[startIndex];
   const xpiName = options?.name ?? extractFileNameFromUrl(xpiUrl) ?? "Unknown";
   let sourceName = xpiURLSourceName(xpiUrl);
@@ -90,18 +110,24 @@ export async function installAddonFrom(url: string | string[], options?: {
   } else {
     sourceName = getString(sourceName);
   }
-  const source = getString('downloading-source', { args: { name: sourceName } });
+  const source = getString("downloading-source", {
+    args: { name: sourceName },
+  });
 
   let popWin: ProgressWindowHelper | undefined = undefined;
   if (options?.popWin) {
-    popWin = new ztoolkit.ProgressWindow(getString('addon-name'), {
+    popWin = new ztoolkit.ProgressWindow(getString("addon-name"), {
       closeOnClick: true,
       closeTime: -1,
-    }).createLine({
-      text: getString("downloading", { args: { name: xpiName + ` (${source})` } }),
-      type: "default",
-      progress: 0,
-    }).show(-1);
+    })
+      .createLine({
+        text: getString("downloading", {
+          args: { name: xpiName + ` (${source})` },
+        }),
+        type: "default",
+        progress: 0,
+      })
+      .show(-1);
   }
 
   // reference in gecko
@@ -111,24 +137,26 @@ export async function installAddonFrom(url: string | string[], options?: {
   // > https://github.com/mozilla/gecko-dev/blob/f170bc26fdcfda53a270dc4f257202e62f4b781f/toolkit/mozapps/extensions/internal/XPIInstall.jsm#L2225
   // > installAddonFromURL example:
   // > https://github.com/mozilla/gecko-dev/blob/fc757816ed9d8f8552dbcb96c1f89f8108f37b2a/browser/components/enterprisepolicies/Policies.sys.mjs#L2618
-  // > AddonManager states and error types: 
+  // > AddonManager states and error types:
   // > `https://github.com/mozilla/gecko-dev/blob/fc757816ed9d8f8552dbcb96c1f89f8108f37b2a/toolkit/mozapps/extensions/AddonManager.sys.mjs#L3993`
   const actualInstall = async () => {
     try {
       const install = await AddonManager.getInstallForURL(xpiUrl, {
         telemetryInfo: { source: config.addonID },
       });
-      return await new Promise<boolean>(resolve => {
+      return await new Promise<boolean>((resolve) => {
         const listener = {
           onDownloadStarted: (install: any) => {
-            if (!popWin) { return; }
+            if (!popWin) {
+              return;
+            }
             // 下载进度条
             (async () => {
               while (install.state === AddonManager.STATE_DOWNLOADING) {
                 await Zotero.Promise.delay(200);
                 if (install.maxProgress > 0 && install.progress > 0) {
                   popWin.changeLine({
-                    progress: 100 * install.progress / install.maxProgress,
+                    progress: (100 * install.progress) / install.maxProgress,
                   });
                 }
               }
@@ -136,14 +164,16 @@ export async function installAddonFrom(url: string | string[], options?: {
           },
           onDownloadEnded: (install: any) => {
             // Install failed, error will be reported elsewhere.
-            if (!install.addon) { return; }
+            if (!install.addon) {
+              return;
+            }
 
             if (install.addon.appDisabled) {
               ztoolkit.log(`Incompatible add-on from ${xpiUrl}`);
               install.removeListener(listener);
               install.cancel();
               popWin?.changeLine({
-                text: `${getString("install-failed", { args: { name: xpiName } })} [${getString('install-failed-uncompatible')}]`,
+                text: `${getString("install-failed", { args: { name: xpiName } })} [${getString("install-failed-uncompatible")}]`,
                 type: "fail",
                 progress: 0,
               });
@@ -157,23 +187,37 @@ export async function installAddonFrom(url: string | string[], options?: {
             });
           },
           onDownloadFailed: () => {
-            ztoolkit.log(`download from ${xpiUrl} failed ${AddonManager.errorToString(install.error)}`);
+            ztoolkit.log(
+              `download from ${xpiUrl} failed ${AddonManager.errorToString(install.error)}`,
+            );
             install.removeListener(listener);
-            popWin?.changeLine({
-              text: getString("download-failed", { args: { name: xpiName + ` (${source})` } }),
-              type: "fail",
-              progress: 0,
-            }).addDescription(AddonManager.errorToString(install.error).slice(0, 45));
+            popWin
+              ?.changeLine({
+                text: getString("download-failed", {
+                  args: { name: xpiName + ` (${source})` },
+                }),
+                type: "fail",
+                progress: 0,
+              })
+              .addDescription(
+                AddonManager.errorToString(install.error).slice(0, 45),
+              );
             resolve(true);
           },
           onInstallFailed: () => {
-            ztoolkit.log(`install failed ${AddonManager.errorToString(install.error)} from ${xpiUrl}`);
+            ztoolkit.log(
+              `install failed ${AddonManager.errorToString(install.error)} from ${xpiUrl}`,
+            );
             install.removeListener(listener);
-            popWin?.changeLine({
-              text: `${getString("install-failed", { args: { name: xpiName } })} [${AddonManager.errorToString(install.error)}]`,
-              type: "fail",
-              progress: 0,
-            }).addDescription(AddonManager.errorToString(install.error).slice(0, 45));
+            popWin
+              ?.changeLine({
+                text: `${getString("install-failed", { args: { name: xpiName } })} [${AddonManager.errorToString(install.error)}]`,
+                type: "fail",
+                progress: 0,
+              })
+              .addDescription(
+                AddonManager.errorToString(install.error).slice(0, 45),
+              );
             resolve(true);
           },
           onInstallEnded: (install: any, addon: any) => {
@@ -193,14 +237,16 @@ export async function installAddonFrom(url: string | string[], options?: {
       });
     } catch (e) {
       ztoolkit.log(`install from ${xpiUrl} failed: ${e}`);
-      popWin?.changeLine({
-        text: getString("install-failed", { args: { name: xpiName } }),
-        type: "fail",
-        progress: 0,
-      }).addDescription(`${e}`.slice(0, 45));
+      popWin
+        ?.changeLine({
+          text: getString("install-failed", { args: { name: xpiName } }),
+          type: "fail",
+          progress: 0,
+        })
+        .addDescription(`${e}`.slice(0, 45));
       return true;
     }
-  }
+  };
 
   const doNextUrlInstall = await actualInstall();
   popWin?.startCloseTimer(2000);
@@ -218,7 +264,7 @@ export async function installAddonFrom(url: string | string[], options?: {
  */
 export function extractFileNameFromUrl(url: string) {
   try {
-    return new URL(url).pathname.split('/').pop();
+    return new URL(url).pathname.split("/").pop();
   } catch {
     //
   }
