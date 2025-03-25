@@ -1,0 +1,24 @@
+name: Plugin submit
+description: Submit a new plugin for market
+title: "[Plugin] "
+labels:
+  - new plugin
+assignees: syt2
+body:
+  - type: checkboxes
+    id: check-search
+    attributes:
+      label: Is the plugin you submit already in the repository?
+      description: Please search to see if the plugin you want to submit is already in the repository. in [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins) and [syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper)
+      options:
+        - label: I have searched the existing plugins
+          required: true
+
+  - type: input
+    id: repository-url
+    attributes:
+      label: Zotero Plugin Repository URL
+      description:  Please provide the URL of the Zotero plugin repository.
+      placeholder: https://github.com/username/zotero-plugin-repository
+    validations:
+      required: true

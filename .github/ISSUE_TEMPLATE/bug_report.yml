@@ -3,7 +3,6 @@ description: File a bug / issue
 title: "[Bug] "
 labels:
   - bug
-  # - Needs Triage
 assignees: syt2
 body:
   - type: checkboxes
@@ -29,7 +28,7 @@ body:
       label: Environment
       description: |
         examples:
-          - **OS**: Windows 11 22H2
+          - **OS**: Windows/macOS/Linux
           - **Zotero Version**: 7.0.0(-beta.xx)
           - **Plugin Version**: 1.0.0
       value: |
@@ -45,7 +44,7 @@ body:
       label: Describe the bug
       description: |
         A clear and concise description of what the bug is.
-        If applicable, add screenshots and log to help explain your problem.
+        If applicable, add screenshots to help explain your problem.
     validations:
       required: true
 
