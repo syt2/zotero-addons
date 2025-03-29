@@ -123,7 +123,7 @@ export class KeyExampleFactory {
 
 export class UIExampleFactory {
   @example
-  static registerStyleSheet(win: Window) {
+  static registerStyleSheet(win: _ZoteroTypes.MainWindow) {
     const doc = win.document;
     const styles = ztoolkit.UI.createElement(doc, "link", {
       properties: {
@@ -132,7 +132,7 @@ export class UIExampleFactory {
         href: `chrome://${addon.data.config.addonRef}/content/zoteroPane.css`,
       },
     });
-    doc.documentElement.appendChild(styles);
+    doc.documentElement?.appendChild(styles);
     doc.getElementById("zotero-item-pane-content")?.classList.add("makeItRed");
   }
 
@@ -165,7 +165,7 @@ export class UIExampleFactory {
         ],
       },
       "before",
-      win.document.querySelector(
+      win.document?.querySelector(
         "#zotero-itemmenu-addontemplate-test",
       ) as XUL.MenuItem,
     );
@@ -208,12 +208,9 @@ export class UIExampleFactory {
       dataProvider: (item: Zotero.Item, dataKey: string) => {
         return field + String(item.id);
       },
-      renderCell(index, data, column) {
+      renderCell(index, data, column, isFirstColumn, doc) {
         ztoolkit.log("Custom column cell is rendered!");
-        const span = Zotero.getMainWindow().document.createElementNS(
-          "http://www.w3.org/1999/xhtml",
-          "span",
-        );
+        const span = doc.createElement("span");
         span.className = `cell ${column.className}`;
         span.style.background = "#0dd068";
         span.innerText = "⭐" + data;
@@ -502,7 +499,7 @@ export class PromptExampleFactory {
             ids.forEach((id: number) => {
               const item = Zotero.Items.get(id);
               const title = item.getField("title");
-              const ele = ztoolkit.UI.createElement(window.document, "div", {
+              const ele = ztoolkit.UI.createElement(window.document!, "div", {
                 namespace: "html",
                 classList: ["command"],
                 listeners: [

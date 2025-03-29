@@ -108,10 +108,10 @@ async function updatePrefsUI() {
 
 function bindPrefEvents() {
   addon.data
-    .prefs!.window.document.querySelector(
+    .prefs!.window.document?.querySelector(
       `#zotero-prefpane-${config.addonRef}-enable`,
     )
-    ?.addEventListener("command", (e) => {
+    ?.addEventListener("command", (e: Event) => {
       ztoolkit.log(e);
       addon.data.prefs!.window.alert(
         `Successfully changed to ${(e.target as XUL.Checkbox).checked}!`,
@@ -119,10 +119,10 @@ function bindPrefEvents() {
     });
 
   addon.data
-    .prefs!.window.document.querySelector(
+    .prefs!.window.document?.querySelector(
       `#zotero-prefpane-${config.addonRef}-input`,
     )
-    ?.addEventListener("change", (e) => {
+    ?.addEventListener("change", (e: Event) => {
       ztoolkit.log(e);
       addon.data.prefs!.window.alert(
         `Successfully changed to ${(e.target as HTMLInputElement).value}!`,
