@@ -38,8 +38,10 @@ export async function uninstall(
       getString("uninstall-confirm-message", {
         args: { name: addon.name ?? "Unknown" },
       }),
-      Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING +
-        Services.prompt.BUTTON_POS_1 * Services.prompt.BUTTON_TITLE_CANCEL,
+      Services.prompt.BUTTON_POS_0! *
+      Services.prompt.BUTTON_TITLE_IS_STRING! +
+      Services.prompt.BUTTON_POS_1! *
+      Services.prompt.BUTTON_TITLE_CANCEL!,
       getString("uninstall-confirm-confirm"),
       null,
       null,

@@ -47,7 +47,7 @@ async function onStartup() {
   AddonListenerManager.addListener();
 }
 
-async function onMainWindowLoad(win: Window): Promise<void> {
+async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {
   // Create ztoolkit for every window
   addon.data.ztoolkit = createZToolkit();
   AddonTable.registerInToolbar();

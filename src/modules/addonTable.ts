@@ -100,7 +100,7 @@ export class AddonTable {
     if (getPref("hideToolbarEntrance")) {
       toolbar
         .querySelectorAll("#zotero-toolbaritem-addons")
-        .forEach((e) => e.remove());
+        .forEach((e: Element) => e.remove());
       return;
     }
     const lookupNode = toolbar.querySelector("#zotero-tb-lookup")!;
@@ -230,7 +230,7 @@ export class AddonTable {
           oldAddon[0].repo === newAddon[0].repo ||
           (addonReleaseInfo(newAddon[0])?.id &&
             addonReleaseInfo(newAddon[0])?.id ===
-              addonReleaseInfo(oldAddon[0])?.id),
+            addonReleaseInfo(oldAddon[0])?.id),
       );
       if (newIdx >= 0) {
         this.tableHelper?.treeInstance.selection.rangedSelect(
@@ -731,7 +731,7 @@ export class AddonTable {
       }
       searchField.focus();
     });
-    searchField.addEventListener("command", async function (e) {
+    searchField.addEventListener("command", async function () {
       await AddonTable.updateAddonInfos();
       AddonTable.updateTable();
     });
@@ -1018,12 +1018,12 @@ export class AddonTable {
           case "menu-install-state":
             [l, r] = [
               stateMap[
-                infoA[1]["menu-install-state"] ??
-                  this.installStatusDescription(InstallStatus.unknown)
+              infoA[1]["menu-install-state"] ??
+              this.installStatusDescription(InstallStatus.unknown)
               ] ?? 0,
               stateMap[
-                infoB[1]["menu-install-state"] ??
-                  this.installStatusDescription(InstallStatus.unknown)
+              infoB[1]["menu-install-state"] ??
+              this.installStatusDescription(InstallStatus.unknown)
               ] ?? 0,
             ];
             if (l === r) {

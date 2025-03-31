@@ -98,10 +98,10 @@ export function registerConfigScheme() {
               null,
               getString("scheme-install-confirm-title"),
               getString("scheme-install-confirm-message") + "\n" + addonURL,
-              Services.prompt.BUTTON_POS_0 *
-                Services.prompt.BUTTON_TITLE_IS_STRING +
-                Services.prompt.BUTTON_POS_1 *
-                  Services.prompt.BUTTON_TITLE_CANCEL,
+              Services.prompt.BUTTON_POS_0! *
+              Services.prompt.BUTTON_TITLE_IS_STRING! +
+              Services.prompt.BUTTON_POS_1! *
+              Services.prompt.BUTTON_TITLE_CANCEL!,
               getString("scheme-install-confirm-confirm"),
               null,
               null,
