@@ -14,3 +14,5 @@ enable =
     .label = Inschakelen
 disable = 
     .label = Uitschakelen
+comment =
+    .label = Commentaren

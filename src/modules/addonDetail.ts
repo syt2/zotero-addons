@@ -147,6 +147,9 @@ export class AddonInfoDetail {
       }
       Zotero.launchURL(`https://github.com/${addonInfo.repo}`);
     });
+    this.commentButton.addEventListener("click", (e) => {
+      Zotero.openInViewer(`https://zotero.store/addon/${addonInfo.repo}?addonInfo=${JSON.stringify(addonInfo)}`);
+    });
 
     await this.refresh();
   }
@@ -161,6 +164,9 @@ export class AddonInfoDetail {
     });
   }
 
+  private static get commentButton() {
+    return this.window?.document.querySelector("#comment") as HTMLButtonElement;
+  }
   private static get installButton() {
     return this.window?.document.querySelector("#install") as HTMLButtonElement;
   }
