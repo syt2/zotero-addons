@@ -62,8 +62,16 @@ type="text/css"?>
         overflow: hidden;
         /* background-color: #f0f0f0; */
       }
+      .atk-main-editor {
+        display: none;
+      }
+      .artalk {
+        padding: 10px;
+      }
     </style>
     <link rel="localization" href="__addonRef__-addonDetail.ftl" />
+    <link href="ArtalkLite.css" rel="stylesheet" />
+    <script src="ArtalkLite.js"></script>
   </head>
 
   <body>
@@ -210,11 +218,6 @@ type="text/css"?>
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     >
       <button
-        id="comment"
-        data-l10n-id="comment"
-        style="cursor: pointer"
-      ></button>
-      <button
         id="install"
         data-l10n-id="install"
         style="cursor: pointer"
@@ -255,5 +258,47 @@ type="text/css"?>
         style="cursor: pointer"
       ></button>
     </div>
+
+
+    <div
+      class="artalk-comment-container"
+      style="padding: 8px; display: flex; flex-wrap: wrap;"
+      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    >
+      <button
+        id="comment"
+        data-l10n-id="comment"
+        style="cursor: pointer"
+      ></button>
+    </div>
+    <div id="artalk-container"></div>
+    <script>
+      const addonInfo = window.arguments[0].addonInfo;
+      const downloadSourceAction = window.arguments[0].downloadSourceAction;
+
+      const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+      const artalk = Artalk.init({
+        el: '#artalk-container',
+        pageKey: `/${addonInfo.repo}/post/1`,
+        pageTitle: addonInfo.name,
+        server: 'https://apod.tracepad.site',
+        site: 'Zotero Plugin Market',
+        darkMode: prefersDarkScheme.matches,
+        getItem: (key) => Services.prefs.getStringPref(`${key}`, ''),
+        setItem: (key, value) => Services.prefs.setStringPref(`${key}`, value),
+        downloadSource: (url) => downloadSourceAction(url),
+      });
+      window.addEventListener('unload', () => {
+        console.log('unload');
+        artalk.destroy();
+      });
+
+      const updateTheme = (e) => {
+        const newTheme = e.matches ? 'dark' : 'light'
+        artalk.setDarkMode(newTheme === 'dark')
+      }
+      prefersDarkScheme.addEventListener('change', updateTheme)
+    </script>
   </body>
 </html>

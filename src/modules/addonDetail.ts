@@ -38,7 +38,14 @@ export class AddonInfoDetail {
   static async showDetailWindow(addonInfo: AddonInfo) {
     this.window?.close();
     this.addonInfo = addonInfo;
-    const windowArgs = { _initPromise: Zotero.Promise.defer() };
+    const windowArgs = {
+      _initPromise: Zotero.Promise.defer(),
+      addonInfo: addonInfo,
+      downloadSourceAction: async (url: string) => {
+        const response = await Zotero.HTTP.request("GET", url);
+        return `data:text/javascript;base64,${btoa(response.response)}`;
+      },
+    };
     const win = Zotero.getMainWindow().openDialog(
       `chrome://${config.addonRef}/content/addonDetail.xhtml`,
       `${config.addonRef}-addonDetail`,
@@ -148,7 +155,8 @@ export class AddonInfoDetail {
       Zotero.launchURL(`https://github.com/${addonInfo.repo}`);
     });
     this.commentButton.addEventListener("click", (e) => {
-      Zotero.openInViewer(`https://zotero.store/addon/${addonInfo.repo}?addonInfo=${JSON.stringify(addonInfo)}`);
+      const url = `https://zotero.store?addonInfo=${encodeURIComponent(JSON.stringify(addonInfo))}`;
+      Zotero.openInViewer(url);
     });
 
     await this.refresh();
