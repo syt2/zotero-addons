@@ -49,7 +49,7 @@ export class AddonInfoDetail {
     const win = Zotero.getMainWindow().openDialog(
       `chrome://${config.addonRef}/content/addonDetail.xhtml`,
       `${config.addonRef}-addonDetail`,
-      `chrome,centerscreen,resizable,status,dialog=no,width=520,height=240`,
+      `chrome,centerscreen,resizable,status,dialog=no,width=800,height=640`,
       windowArgs,
     );
     await windowArgs._initPromise.promise;
@@ -154,10 +154,6 @@ export class AddonInfoDetail {
       }
       Zotero.launchURL(`https://github.com/${addonInfo.repo}`);
     });
-    this.commentButton.addEventListener("click", (e) => {
-      const url = `https://zotero.store?addonInfo=${encodeURIComponent(JSON.stringify(addonInfo))}`;
-      Zotero.openInViewer(url);
-    });
 
     await this.refresh();
   }
@@ -172,9 +168,6 @@ export class AddonInfoDetail {
     });
   }
 
-  private static get commentButton() {
-    return this.window?.document.querySelector("#comment") as HTMLButtonElement;
-  }
   private static get installButton() {
     return this.window?.document.querySelector("#install") as HTMLButtonElement;
   }

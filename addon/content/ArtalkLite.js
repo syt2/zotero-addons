@@ -1,63 +1,64 @@
-(function(global2, factory) {
+(function (global2, factory) {
   typeof exports === "object" && typeof module !== "undefined" ? factory(exports, require("marked")) : typeof define === "function" && define.amd ? define(["exports", "marked"], factory) : (global2 = typeof globalThis !== "undefined" ? globalThis : global2 || self, factory(global2.Artalk = {}, global2.marked));
-})(this, function(exports2, marked$1) {
-  "use strict";var __defProp = Object.defineProperty;
-var __defProps = Object.defineProperties;
-var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
-var __getOwnPropSymbols = Object.getOwnPropertySymbols;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __propIsEnum = Object.prototype.propertyIsEnumerable;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __spreadValues = (a, b) => {
-  for (var prop in b || (b = {}))
-    if (__hasOwnProp.call(b, prop))
-      __defNormalProp(a, prop, b[prop]);
-  if (__getOwnPropSymbols)
-    for (var prop of __getOwnPropSymbols(b)) {
-      if (__propIsEnum.call(b, prop))
+})(this, function (exports2, marked$1) {
+  "use strict"; var __defProp = Object.defineProperty;
+  var __defProps = Object.defineProperties;
+  var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+  var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __propIsEnum = Object.prototype.propertyIsEnumerable;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __spreadValues = (a, b) => {
+    for (var prop in b || (b = {}))
+      if (__hasOwnProp.call(b, prop))
         __defNormalProp(a, prop, b[prop]);
-    }
-  return a;
-};
-var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
-var __objRest = (source, exclude) => {
-  var target = {};
-  for (var prop in source)
-    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
-      target[prop] = source[prop];
-  if (source != null && __getOwnPropSymbols)
-    for (var prop of __getOwnPropSymbols(source)) {
-      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+    if (__getOwnPropSymbols)
+      for (var prop of __getOwnPropSymbols(b)) {
+        if (__propIsEnum.call(b, prop))
+          __defNormalProp(a, prop, b[prop]);
+      }
+    return a;
+  };
+  var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+  var __objRest = (source, exclude) => {
+    var target = {};
+    for (var prop in source)
+      if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
         target[prop] = source[prop];
-    }
-  return target;
-};
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
+    if (source != null && __getOwnPropSymbols)
+      for (var prop of __getOwnPropSymbols(source)) {
+        if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+          target[prop] = source[prop];
       }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
+    return target;
+  };
+  var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  var __async = (__this, __arguments, generator) => {
+    return new Promise((resolve, reject) => {
+      var fulfilled = (value) => {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      };
+      var rejected = (value) => {
+        try {
+          step(generator.throw(value));
+        } catch (e) {
+          reject(e);
+        }
+      };
+      var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+      step((generator = generator.apply(__this, __arguments)).next());
+    });
+  };
 
   function createElement(htmlStr = "") {
-    const div = document.createElement("div");
-    div.innerHTML = htmlStr.trim();
-    return div.firstElementChild || div;
+    const parser2 = new DOMParser();
+    const doc = parser2.parseFromString(htmlStr.trim(), "text/html");
+    const element = doc.body.firstElementChild || doc.body;
+    return document.importNode(element, true);
   }
   function getHeight(el) {
     const num = parseFloat(getComputedStyle(el, null).height.replace("px", ""));
@@ -923,26 +924,26 @@ var __async = (__this, __arguments, generator) => {
     return insane$1(content, insaneOptions);
   }
   var hanabi$1 = { exports: {} };
-  (function(module2, exports3) {
-    (function(global2, factory) {
+  (function (module2, exports3) {
+    (function (global2, factory) {
       module2.exports = factory();
-    })(commonjsGlobal, function() {
+    })(commonjsGlobal, function () {
       function createCommonjsModule(fn, module3) {
         return module3 = { exports: {} }, fn(module3, module3.exports), module3.exports;
       }
-      var index$1 = createCommonjsModule(function(module3) {
-        var comment = module3.exports = function() {
+      var index$1 = createCommonjsModule(function (module3) {
+        var comment = module3.exports = function () {
           return new RegExp("(?:" + comment.line().source + ")|(?:" + comment.block().source + ")", "gm");
         };
-        comment.line = function() {
+        comment.line = function () {
           return /(?:^|\s)\/\/(.+?)$/gm;
         };
-        comment.block = function() {
+        comment.block = function () {
           return /\/\*([\S\s]*?)\*\//gm;
         };
       });
       var defaultColors = ["23AC69", "91C132", "F19726", "E8552D", "1AAB8E", "E1147F", "2980C1", "1BA1E6", "9FA0A0", "F19726", "E30B20", "E30B20", "A3338B"];
-      var index = function(input, ref) {
+      var index = function (input, ref) {
         if (ref === void 0) ref = {};
         var colors = ref.colors;
         if (colors === void 0) colors = defaultColors;
@@ -951,7 +952,7 @@ var __async = (__this, __arguments, generator) => {
         var wordRe = /[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af\u0400-\u04FF]+|\w+/;
         var leftAngleRe = /</;
         var re = new RegExp("(" + wordRe.source + "|" + leftAngleRe.source + ")|(" + index$1().source + ")", "gmi");
-        return input.replace(re, function(m, word, cm) {
+        return input.replace(re, function (m, word, cm) {
           if (cm) {
             return toComment(cm);
           }

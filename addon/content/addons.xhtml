@@ -7,182 +7,154 @@ href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://__addonRef__/content/virtualizedTable.css"
 type="text/css"?>
 <!DOCTYPE html>
-<html
-  lang="en"
-  xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-  xmlns:html="http://www.w3.org/1999/xhtml"
-  windowtype="__addonRef__-addons"
-  sizemode="normal"
-  scrolling="false"
-  persist="screenX screenY width height sizemode"
->
-  <head>
-    <title data-l10n-id="title"></title>
-    <meta charset="utf-8" />
-    <script>
-      document.addEventListener("DOMContentLoaded", (ev) => {
-        Services.scriptloader.loadSubScript(
-          "chrome://zotero/content/include.js",
-          this,
-        );
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:html="http://www.w3.org/1999/xhtml"
+  windowtype="__addonRef__-addons" sizemode="normal" scrolling="false" persist="screenX screenY width height sizemode">
 
-        Services.scriptloader.loadSubScript(
-          "resource://zotero/require.js",
-          this,
-        );
-        window.arguments[0]._initPromise.resolve();
-      });
-    </script>
-    <style>
-      html,
-      body,
-      .viewport {
-        padding: 0;
-        margin: 0;
-        height: 100%;
-        overflow-x: hidden;
-        overflow-y: auto;
-        word-wrap: break-word;
-        font-family: initial;
-      }
+<head>
+  <title data-l10n-id="title"></title>
+  <meta charset="utf-8" />
+  <script>
+    document.addEventListener("DOMContentLoaded", (ev) => {
+      Services.scriptloader.loadSubScript(
+        "chrome://zotero/content/include.js",
+        this,
+      );
 
-      .viewport {
-        margin: 0 5px 0 5px;
-      }
+      Services.scriptloader.loadSubScript(
+        "resource://zotero/require.js",
+        this,
+      );
+      window.arguments[0]._initPromise.resolve();
+    });
+  </script>
+  <style>
+    html,
+    body,
+    .viewport {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      word-wrap: break-word;
+      font-family: initial;
+    }
 
-      .viewport-container {
-        padding: 0;
-        margin: 0;
-        height: calc(100% - 50px);
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        overflow: hidden;
-      }
+    .viewport {
+      margin: 0 5px 0 5px;
+    }
 
-      .list-viewport {
-        width: 100%;
-        overflow: hidden;
-      }
+    .viewport-container {
+      padding: 0;
+      margin: 0;
+      height: calc(100% - 50px);
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+    }
 
-      #table-container {
-        height: 100%;
-        width: 100%;
-        overflow-x: hidden;
-        overflow-y: scroll;
-      }
+    .list-viewport {
+      width: 100%;
+      overflow: hidden;
+    }
 
-      #search-container {
-        border-bottom: 1px solid transparent;
-      }
+    #table-container {
+      height: 100%;
+      width: 100%;
+      overflow-x: hidden;
+      overflow-y: scroll;
+    }
 
-      #search-button {
-        list-style-image: url("chrome://zotero/skin/20/universal/magnifier.svg");
-        fill: currentColor;
-      }
+    #search-container {
+      border-bottom: 1px solid transparent;
+    }
 
-      #search-field {
-        max-width: 0;
-        transition: max-width 0.2s ease;
-        padding: 0;
-        padding-inline-end: 6px;
-        margin: 0;
-        appearance: none;
-        height: 28px;
-      }
+    #search-button {
+      list-style-image: url("chrome://zotero/skin/20/universal/magnifier.svg");
+      fill: currentColor;
+    }
 
-      #search-field.visible {
-        max-width: 180px;
-      }
+    #search-field {
+      max-width: 0;
+      transition: max-width 0.2s ease;
+      padding: 0;
+      padding-inline-end: 6px;
+      margin: 0;
+      appearance: none;
+      height: 28px;
+    }
 
-      #search-field.expanding {
-        padding-inline-end: 35px;
-      }
+    #search-field.visible {
+      max-width: 180px;
+    }
 
-      #refresh {
-        list-style-image: url("chrome://zotero/skin/20/universal/sync.svg");
-        fill: currentColor;
-      }
-    </style>
-    <link rel="localization" href="__addonRef__-addonTable.ftl" />
-  </head>
+    #search-field.expanding {
+      padding-inline-end: 35px;
+    }
 
-  <body>
-    <div class="viewport-container">
-      <div id="list-container" class="viewport list-viewport">
-        <div id="listContainerPlaceholder"></div>
-        <div id="listContainerColumnMenuPlaceholder"></div>
-        <div id="table-container"></div>
-      </div>
+    #refresh {
+      list-style-image: url("chrome://zotero/skin/20/universal/sync.svg");
+      fill: currentColor;
+    }
+  </style>
+  <link rel="localization" href="__addonRef__-addonTable.ftl" />
+</head>
+
+<body>
+  <div class="viewport-container">
+    <div id="list-container" class="viewport list-viewport">
+      <div id="listContainerPlaceholder"></div>
+      <div id="listContainerColumnMenuPlaceholder"></div>
+      <div id="table-container"></div>
     </div>
-    <div
-      class="footer-container"
-      style="
+  </div>
+  <div class="footer-container" style="
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 4px;
-      "
-      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-    >
-      <!-- zotero original source: https://github.com/zotero/zotero/blob/3b7dd58c504884a55fab345efbc06de366983ab2/chrome/content/zotero/zoteroPane.xhtml#L1184 -->
-      <toolbar
-        id="search-container-toolbar"
-        tabindex="-1"
-        class="zotero-toolbar toolbar toolbar-primary"
-      >
-        <hbox id="search-container" style="align-items: center">
-          <html:div
-            style="
+      " xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <!-- zotero original source: https://github.com/zotero/zotero/blob/3b7dd58c504884a55fab345efbc06de366983ab2/chrome/content/zotero/zoteroPane.xhtml#L1184 -->
+    <toolbar id="search-container-toolbar" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
+      <hbox id="search-container" style="align-items: center">
+        <html:div style="
               display: flex;
               flex-direction: row;
               flex-grow: 0;
               flex-shrink: 1;
               min-width: 0;
-            "
-          >
-            <toolbarbutton id="search-button" tabindex="-1" />
-            <search-textbox
-              id="search-field"
-              class="hidden"
-              disabled="true"
-              data-l10n-id="search-field"
-              data-l10n-attrs="placeholder"
-            />
-          </html:div>
-        </hbox>
-      </toolbar>
+            ">
+          <toolbarbutton id="search-button" tabindex="-1" />
+          <search-textbox id="search-field" class="hidden" disabled="true" data-l10n-id="search-field"
+            data-l10n-attrs="placeholder" />
+        </html:div>
+      </hbox>
+    </toolbar>
 
-      <toolbarbutton id="refresh" tabindex="-1" />
-      <div style="width: 8px"></div>
+    <toolbarbutton id="refresh" tabindex="-1" />
+    <div style="width: 8px"></div>
 
-      <groupbox>
-        <div style="display: flex; align-items: center">
-          <label data-l10n-id="selectSource"></label>
-          <div id="sourceContainerPlaceholder"></div>
-        </div>
-      </groupbox>
-      <groupbox id="customSource-container">
-        <div style="display: flex; align-items: center">
-          <label data-l10n-id="customSource"></label>
-          <html:input type="text" id="customSourceInput"></html:input>
-        </div>
-      </groupbox>
+    <groupbox>
+      <div style="display: flex; align-items: center">
+        <label data-l10n-id="selectSource"></label>
+        <div id="sourceContainerPlaceholder"></div>
+      </div>
+    </groupbox>
+    <groupbox id="customSource-container">
+      <div style="display: flex; align-items: center">
+        <label data-l10n-id="customSource"></label>
+        <html:input type="text" id="customSourceInput"></html:input>
+      </div>
+    </groupbox>
 
-      <checkbox
-        id="hide-toolbar-entrance"
-        style="padding-left: 2px; margin-left: auto"
-        hidden="true"
-        data-l10n-id="hideToolbarEntrance"
-      >
-      </checkbox>
-      <checkbox
-        id="auto-update"
-        style="padding-left: 24px; margin-left: auto"
-        data-l10n-id="autoUpdate"
-      >
-      </checkbox>
-    </div>
-  </body>
+    <checkbox id="hide-toolbar-entrance" style="padding-left: 2px; margin-left: auto" hidden="true"
+      data-l10n-id="hideToolbarEntrance">
+    </checkbox>
+    <checkbox id="auto-update" style="padding-left: 24px; margin-left: auto" data-l10n-id="autoUpdate">
+    </checkbox>
+  </div>
+</body>
+
 </html>
