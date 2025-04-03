@@ -38,11 +38,18 @@ export class AddonInfoDetail {
   static async showDetailWindow(addonInfo: AddonInfo) {
     this.window?.close();
     this.addonInfo = addonInfo;
-    const windowArgs = { _initPromise: Zotero.Promise.defer() };
+    const windowArgs = {
+      _initPromise: Zotero.Promise.defer(),
+      addonInfo: addonInfo,
+      downloadSourceAction: async (url: string) => {
+        const response = await Zotero.HTTP.request("GET", url);
+        return btoa(response.response);
+      },
+    };
     const win = Zotero.getMainWindow().openDialog(
       `chrome://${config.addonRef}/content/addonDetail.xhtml`,
       `${config.addonRef}-addonDetail`,
-      `chrome,centerscreen,resizable,status,dialog=no,width=520,height=240`,
+      `chrome,centerscreen,resizable,status,dialog=no,width=800,height=640`,
       windowArgs,
     );
     await windowArgs._initPromise.promise;

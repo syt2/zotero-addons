@@ -7,71 +7,75 @@ href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://__addonRef__/content/virtualizedTable.css"
 type="text/css"?>
 <!DOCTYPE html>
-<html
-  lang="en"
-  xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-  xmlns:html="http://www.w3.org/1999/xhtml"
-  windowtype="__addonRef__-addon_detail"
-  sizemode="normal"
-  scrolling="true"
-  persist="screenX screenY width height sizemode"
->
-  <head>
-    <title id="win-title"></title>
-    <meta charset="utf-8" />
-    <script>
-      document.addEventListener("DOMContentLoaded", (ev) => {
-        Services.scriptloader.loadSubScript(
-          "chrome://zotero/content/include.js",
-          this,
-        );
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:html="http://www.w3.org/1999/xhtml"
+  windowtype="__addonRef__-addon_detail" sizemode="normal" scrolling="true"
+  persist="screenX screenY width height sizemode">
 
-        Services.scriptloader.loadSubScript(
-          "resource://zotero/require.js",
-          this,
-        );
-        window.arguments[0]._initPromise.resolve();
-      });
-    </script>
-    <style>
-      html,
-      body,
-      .viewport {
-        padding: 0;
-        margin: 0;
-        /* height: 100%; */
-        overflow-x: hidden;
-        overflow-y: auto;
-        word-wrap: break-word;
-        /* background-color: #f0f0f0; */
-        font-family: initial;
-      }
+<head>
+  <title id="win-title"></title>
+  <meta charset="utf-8" />
+  <script>
+    document.addEventListener("DOMContentLoaded", (ev) => {
+      Services.scriptloader.loadSubScript(
+        "chrome://zotero/content/include.js",
+        this,
+      );
 
-      .viewport {
-        margin: 0 5px 0 5px;
-      }
+      Services.scriptloader.loadSubScript(
+        "resource://zotero/require.js",
+        this,
+      );
+      window.arguments[0]._initPromise.resolve();
+    });
+  </script>
+  <style>
+    html,
+    body,
+    .viewport {
+      padding: 0;
+      margin: 0;
+      /* height: 100%; */
+      overflow-x: hidden;
+      overflow-y: auto;
+      word-wrap: break-word;
+      /* background-color: #f0f0f0; */
+      font-family: initial;
+    }
 
-      .viewport-container {
-        padding: 0;
-        margin: 16px;
-        height: 100%;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        /* background-color: #f0f0f0; */
-      }
-    </style>
-    <link rel="localization" href="__addonRef__-addonDetail.ftl" />
-  </head>
+    .viewport {
+      margin: 0 5px 0 5px;
+    }
 
-  <body>
-    <div class="viewport-container">
-      <div style="display: flex; align-items: center; flex-wrap: wrap">
-        <img
-          id="addon-icon"
-          style="
+    .viewport-container {
+      padding: 0;
+      margin: 16px;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      /* background-color: #f0f0f0; */
+    }
+
+    .artalk-container {
+      margin: 16px;
+    }
+
+    .atk-on {
+      /* iframe cannot load, hide it */
+      display: none;
+    }
+  </style>
+  <link rel="localization" href="__addonRef__-addonDetail.ftl" />
+  <link href="ArtalkLite.css" rel="stylesheet" />
+  <script src="ArtalkLite.js"></script>
+</head>
+
+<body>
+  <div class="viewport-container">
+    <div style="display: flex; align-items: center; flex-wrap: wrap">
+      <img id="addon-icon" style="
             vertical-align: middle;
             width: 32px;
             height: 100%;
@@ -79,30 +83,22 @@ type="text/css"?>
             object-position: left;
             cursor: pointer;
             padding-right: 8px;
-          "
-        />
-        <a
-          id="addon-name"
-          style="
+          " />
+      <a id="addon-name" style="
             font-weight: bold;
             font-size: large;
             text-decoration: underline;
             color: cornflowerblue;
             cursor: pointer;
-          "
-        ></a>
-      </div>
-      <div
-        style="
+          "></a>
+    </div>
+    <div style="
           display: flex;
           align-items: center;
           margin-top: 2px;
           flex-wrap: wrap;
-        "
-      >
-        <img
-          id="avatar-icon"
-          style="
+        ">
+      <img id="avatar-icon" style="
             vertical-align: middle;
             width: 24px;
             height: 100%;
@@ -110,145 +106,118 @@ type="text/css"?>
             object-position: left;
             border-radius: 50%;
             cursor: pointer;
-          "
-        />
-        <a
-          id="author-name"
-          style="
+          " />
+      <a id="author-name" style="
             padding-left: 8px;
             text-decoration: underline;
             cursor: pointer;
             font-size: small;
             color: cornflowerblue;
-          "
-        ></a>
-      </div>
-      <div
-        style="
+          "></a>
+    </div>
+    <div style="
           display: flex;
           align-items: center;
           margin-top: 4px;
           flex-wrap: wrap;
-        "
-      >
-        <img
-          id="stars-icon"
-          style="
+        ">
+      <img id="stars-icon" style="
             vertical-align: middle;
             height: 100%;
             object-fit: contain;
             object-position: left;
             margin: 1px;
-          "
-        />
-        <img
-          id="local-version-icon"
-          style="
+          " />
+      <img id="local-version-icon" style="
             vertical-align: middle;
             height: 100%;
             object-fit: contain;
             object-position: left;
             margin: 1px;
-          "
-        />
-        <img
-          id="remote-version-icon"
-          style="
+          " />
+      <img id="remote-version-icon" style="
             vertical-align: middle;
             height: 100%;
             object-fit: contain;
             object-position: left;
             margin: 1px;
-          "
-        />
-        <img
-          id="download-latest-count-icon"
-          style="
+          " />
+      <img id="download-latest-count-icon" style="
             vertical-align: middle;
             height: 100%;
             object-fit: contain;
             object-position: left;
             margin: 1px;
-          "
-        />
-        <img
-          id="release-time-icon"
-          style="
+          " />
+      <img id="release-time-icon" style="
             vertical-align: middle;
             height: 100%;
             object-fit: contain;
             object-position: left;
             margin: 1px;
-          "
-        />
-      </div>
-      <label
-        id="uncompatibleDescription"
-        style="
+          " />
+    </div>
+    <label id="uncompatibleDescription" style="
           font-size: small;
           margin-top: 12px;
           text-align: left;
           padding-right: 16px;
           color: firebrick;
-        "
-        hidden="true"
-      ></label>
-      <label
-        id="description"
-        style="
+        " hidden="true"></label>
+    <label id="description" style="
           font-size: medium;
           margin-top: 12px;
           text-align: left;
           padding-right: 16px;
-        "
-      ></label>
-    </div>
+        "></label>
+  </div>
 
-    <div
-      class="footer-container"
-      style="padding: 10px; display: flex; flex-wrap: wrap"
-      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-    >
-      <button
-        id="install"
-        data-l10n-id="install"
-        style="cursor: pointer"
-      ></button>
-      <button
-        id="update"
-        data-l10n-id="update"
-        style="cursor: pointer"
-      ></button>
-      <button
-        id="reinstall"
-        data-l10n-id="reinstall"
-        style="cursor: pointer"
-      ></button>
-      <button
-        id="uninstall"
-        data-l10n-id="uninstall"
-        style="cursor: pointer"
-      ></button>
-      <button
-        id="remove"
-        data-l10n-id="remove"
-        style="cursor: pointer"
-      ></button>
-      <button
-        id="uninstallUndo"
-        data-l10n-id="uninstallUndo"
-        style="cursor: pointer"
-      ></button>
-      <button
-        id="enable"
-        data-l10n-id="enable"
-        style="cursor: pointer"
-      ></button>
-      <button
-        id="disable"
-        data-l10n-id="disable"
-        style="cursor: pointer"
-      ></button>
-    </div>
-  </body>
+  <div class="footer-container" style="padding: 10px; display: flex; flex-wrap: wrap"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <button id="install" data-l10n-id="install" style="cursor: pointer"></button>
+    <button id="update" data-l10n-id="update" style="cursor: pointer"></button>
+    <button id="reinstall" data-l10n-id="reinstall" style="cursor: pointer"></button>
+    <button id="uninstall" data-l10n-id="uninstall" style="cursor: pointer"></button>
+    <button id="remove" data-l10n-id="remove" style="cursor: pointer"></button>
+    <button id="uninstallUndo" data-l10n-id="uninstallUndo" style="cursor: pointer"></button>
+    <button id="enable" data-l10n-id="enable" style="cursor: pointer"></button>
+    <button id="disable" data-l10n-id="disable" style="cursor: pointer"></button>
+  </div>
+
+  <div class="artalk-container">
+    <div id="artalk-placeholder"></div>
+  </div>
+  <script>
+    const addonInfo = window.arguments[0].addonInfo;
+    const downloadSourceAction = window.arguments[0].downloadSourceAction;
+
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const artalk = Artalk.init({
+      el: '#artalk-placeholder',
+      pageKey: `/${addonInfo.repo}/post`,
+      pageTitle: addonInfo.name,
+      server: 'https://apod.tracepad.site',
+      site: 'Zotero Plugin Market',
+      darkMode: prefersDarkScheme.matches,
+      getItem: (key) => Services.prefs.getStringPref(`${key}`, ''),
+      setItem: (key, value) => Services.prefs.setStringPref(`${key}`, value),
+      downloadSource: (url) => downloadSourceAction(url),
+    });
+    artalk.on('mounted', () => { // not working in init, so we need to call it again  
+      artalk?.update({ locale: Services.prefs.getStringPref(`intl.accept_languages`, '[en-US]').split(',')[0] })
+    })
+    window.addEventListener('unload', () => {
+      console.log('unload');
+      artalk.destroy();
+    });
+
+    const updateTheme = (e) => {
+      const newTheme = e.matches ? 'dark' : 'light'
+      artalk.setDarkMode(newTheme === 'dark')
+    }
+    prefersDarkScheme.addEventListener('change', updateTheme)
+  </script>
+</body>
+
 </html>
