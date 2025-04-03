@@ -41,6 +41,7 @@ export class AddonInfoDetail {
     const windowArgs = {
       _initPromise: Zotero.Promise.defer(),
       addonInfo: addonInfo,
+      site: __env__ === 'development' ? 'Zotero Plugin Market for testing' : 'Zotero Plugin Market',
       downloadSourceAction: async (url: string) => {
         const response = await Zotero.HTTP.request("GET", url);
         return btoa(response.response);
