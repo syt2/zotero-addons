@@ -1,17 +1,18 @@
 # <img align="center" src="../addon/content/icons/favicon.svg" width=60/> Zotero 插件市场
 
 [![zotero target version](https://img.shields.io/badge/Zotero-7-green?style=flat-square&logo=zotero&logoColor=CC2936)](https://www.zotero.org)
+[![Release](https://img.shields.io/github/v/release/syt2/zotero-addons?style=flat-square&logo=github&color=red)](https://github.com/syt2/zotero-addons/releases/latest)
+![Downloads@z7](https://img.shields.io/github/downloads/syt2/zotero-addons/latest/total?style=flat-square&logo=github&label=downloads@z7)  
 [![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)
 [![Using Zotero Chinese Plugins](https://img.shields.io/badge/Using-Zotero%20Chinese%20Plugins-blue?style=flat-square&logo=github)](https://github.com/zotero-chinese/zotero-plugins)
-[![Using Zotero Scraper](https://img.shields.io/badge/Using-Zotero%20Addons%20Scraper-blue?style=flat-square&logo=github)](https://github.com/syt2/zotero-addons-scraper)  
-[![Release](https://img.shields.io/github/v/release/syt2/zotero-addons?style=flat-square&logo=github&color=red)](https://github.com/syt2/zotero-addons/releases/latest)
-![Downloads@z7](https://img.shields.io/github/downloads/syt2/zotero-addons/latest/total?style=flat-square&logo=github&label=downloads@z7)
+[![Using Zotero Scraper](https://img.shields.io/badge/Using-Zotero%20Addons%20Scraper-blue?style=flat-square&logo=github)](https://github.com/syt2/zotero-addons-scraper)
+[![Using Artalk](https://img.shields.io/badge/Using-Artalk-blue?style=flat-square&logo=github)](https://github.com/ArtalkJS/Artalk) 
 
 [English](../README.md) | [简体中文](README-CN.md)
 
 ## 简介
 
-这是一个用于在 [Zotero](https://www.zotero.org) 内浏览和安装插件的 [Zotero](https://www.zotero.org) 插件
+这是一个用于在 [Zotero](https://www.zotero.org) 内浏览、安装和评论插件的 [Zotero](https://www.zotero.org) 插件
 
 ## 安装
 
@@ -23,7 +24,7 @@
 
 安装完成后，点击工具栏的 <img align="center" src="../addon/content/icons/favicon.svg" width=20/> 按钮，或者在`工具`菜单内点击`插件市场`
 
-<img align="center" src="screenshot.png" width=600/>
+<img align="center" src="screenshot.jpg" width=600/>
 
 ## 插件数据源
 

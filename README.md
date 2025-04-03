@@ -1,17 +1,20 @@
 # <img align="center" src="addon/content/icons/favicon.svg" width=60/> Add-on Market for Zotero
 
 [![zotero target version](https://img.shields.io/badge/Zotero-7-green?style=flat-square&logo=zotero&logoColor=CC2936)](https://www.zotero.org)
+[![Release](https://img.shields.io/github/v/release/syt2/zotero-addons?style=flat-square&logo=github&color=red)](https://github.com/syt2/zotero-addons/releases/latest)
+![Downloads@z7](https://img.shields.io/github/downloads/syt2/zotero-addons/latest/total?style=flat-square&logo=github&label=downloads@z7)  
 [![Using Zotero Plugin Template](https://img.shields.io/badge/Using-Zotero%20Plugin%20Template-blue?style=flat-square&logo=github)](https://github.com/windingwind/zotero-plugin-template)
 [![Using Zotero Chinese Plugins](https://img.shields.io/badge/Using-Zotero%20Chinese%20Plugins-blue?style=flat-square&logo=github)](https://github.com/zotero-chinese/zotero-plugins)
-[![Using Zotero Scraper](https://img.shields.io/badge/Using-Zotero%20Addons%20Scraper-blue?style=flat-square&logo=github)](https://github.com/syt2/zotero-addons-scraper)  
-[![Release](https://img.shields.io/github/v/release/syt2/zotero-addons?style=flat-square&logo=github&color=red)](https://github.com/syt2/zotero-addons/releases/latest)
-![Downloads@z7](https://img.shields.io/github/downloads/syt2/zotero-addons/latest/total?style=flat-square&logo=github&label=downloads@z7)
+[![Using Zotero Scraper](https://img.shields.io/badge/Using-Zotero%20Addons%20Scraper-blue?style=flat-square&logo=github)](https://github.com/syt2/zotero-addons-scraper)
+[![Using Artalk](https://img.shields.io/badge/Using-Artalk-blue?style=flat-square&logo=github)](https://github.com/ArtalkJS/Artalk)  
+
 
 [English](README.md) | [简体中文](doc/README-CN.md)
 
 ## Introduction
 
-This is a Zotero add-on that allows for the direct installation of other add-ons in [Zotero](https://www.zotero.org).
+This is a Zotero plugin designed for browsing, installing, and reviewing plugins within [Zotero](https://www.zotero.org).
+
 
 ## Install
 
@@ -22,7 +25,7 @@ This is a Zotero add-on that allows for the direct installation of other add-ons
 ## Usage
 
 After install this add-on in Zotero, click <img align="center" src="addon/content/icons/favicon.svg" width=20/> in Toolbar, or click `Add-on market` in `Tools` menu.
-<img align="center" src="doc/screenshot.png" width=600/>
+<img align="center" src="doc/screenshot.jpg" width=600/>
 
 ## Add-on Data Source
 
