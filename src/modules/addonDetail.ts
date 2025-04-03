@@ -43,7 +43,7 @@ export class AddonInfoDetail {
       addonInfo: addonInfo,
       downloadSourceAction: async (url: string) => {
         const response = await Zotero.HTTP.request("GET", url);
-        return `data:text/javascript;base64,${btoa(response.response)}`;
+        return btoa(response.response);
       },
     };
     const win = Zotero.getMainWindow().openDialog(

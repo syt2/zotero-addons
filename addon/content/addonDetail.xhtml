@@ -61,6 +61,11 @@ type="text/css"?>
     .artalk-container {
       margin: 16px;
     }
+
+    .atk-on {
+      /* iframe cannot load, hide it */
+      display: none;
+    }
   </style>
   <link rel="localization" href="__addonRef__-addonDetail.ftl" />
   <link href="ArtalkLite.css" rel="stylesheet" />
@@ -190,7 +195,7 @@ type="text/css"?>
 
     const artalk = Artalk.init({
       el: '#artalk-placeholder',
-      pageKey: `/${addonInfo.repo}/post/1`,
+      pageKey: `/${addonInfo.repo}/post`,
       pageTitle: addonInfo.name,
       server: 'https://apod.tracepad.site',
       site: 'Zotero Plugin Market',
@@ -199,6 +204,9 @@ type="text/css"?>
       setItem: (key, value) => Services.prefs.setStringPref(`${key}`, value),
       downloadSource: (url) => downloadSourceAction(url),
     });
+    artalk.on('mounted', () => { // not working in init, so we need to call it again  
+      artalk?.update({ locale: Services.prefs.getStringPref(`intl.accept_languages`, '[en-US]').split(',')[0] })
+    })
     window.addEventListener('unload', () => {
       console.log('unload');
       artalk.destroy();

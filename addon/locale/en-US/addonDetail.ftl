@@ -14,5 +14,3 @@ enable =
     .label = Enable
 disable = 
     .label = Disable
-comment =
-    .label = Comments

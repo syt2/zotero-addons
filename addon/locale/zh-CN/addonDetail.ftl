@@ -14,5 +14,3 @@ enable =
     .label = 启用
 disable = 
     .label = 禁用
-comment =
-    .label = 评论
