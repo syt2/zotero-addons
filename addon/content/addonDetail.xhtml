@@ -190,6 +190,7 @@ type="text/css"?>
   <script>
     const addonInfo = window.arguments[0].addonInfo;
     const downloadSourceAction = window.arguments[0].downloadSourceAction;
+    const site = window.arguments[0].site;
 
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -198,7 +199,7 @@ type="text/css"?>
       pageKey: `/${addonInfo.repo}/post`,
       pageTitle: addonInfo.name,
       server: 'https://artalk.zotero.store',
-      site: 'Zotero Plugin Market',
+      site: site,
       darkMode: prefersDarkScheme.matches,
       getItem: (key) => Services.prefs.getStringPref(`${key}`, ''),
       setItem: (key, value) => Services.prefs.setStringPref(`${key}`, value),
@@ -208,7 +209,6 @@ type="text/css"?>
       artalk?.update({ locale: Services.prefs.getStringPref(`intl.accept_languages`, '[en-US]').split(',')[0] })
     })
     window.addEventListener('unload', () => {
-      console.log('unload');
       artalk.destroy();
     });
 
