@@ -61,11 +61,6 @@ type="text/css"?>
     .artalk-container {
       margin: 16px;
     }
-
-    .atk-on {
-      /* iframe cannot load, hide it */
-      display: none;
-    }
   </style>
   <link rel="localization" href="__addonRef__-addonDetail.ftl" />
   <link href="ArtalkLite.css" rel="stylesheet" />
@@ -190,6 +185,7 @@ type="text/css"?>
   <script>
     const addonInfo = window.arguments[0].addonInfo;
     const downloadSourceAction = window.arguments[0].downloadSourceAction;
+    const openInViewAction = window.arguments[0].openInViewAction;
     const site = window.arguments[0].site;
 
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
@@ -204,6 +200,7 @@ type="text/css"?>
       getItem: (key) => Services.prefs.getStringPref(`${key}`, ''),
       setItem: (key, value) => Services.prefs.setStringPref(`${key}`, value),
       downloadSource: (url) => downloadSourceAction(url),
+      openInView: (url) => openInViewAction(url),
     });
     artalk.on('mounted', () => { // not working in init, so we need to call it again  
       artalk?.update({ locale: Services.prefs.getStringPref(`intl.accept_languages`, '[en-US]').split(',')[0] })
