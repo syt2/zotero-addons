@@ -204,6 +204,19 @@ type="text/css"?>
     });
     artalk.on('mounted', () => { // not working in init, so we need to call it again  
       artalk?.update({ locale: Services.prefs.getStringPref(`intl.accept_languages`, '[en-US]').split(',')[0] })
+
+      document.addEventListener('click', function (e) {
+        const anchor = e.target.closest('a[target="_blank"]')
+        if (!anchor) { return }
+        if (!anchor.hasAttribute('href')) { return }
+        const href = anchor.getAttribute('href')
+        if (href.startsWith('javascript:')) { return }
+        if (href === window.location.href) { return }
+        if (!href.trim()) { return }
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        openInViewAction(anchor.href);
+      }, true); // 使用捕获阶段确保优先执行
     })
     window.addEventListener('unload', () => {
       artalk.destroy();
