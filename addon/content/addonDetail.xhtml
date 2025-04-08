@@ -61,6 +61,10 @@ type="text/css"?>
     .artalk-container {
       margin: 16px;
     }
+
+    .atk-link {
+      display: none;
+    }
   </style>
   <link rel="localization" href="__addonRef__-addonDetail.ftl" />
   <link href="ArtalkLite.css" rel="stylesheet" />
@@ -187,8 +191,26 @@ type="text/css"?>
     const downloadSourceAction = window.arguments[0].downloadSourceAction;
     const openInViewAction = window.arguments[0].openInViewAction;
     const site = window.arguments[0].site;
-
+    const zotero = window.arguments[0].zotero;
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+    try {
+      const artalkUser = Services.prefs.getStringPref('ArtalkUser', '{}');
+      const user = JSON.parse(artalkUser);
+      if (!user.email || !user.name) {
+        const name = zotero.Users.getCurrentUsername() || zotero.Prefs.get('sync.server.username') || "";
+        const email = Services.prefs.getStringPref('extensions.zotero.sync.server.username', '') || `${zotero.Users.getCurrentUserID()}@zotero.org` || "";
+        if (!user.email) {
+          user.email = email;
+        }
+        if (!user.name) {
+          user.name = name;
+        }
+        Services.prefs.setStringPref('ArtalkUser', JSON.stringify(user));
+      }
+    } catch (e) {
+      console.error(e);
+    }
 
     const artalk = Artalk.init({
       el: '#artalk-placeholder',
@@ -217,7 +239,7 @@ type="text/css"?>
         e.preventDefault();
         e.stopImmediatePropagation();
         openInViewAction(anchor.href);
-      }, true); // 使用捕获阶段确保优先执行
+      }, true);
     })
     window.addEventListener('unload', () => {
       artalk.destroy();

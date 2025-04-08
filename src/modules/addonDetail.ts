@@ -47,6 +47,7 @@ export class AddonInfoDetail {
         return btoa(response.response);
       },
       openInViewAction: (url: string) => Zotero.openInViewer(url),
+      zotero: Zotero,
     };
     const win = Zotero.getMainWindow().openDialog(
       `chrome://${config.addonRef}/content/addonDetail.xhtml`,
