@@ -199,7 +199,8 @@ type="text/css"?>
       const user = JSON.parse(artalkUser);
       if (!user.email || !user.name) {
         const name = zotero.Users.getCurrentUsername() || zotero.Prefs.get('sync.server.username') || "";
-        const email = Services.prefs.getStringPref('extensions.zotero.sync.server.username', '') || `${zotero.Users.getCurrentUserID()}@zotero.org` || "";
+        const email = Services.prefs.getStringPref('extensions.zotero.sync.server.username', '') || "";
+        // const email = Services.prefs.getStringPref('extensions.zotero.sync.server.username', '') || `${zotero.Users.getCurrentUserID()}@zotero.org` || "";
         if (!user.email) {
           user.email = email;
         }
