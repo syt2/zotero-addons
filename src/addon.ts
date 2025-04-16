@@ -1,5 +1,6 @@
 import { config } from "../package.json";
 import hooks from "./hooks";
+import actions from "./modules/registerScheme";
 import { createZToolkit } from "./utils/ztoolkit";
 
 class Addon {
@@ -18,6 +19,8 @@ class Addon {
   // APIs
   public api: object;
 
+  public actions: typeof actions;
+
   constructor() {
     this.data = {
       alive: true,
@@ -27,6 +30,7 @@ class Addon {
     };
     this.hooks = hooks;
     this.api = {};
+    this.actions = actions;
   }
 }
 

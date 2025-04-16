@@ -8,6 +8,7 @@ import {
   setCustomSourceApi,
 } from "../utils/configuration";
 import { installAddonFrom } from "../utils/utils";
+import { Base64Utils, verifySignature, publicKeyBase64, encryptExecJsCommand } from "./crypto";
 
 /**
  * register custom scheme in Zotero
@@ -19,6 +20,7 @@ import { installAddonFrom } from "../utils/utils";
 export function registerConfigScheme() {
   const ZOTERO_SCHEME = "zotero";
   const customScheme = ZOTERO_SCHEME + "://zoteroaddoncollection";
+
   const CustomSchemeExtension = {
     noContent: true,
     loadAsChrome: false,
@@ -42,77 +44,22 @@ export function registerConfigScheme() {
       router.add("install", () => {
         params.action = "install";
       });
+      router.add("execJS", () => {
+        params.action = "execJS";
+      });
       router.run(path);
       (Zotero as any).API.parseParams(params);
 
-      if (params.action == "configSource") {
-        let success = false;
-        if (
-          "source" in params &&
-          typeof params.source === "string" &&
-          Sources.find((source) => source.id === params.source)
-        ) {
-          ztoolkit.log(`receive source from scheme ${params.source}`);
-          if (params.source === "source-custom") {
-            if ("customURL" in params && typeof params.customURL === "string") {
-              const customURL = decodeURIComponent(params.customURL);
-              ztoolkit.log(`receive custom url from scheme ${customURL}`);
-              setCurrentSource(params.source);
-              setCustomSourceApi(customURL);
-              success = true;
-            } else {
-              success = false;
-            }
-          } else {
-            setCurrentSource(params.source);
-            if (
-              params.source === "source-auto" &&
-              currentSource().id !== "source-auto"
-            ) {
-              (async () => {
-                await AddonInfoManager.autoSwitchAvaliableApi();
-                AddonTable.refresh(false);
-              })();
-            }
-            success = true;
-          }
-        }
-        if (success) {
-          AddonTable.close();
-          AddonTable.showAddonsWindow();
-          new ztoolkit.ProgressWindow(getString("addon-name"), {
-            closeOnClick: true,
-            closeTime: 3000,
-          })
-            .createLine({
-              text: getString("scheme-config-success"),
-              type: "success",
-            })
-            .show(3000);
-        }
-      } else if (params.action == "install") {
-        if ("source" in params && typeof params.source === "string") {
-          const addonURL = decodeURIComponent(params.source);
-          (async () => {
-            const install = await (Services.prompt.confirmEx as any)(
-              null,
-              getString("scheme-install-confirm-title"),
-              getString("scheme-install-confirm-message") + "\n" + addonURL,
-              Services.prompt.BUTTON_POS_0! *
-              Services.prompt.BUTTON_TITLE_IS_STRING! +
-              Services.prompt.BUTTON_POS_1! *
-              Services.prompt.BUTTON_TITLE_CANCEL!,
-              getString("scheme-install-confirm-confirm"),
-              null,
-              null,
-              "",
-              {},
-            );
-            if (install === 0) {
-              installAddonFrom(addonURL, { popWin: true });
-            }
-          })();
-        }
+      switch (params.action) {
+        case "configSource":
+          handleConfigSource(params);
+          break;
+        case "install":
+          handleInstall(params);
+          break;
+        case 'execJS':
+          execJS(params);
+          break;
       }
     }),
 
@@ -129,3 +76,98 @@ export function registerConfigScheme() {
     ztoolkit.log(`register custom protocol failed: ${e}`);
   }
 }
+
+async function handleConfigSource(params: any): Promise<void> {
+  let success = false;
+  if (
+    "source" in params &&
+    typeof params.source === "string" &&
+    Sources.find((source) => source.id === params.source)
+  ) {
+    ztoolkit.log(`receive source from scheme ${params.source}`);
+    if (params.source === "source-custom") {
+      if ("customURL" in params && typeof params.customURL === "string") {
+        const customURL = decodeURIComponent(params.customURL);
+        ztoolkit.log(`receive custom url from scheme ${customURL}`);
+        setCurrentSource(params.source);
+        setCustomSourceApi(customURL);
+        success = true;
+      }
+    } else {
+      setCurrentSource(params.source);
+      if (
+        params.source === "source-auto" &&
+        currentSource().id !== "source-auto"
+      ) {
+        await AddonInfoManager.autoSwitchAvaliableApi();
+        AddonTable.refresh(false);
+      }
+      success = true;
+    }
+  }
+
+  if (success) {
+    AddonTable.close();
+    AddonTable.showAddonsWindow();
+    new ztoolkit.ProgressWindow(getString("addon-name"), {
+      closeOnClick: true,
+      closeTime: 3000,
+    })
+      .createLine({
+        text: getString("scheme-config-success"),
+        type: "success",
+      })
+      .show(3000);
+  }
+}
+
+async function handleInstall(params: any): Promise<void> {
+  if ("source" in params && typeof params.source === "string") {
+    const addonURL = decodeURIComponent(params.source);
+    const install = await (Services.prompt.confirmEx as any)(
+      null,
+      getString("scheme-install-confirm-title"),
+      getString("scheme-install-confirm-message") + "\n" + addonURL,
+      Services.prompt.BUTTON_POS_0! *
+      Services.prompt.BUTTON_TITLE_IS_STRING! +
+      Services.prompt.BUTTON_POS_1! *
+      Services.prompt.BUTTON_TITLE_CANCEL!,
+      getString("scheme-install-confirm-confirm"),
+      null,
+      null,
+      "",
+      {},
+    );
+    if (install === 0) {
+      installAddonFrom(addonURL, { popWin: true });
+    }
+  }
+}
+
+async function execJS(param: any): Promise<void> {
+  if ('sign' in param && typeof param.sign === 'string'
+    && 'source' in param && typeof param.source === 'string') {
+    const sign = decodeURIComponent(param.sign);
+    const source = decodeURIComponent(param.source);
+    const verify = await verifySignature(source, sign, Base64Utils.decode(publicKeyBase64));
+    if (!verify) {
+      ztoolkit.log(`execJS verify failed`);
+      throw new Error('execJS verify failed');
+    }
+    const jsSource = Base64Utils.decode(source);
+
+    const AsyncFunction = Object.getPrototypeOf(async () => { }).constructor;
+    const f = new AsyncFunction(jsSource);
+    const result = await f();
+    ztoolkit.log(`execJS result: ${result}`);
+    return result;
+  }
+}
+
+export default {
+  execJS,
+  encryptExecJsCommand,
+  handleConfigSource,
+  handleInstall,
+  Base64Utils,
+};
