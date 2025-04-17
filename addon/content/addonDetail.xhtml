@@ -240,6 +240,19 @@ type="text/css"?>
         e.stopImmediatePropagation();
         openInViewAction(anchor.href);
       }, true);
+      document.addEventListener('click', function (e) {
+        const placeholderAttrName = 'name';
+        const anchor = e.target.closest(`a[${placeholderAttrName}^="zotero://"]`);
+        if (!anchor) { return }
+        const scheme = anchor.getAttribute(placeholderAttrName)
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        const link = document.createElement('a');
+        link.href = scheme;
+        link.target = '_self';
+        link.click();
+      }, true);
     })
     window.addEventListener('unload', () => {
       artalk.destroy();
