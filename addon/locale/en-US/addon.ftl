@@ -84,3 +84,5 @@ guide-open-addons-table-title = Open add-on market
 guide-open-addons-table-message = Click to enter the Add-on market, directly search and install add-ons within Zotero.
 guide-addons-table-switch-source-title = Switch source
 guide-addons-table-switch-source-message = Switch Add-on data source if page is blank, encounters an error, or fails to retrieve add-ons.
+
+send-button-status-login = login

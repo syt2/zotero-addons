@@ -84,3 +84,5 @@ guide-open-addons-table-title = 打开插件市场
 guide-open-addons-table-message = 点击进入插件市场, 直接在 Zotero 内检索和安装插件
 guide-addons-table-switch-source-title = 切换插件源
 guide-addons-table-switch-source-message = 如果插件页面空白、出现异常、获取不到插件，可以尝试在此切换插件源
+
+send-button-status-login = 登录
