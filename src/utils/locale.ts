@@ -1,4 +1,5 @@
 import { config } from "../../package.json";
+import { FluentMessageId } from "../../typings/i10n";
 
 export { initLocale, getString, getLocaleID };
 
@@ -39,10 +40,10 @@ function initLocale() {
  * getString("addon-dynamic-example", { args: { count: 2 } }); // I have 2 apples
  * ```
  */
-function getString(localString: string): string;
-function getString(localString: string, branch: string): string;
+function getString(localString: FluentMessageId): string;
+function getString(localString: FluentMessageId, branch: string): string;
 function getString(
-  localeString: string,
+  localeString: FluentMessageId,
   options: { branch?: string | undefined; args?: Record<string, unknown> },
 ): string;
 function getString(...inputs: any[]) {
@@ -60,7 +61,7 @@ function getString(...inputs: any[]) {
 }
 
 function _getString(
-  localeString: string,
+  localeString: FluentMessageId,
   options: { branch?: string | undefined; args?: Record<string, unknown> } = {},
 ): string {
   const localStringWithPrefix = `${config.addonRef}-${localeString}`;
@@ -83,6 +84,6 @@ function _getString(
   }
 }
 
-function getLocaleID(id: string) {
+function getLocaleID(id: FluentMessageId) {
   return `${config.addonRef}-${id}`;
 }

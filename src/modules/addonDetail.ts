@@ -62,6 +62,7 @@ export class AddonInfoDetail {
     );
     await windowArgs._initPromise.promise;
     this.window = win;
+    // @ts-ignore
     win?.addEventListener("keypress", (e: KeyboardEvent) => {
       if (
         ((Zotero.isMac && e.metaKey && !e.ctrlKey) ||
