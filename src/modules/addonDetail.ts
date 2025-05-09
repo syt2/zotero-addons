@@ -47,12 +47,6 @@ export class AddonInfoDetail {
         return btoa(response.response);
       },
       openInViewAction: (url: string) => Zotero.openInViewer(url),
-      zotero: Zotero,
-      reload: () => {
-        this.showDetailWindow(addonInfo);
-      },
-      getString: getString,
-      needLogin: true,
     };
     const win = Zotero.getMainWindow().openDialog(
       `chrome://${config.addonRef}/content/addonDetail.xhtml`,
@@ -62,7 +56,7 @@ export class AddonInfoDetail {
     );
     await windowArgs._initPromise.promise;
     this.window = win;
-    // @ts-ignore
+    // @ts-ignore ignore keyboardevent type check
     win?.addEventListener("keypress", (e: KeyboardEvent) => {
       if (
         ((Zotero.isMac && e.metaKey && !e.ctrlKey) ||

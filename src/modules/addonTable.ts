@@ -156,7 +156,7 @@ export class AddonTable {
     if (!win) {
       return;
     }
-    // @ts-ignore
+    // @ts-ignore ignore keyboardevent type check
     win.addEventListener("keypress", (e: KeyboardEvent) => {
       if (
         ((Zotero.isMac && e.metaKey && !e.ctrlKey) ||
@@ -318,7 +318,7 @@ export class AddonTable {
     const result: [TableMenuItemID, string][] = [];
     const selects = this.tableHelper?.treeInstance.selection.selected;
     const append = (id: TableMenuItemID, selectCount?: number) => {
-      // @ts-ignore
+      // @ts-ignore ignore getString type check
       let str = getString(id);
       if (selects && selects.size > 1 && selectCount) {
         str += ` [${selectCount} ${getString("menu-items-count")}]`;
@@ -683,7 +683,7 @@ export class AddonTable {
         children: allColumnSelectMenus.map((menuItem) => ({
           tag: "menuitem",
           attributes: {
-            // @ts-ignore
+            // @ts-ignore ignore getString type check
             label: getString(menuItem),
             value: menuItem,
             checked: !(
@@ -1207,7 +1207,7 @@ export class AddonTable {
       //
     }
     this._columns.map((column) =>
-      // @ts-ignore
+      // @ts-ignore ignore getString type check
       Object.assign(column, { label: getString(column.dataKey) }),
     );
     return this._columns;

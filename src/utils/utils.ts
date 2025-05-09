@@ -110,7 +110,7 @@ export async function installAddonFrom(
   if (sourceName === "source-others") {
     sourceName = `${getString(sourceName)} ${startIndex + 1}`;
   } else {
-    // @ts-ignore
+    // @ts-ignore ignore getString type check
     sourceName = getString(sourceName);
   }
   const source = getString("downloading-source", {
