@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "fuse.js": "^7.1.0",
-    "zotero-plugin-toolkit": "^5.0.0-1"
+    "zotero-plugin-toolkit": "^5.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",
