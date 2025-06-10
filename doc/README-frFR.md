@@ -137,7 +137,7 @@ S'active avec `Shift+P`.
 ### 0. Pré-requis
 
 1. Installez une version beta de Zotero: <https://www.zotero.org/support/beta_builds>
-2. Installez [Node.js](https://nodejs.org/en/) and [Git](https://git-scm.com/)
+2. Installez [Node.js latest LTS version](https://nodejs.org/en/) and [Git](https://git-scm.com/)
 
 > [!NOTE]
 > Ce guide suppose que vous avez une compréhension initiale de la structure de base et du fonctionnement des extensiosn Zotero. Si ce n'est pas le cas, veuillez vous référer à la [documentation](https://www.zotero.org/support/dev/zotero_7_for_developers)et aux exemples officiels de l'extension [Make It Red](https://github.com/zotero/make-it-red) en premier lieu.
@@ -164,19 +164,26 @@ S'active avec `Shift+P`.
 
 1. Modifier les paramètres dans `./package.json`, y compris :
 
-   ```json5
+   ```jsonc
    {
-     version: "", // to 0.0.0
-     author: "",
-     description: "",
-     homepage: "",
-     config: {
-       addonName: "", // name to be displayed in the plugin manager
-       addonID: "", // ID to avoid conflict. IMPORTANT!
-       addonRef: "", // e.g. Element ID prefix
-       addonInstance: "", // the plugin's root instance: Zotero.${addonInstance}
-       prefsPrefix: "extensions.zotero.${addonRef}", // the prefix of prefs
+     "version": "0.0.0",
+     "description": "",
+     "config": {
+       "addonName": "", // name to be displayed in the plugin manager
+       "addonID": "", // ID to avoid conflict. IMPORTANT!
+       "addonRef": "", // e.g. Element ID prefix
+       "addonInstance": "", // the plugin's root instance: Zotero.${addonInstance}
+       "prefsPrefix": "extensions.zotero.${addonRef}", // the prefix of prefs
      },
+     "repository": {
+       "type": "git",
+       "url": "git+https://github.com/your-github-name/repo-name.git",
+     },
+     "author": "Your Name",
+     "bugs": {
+       "url": "https://github.com/your-github-name/repo-name/issues",
+     },
+     "homepage": "https://github.com/your-github-name/repo-name#readme",
    }
    ```
 
@@ -203,7 +210,7 @@ vim .env
 
    Si vous obtenez `npm ERR ! ERESOLVE unable to resolve dependency tree` avec `npm install`, qui est un bogue de dépendance en amont de typescript-eslint, utilisez la commande `npm i -f` pour l'installer.
 
-### 3. Codez !
+### 3. Codez
 
 Démarrez le serveur de développement avec `npm start`:
 
@@ -248,7 +255,7 @@ Exécutez `npm run build` construire l'extension en mode production : t le xpi p
 - Copiez `addon/**` dans `build/addon/**`.
 - Remplacez les espaces réservés : utilisez `replace-in-file` pour remplacer les mots-clés et les configurations définis dans `package.json` dans les fichiers non-construits (`xhtml`, `json`, et al.).
 
-- Préparez les fichiers de locale pour [éviter les conflits] (https://www.zotero.org/support/dev/zotero_7_for_developers#avoiding_localization_conflicts)
+- Préparez les fichiers de locale pour [éviter les conflits](https://www.zotero.org/support/dev/zotero_7_for_developers#avoiding_localization_conflicts)
 - Renommer `**/*.flt` en `**/${addonRef}-*.flt`
 - Préfixez chaque message fluent[TODO] avec `addonRef-`
 - Utilisez ESBuild pour construire le code source `.ts` vers `.js`, construisez `src/index.ts` vers `./build/addon/content/scripts`.
@@ -304,7 +311,7 @@ Lorsque la prochaine version normale sera mise à jour, `update.json` et `update
 
 ### À propos des variables globales
 
-> Voir aussi [`src/index.ts`] (https://github.com/windingwind/zotero-plugin-template/blob/main/src/index.ts)
+> Voir aussi [`src/index.ts`](https://github.com/windingwind/zotero-plugin-template/blob/main/src/index.ts)
 
 L'extension 'bootstrappé' fonctionne dans un bac à sable, qui n'a pas de variables globales par défaut comme `Zotero` ou `window`, que nous avions l'habitude d'avoir en superposition dans la fenêtre d'environnement des extensions.
 

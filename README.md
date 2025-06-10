@@ -55,14 +55,13 @@ If you are using this repo, I recommended that you put the following badge on yo
 
 - Event-driven, functional programming, under extensive skeleton;
 - Simple and user-friendly, works out-of-the-box.
-- ⭐ [New!] Auto hot reload! Whenever the source code is modified, automatically compile and reload. [See here→](#auto-hot-reload)
 - Abundant examples in `src/modules/examples.ts`, covering most of the commonly used APIs in plugins (using [zotero-plugin-toolkit](https://github.com/windingwind/zotero-plugin-toolkit));
 - TypeScript support:
   - Full type definition support for the whole Zotero project, which is written in JavaScript (using [zotero-types](https://github.com/windingwind/zotero-types));
   - Global variables and environment setup;
 - Plugin develop/build/release workflow:
+  - ⭐ [New!] Auto hot reload! Whenever the source code is modified, automatically compile and reload. [See here→](#auto-hot-reload)
   - Automatically generate/update plugin id/version, update configrations, and set environment variables (`development` / `production`);
-  - Automatically build and reload code in Zotero;
   - Automatically release to GitHub;
 - Prettier and ES Lint integration.
 
@@ -134,7 +133,7 @@ Activate with `Shift+P`.
 ### 0 Requirement
 
 1. Install a beta version of Zotero: <https://www.zotero.org/support/beta_builds>
-2. Install [Node.js](https://nodejs.org/en/) and [Git](https://git-scm.com/)
+2. Install [Node.js latest LTS version](https://nodejs.org/en/) and [Git](https://git-scm.com/)
 
 > [!note]
 > This guide assumes that you have an initial understanding of the basic structure and workings of the Zotero plugin. If you don't, please refer to the [documentation](https://www.zotero.org/support/dev/zotero_7_for_developers) and official plugin examples [Make It Red](https://github.com/zotero/make-it-red) first.
@@ -161,19 +160,26 @@ Activate with `Shift+P`.
 
 1. Modify the settings in `./package.json`, including:
 
-   ```json5
+   ```jsonc
    {
-     version: "", // to 0.0.0
-     author: "",
-     description: "",
-     homepage: "",
-     config: {
-       addonName: "", // name to be displayed in the plugin manager
-       addonID: "", // ID to avoid conflict. IMPORTANT!
-       addonRef: "", // e.g. Element ID prefix
-       addonInstance: "", // the plugin's root instance: Zotero.${addonInstance}
-       prefsPrefix: "extensions.zotero.${addonRef}", // the prefix of prefs
+     "version": "0.0.0",
+     "description": "",
+     "config": {
+       "addonName": "", // name to be displayed in the plugin manager
+       "addonID": "", // ID to avoid conflict. IMPORTANT!
+       "addonRef": "", // e.g. Element ID prefix
+       "addonInstance": "", // the plugin's root instance: Zotero.${addonInstance}
+       "prefsPrefix": "extensions.zotero.${addonRef}", // the prefix of prefs
      },
+     "repository": {
+       "type": "git",
+       "url": "git+https://github.com/your-github-name/repo-name.git",
+     },
+     "author": "Your Name",
+     "bugs": {
+       "url": "https://github.com/your-github-name/repo-name/issues",
+     },
+     "homepage": "https://github.com/your-github-name/repo-name#readme",
    }
    ```
 
@@ -206,9 +212,7 @@ Start development server with `npm start`, it will:
 
 - Prebuild the plugin in development mode
 - Start Zotero with plugin loaded from `build/`
-- Watch `src/**` and `addon/**`.
-  - If `src/**` changed, run esbuild and reload
-  - If `addon/**` has changed, rebuild the plugin (in development mode) and reload
+- Watch `src/**` and `addon/**`, rebuild and reload plugin in Zotero when source code changed.
 
 #### Auto Hot Reload
 
@@ -237,19 +241,21 @@ You can also:
 
 ### 4 Build
 
-Run `npm run build` to build the plugin in production mode, and the xpi for installation and the built code is under `build` folder.
+Run `npm run build` to build the plugin in production mode. The build output will be located in the `.scaffold/build/` directory.
 
-Steps of build:
+For detailed build steps, refer to the [zotero-plugin-scaffold documentation](https://northword.github.io/zotero-plugin-scaffold/build.html). In short, the process can be divided into the following steps:
 
-- Create/empty `build/`.
-- Copy `addon/**` to `build/addon/**`
-- Replace placeholders: use `replace-in-file` to replace keywords and configurations defined in `package.json` in non-build files (`xhtml`, `json`, et al.).
-- Prepare locale files to [avoid conflict](https://www.zotero.org/support/dev/zotero_7_for_developers#avoiding_localization_conflicts)
+- Create or clear the `build/` directory
+- Copy `addon/**` to `.scaffold/build/addon/**`
+- Replace placeholders: substitute keywords and configurations defined in `package.json`
+- Prepare localization files to avoid conflicts (see the [zotero_7_for_developers](https://www.zotero.org/support/dev/zotero_7_for_developers#avoiding_localization_conflicts) for more information):
   - Rename `**/*.flt` to `**/${addonRef}-*.flt`
-  - Prefix each fluent message with `addonRef-`
-- Use ESBuild to build `.ts` source code to `.js`, build `src/index.ts` to `./build/addon/content/scripts`.
-- (Production mode only) Zip the `./build/addon` to `./build/*.xpi`
-- (Production mode only) Prepare `update.json` or `update-beta.json`
+  - Prefix each message with `addonRef-`
+  - Generate type declaration files for FTL messages
+- Prepare preferences files: prefix preference keys with `package.json#prefsPrefix` and generate type declaration files for preferences
+- Use ESBuild to compile `.ts` source code to `.js`, building from `src/index.ts` to `.scaffold/build/addon/content/scripts`
+- _(Production mode only)_ Compress the `.scaffold/build/addon` directory into `.scaffold/build/*.xpi`
+- _(Production mode only)_ Prepare `update.json` or `update-beta.json`
 
 > [!note]
 >
