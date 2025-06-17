@@ -42,6 +42,7 @@ This is a plugin template for [Zotero](https://www.zotero.org/).
 [![GitHub Repo stars](https://img.shields.io/github/stars/l0o0/jasminum?label=jasminum&style=flat-square)](https://github.com/l0o0/jasminum)
 [![GitHub Repo stars](https://img.shields.io/github/stars/lifan0127/ai-research-assistant?label=ai-research-assistant&style=flat-square)](https://github.com/lifan0127/ai-research-assistant)
 [![GitHub Repo stars](https://img.shields.io/github/stars/daeh/zotero-markdb-connect?label=zotero-markdb-connect&style=flat-square)](https://github.com/daeh/zotero-markdb-connect)
+[![GitHub Repo stars](https://img.shields.io/github/stars/daeh/zotero-citation-tally?label=citation-tally&style=flat-square)](https://github.com/daeh/zotero-citation-tally)
 
 If you are using this repo, I recommended that you put the following badge on your README:
 
