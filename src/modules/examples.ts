@@ -445,7 +445,7 @@ export class PromptExampleFactory {
           s.addCondition("itemType", "isNot", "attachment");
           let ids = await s.search();
           // prompt.exit will remove current container element.
-          // @ts-ignore ignore
+          // @ts-expect-error ignore
           prompt.exit();
           const container = prompt.createCommandsContainer();
           container.classList.add("suggestions");
@@ -506,7 +506,7 @@ export class PromptExampleFactory {
                   {
                     type: "mousemove",
                     listener: function () {
-                      // @ts-ignore ignore
+                      // @ts-expect-error ignore
                       prompt.selectItem(this);
                     },
                   },
@@ -553,7 +553,7 @@ export class PromptExampleFactory {
               container.appendChild(ele);
             });
           } else {
-            // @ts-ignore ignore
+            // @ts-expect-error ignore
             prompt.exit();
             prompt.showTip("Not Found.");
           }

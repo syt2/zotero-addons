@@ -1,46 +1,16 @@
 // @ts-check Let TS check this config file
 
-import eslint from "@eslint/js";
-import tseslint from "typescript-eslint";
+import zotero from "@zotero-plugin/eslint-config";
 
-export default tseslint.config(
-  {
-    ignores: ["build/**", ".scaffold/**", "node_modules/**", "scripts/"],
-  },
-  {
-    extends: [eslint.configs.recommended, ...tseslint.configs.recommended],
-    rules: {
-      "no-restricted-globals": [
-        "error",
-        { message: "Use `Zotero.getMainWindow()` instead.", name: "window" },
-        {
-          message: "Use `Zotero.getMainWindow().document` instead.",
-          name: "document",
-        },
-        {
-          message: "Use `Zotero.getActiveZoteroPane()` instead.",
-          name: "ZoteroPane",
-        },
-        "Zotero_Tabs",
-      ],
-
-      "@typescript-eslint/ban-ts-comment": [
-        "warn",
-        {
-          "ts-expect-error": "allow-with-description",
-          "ts-ignore": "allow-with-description",
-          "ts-nocheck": "allow-with-description",
-          "ts-check": "allow-with-description",
-        },
-      ],
-      "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-explicit-any": [
-        "off",
-        {
-          ignoreRestArgs: true,
-        },
-      ],
-      "@typescript-eslint/no-non-null-assertion": "off",
+export default zotero({
+  overrides: [
+    {
+      files: ["**/*.ts"],
+      rules: {
+        // We disable this rule here because the template
+        // contains some unused examples and variables
+        "@typescript-eslint/no-unused-vars": "off",
+      },
     },
-  },
-);
+  ],
+});

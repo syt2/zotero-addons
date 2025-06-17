@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 /**
  * Most of this code is from Zotero team's official Make It Red example[1]
  * or the Zotero 7 documentation[2].
@@ -33,9 +31,7 @@ async function startup({ id, version, resourceURI, rootURI }, reason) {
    * and all child variables assigned to it is globally accessible.
    * See `src/index.ts` for details.
    */
-  const ctx = {
-    rootURI,
-  };
+  const ctx = { rootURI };
   ctx._globalThis = ctx;
 
   Services.scriptloader.loadSubScript(
