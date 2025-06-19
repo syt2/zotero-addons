@@ -356,11 +356,10 @@ export class AddonInfoManager {
     if (!url) {
       return [];
     }
-    if (
-      url in this.sourceInfos &&
-      new Date().getTime() - this.sourceInfos[url][0].getTime() <
-        12 * 60 * 60 * 1000
-    ) {
+    if (url in this.sourceInfos) {
+      if (new Date().getTime() - this.sourceInfos[url][0].getTime() < 12 * 60 * 60 * 1000) {
+        this.fetchAddonInfos(true);
+      }
       return this.sourceInfos[url][1];
     }
     return [];
