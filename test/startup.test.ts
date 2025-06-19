@@ -1,3 +1,5 @@
+declare const Zotero: any;
+
 import { assert } from "chai";
 import { config } from "../package.json";
 
