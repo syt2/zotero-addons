@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "fuse.js": "^7.1.0",
-    "zotero-plugin-toolkit": "^5.0.0"
+    "zotero-plugin-toolkit": "^5.0.1"
   },
   "devDependencies": {
     "@types/chai": "^5.2.2",
@@ -38,12 +38,12 @@
     "@types/node": "^24.0.3",
     "@zotero-plugin/eslint-config": "^0.6.7",
     "chai": "^5.2.0",
-    "eslint": "^9.28.0",
+    "eslint": "^9.29.0",
     "mocha": "^11.6.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3",
     "zotero-plugin-scaffold": "^0.6.1",
-    "zotero-types": "^4.0.3"
+    "zotero-types": "^4.0.4"
   },
   "prettier": {
     "printWidth": 80,
