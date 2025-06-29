@@ -149,7 +149,6 @@ Activate with `Shift+P`.
    _GitHub CodeSpace_ enables you getting started without the need to download code/IDE/dependencies locally.
 
    Replace the steps above and build you first plugin in 30 seconds!
-
    - Goto top of the [homepage](https://github.com/windingwind/zotero-plugin-template), click the green button `Use this template`, click `Open in codespace`. You may need to login to your GitHub account.
    - Wait for codespace to load.
 
@@ -314,7 +313,7 @@ The bootstrapped plugin runs in a sandbox, which does not have default global va
 
 This template registers the following variables to the global scope:
 
-```ts
+```plain
 Zotero, ZoteroPane, Zotero_Tabs, window, document, rootURI, ztoolkit, addon;
 ```
 

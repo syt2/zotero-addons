@@ -152,7 +152,6 @@ S'active avec `Shift+P`.
    _GitHub CodeSpace_ vous permet de démarrer votre projet sans avoir à télécharger le code/IDE/dépendances localement.
 
    Effectuez les étapes ci-dessus et créez votre première extension en 30 secondes!
-
    - Allez en haut de la [page d'accueil](https://github.com/windingwind/zotero-plugin-template), cliquez sur le bouton vert `Use this template`, cliquez sur `Open in codespace`. ous devrez peut-être vous connecter à votre compte GitHub.
    - Attendez que _GitHub CodeSpace_ se charge.
 
@@ -317,7 +316,7 @@ L'extension 'bootstrappé' fonctionne dans un bac à sable, qui n'a pas de varia
 
 Ce modèle enregistre les variables suivantes avec une portée globale :
 
-```ts
+```plain
 Zotero, ZoteroPane, Zotero_Tabs, window, document, rootURI, ztoolkit, addon;
 ```
 

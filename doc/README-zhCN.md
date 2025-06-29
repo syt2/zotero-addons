@@ -146,7 +146,6 @@ Obsidian 风格的指令输入模块，它通过接受文本来运行插件，�
    _GitHub CodeSpace_ 使你可以直接开始开发而无需在本地下载代码/IDE/依赖。
 
    重复下列步骤，仅需三十秒即可开始构建你的第一个插件！
-
    - 点击首页 `Use this template` 按钮，随后点击 `Open in codespace`，你需要登录你的 GitHub 账号。
    - 等待 codespace 加载。
 
@@ -312,7 +311,7 @@ bootstrap 插件在沙盒中运行，但沙盒中没有默认的全局变量，�
 
 此模板将以下变量注册到全局范围：
 
-```ts
+```plain
 Zotero, ZoteroPane, Zotero_Tabs, window, document, rootURI, ztoolkit, addon;
 ```
 

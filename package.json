@@ -30,20 +30,20 @@
     "update-deps": "npm update --save"
   },
   "dependencies": {
-    "zotero-plugin-toolkit": "^5.0.0"
+    "zotero-plugin-toolkit": "^5.0.1"
   },
   "devDependencies": {
     "@types/chai": "^5.2.2",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.0.7",
     "@zotero-plugin/eslint-config": "^0.6.7",
     "chai": "^5.2.0",
-    "eslint": "^9.28.0",
-    "mocha": "^11.6.0",
-    "prettier": "^3.5.3",
+    "eslint": "^9.30.0",
+    "mocha": "^11.7.1",
+    "prettier": "^3.6.2",
     "typescript": "^5.8.3",
-    "zotero-plugin-scaffold": "^0.6.1",
-    "zotero-types": "^4.0.3"
+    "zotero-plugin-scaffold": "^0.7.1",
+    "zotero-types": "^4.0.5"
   },
   "prettier": {
     "printWidth": 80,
