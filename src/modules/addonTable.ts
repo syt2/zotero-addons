@@ -26,16 +26,8 @@ import { AddonInfoDetail } from "./addonDetail";
 import { Guide } from "./guide";
 import { LargePrefHelper } from "zotero-plugin-toolkit";
 import Fuse from "fuse.js";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-const { XPIDatabase } = ChromeUtils.import(
-  "resource://gre/modules/addons/XPIDatabase.jsm",
-);
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-const { AddonManager } = ChromeUtils.import(
-  "resource://gre/modules/AddonManager.jsm",
-);
+const { XPIDatabase } = ChromeUtils.importESModule("resource://gre/modules/addons/XPIDatabase.sys.mjs");
+const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 
 type TableMenuItemID =
   | "menu-install"
@@ -146,7 +138,16 @@ export class AddonTable {
       this.refresh();
       return;
     }
-    const windowArgs = { _initPromise: Zotero.Promise.defer() };
+    let resolveInit: () => void;
+    const _initPromise = new Promise<void>(resolve => {
+      resolveInit = resolve;
+    });
+    const windowArgs = { 
+      _initPromise: {
+        promise: _initPromise,
+        resolve: resolveInit!
+      }
+    };
     const win = Zotero.getMainWindow().openDialog(
       `chrome://${config.addonRef}/content/addons.xhtml`,
       `${config.addonRef}-addons`,
@@ -156,7 +157,6 @@ export class AddonTable {
     if (!win) {
       return;
     }
-    // @ts-ignore ignore keyboardevent type check
     win.addEventListener("keypress", (e: KeyboardEvent) => {
       if (
         ((Zotero.isMac && e.metaKey && !e.ctrlKey) ||
@@ -183,12 +183,12 @@ export class AddonTable {
     );
     await this.initFooterContainer(win);
 
-    Zotero.Promise.delay(2000).then(() => {
+    setTimeout(() => {
       if (this.addonInfos.length > 0 || !this.window) {
         return;
       }
       Guide.showGuideInAddonTableIfNeed(this.window);
-    });
+    }, 2000);
     // win.open();
   }
 
@@ -318,7 +318,7 @@ export class AddonTable {
     const result: [TableMenuItemID, string][] = [];
     const selects = this.tableHelper?.treeInstance.selection.selected;
     const append = (id: TableMenuItemID, selectCount?: number) => {
-      // @ts-ignore ignore getString type check
+      // @ts-expect-error ignore getString type check
       let str = getString(id);
       if (selects && selects.size > 1 && selectCount) {
         str += ` [${selectCount} ${getString("menu-items-count")}]`;
@@ -389,7 +389,7 @@ export class AddonTable {
     let canStoreColumnPrefs = false;
     (async () => {
       // storeColumnPrefs 会在加载table时就运行，此时并不想保存起状态，因此先做个延迟解决下这个case
-      await Zotero.Promise.delay(666);
+      await new Promise(resolve => setTimeout(resolve, 666));
       canStoreColumnPrefs = true;
     })();
     this.tableHelper = new ztoolkit.VirtualizedTable(win)
@@ -418,7 +418,7 @@ export class AddonTable {
         }
         (async () => {
           await this.replaceRightClickMenu(replaceElem);
-          await Zotero.Promise.delay(10);
+          await new Promise(resolve => setTimeout(resolve, 10));
           // found in ZoteroPane.onItemsContextMenuOpen
           if (Zotero.isWin) {
             x += 10;
@@ -460,7 +460,7 @@ export class AddonTable {
         }
         (async () => {
           await this.replaceColumnSelectMenu(replaceElem);
-          await Zotero.Promise.delay(10);
+          await new Promise(resolve => setTimeout(resolve, 10));
           (
             win.document.querySelector("#listColumnMenu") as any
           ).openPopupAtScreen(
@@ -683,7 +683,7 @@ export class AddonTable {
         children: allColumnSelectMenus.map((menuItem) => ({
           tag: "menuitem",
           attributes: {
-            // @ts-ignore ignore getString type check
+            // @ts-expect-error ignore getString type check
             label: getString(menuItem),
             value: menuItem,
             checked: !(
@@ -1207,7 +1207,7 @@ export class AddonTable {
       //
     }
     this._columns.map((column) =>
-      // @ts-ignore ignore getString type check
+      // @ts-expect-error ignore getString type check
       Object.assign(column, { label: getString(column.dataKey) }),
     );
     return this._columns;

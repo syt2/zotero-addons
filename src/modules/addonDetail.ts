@@ -9,16 +9,8 @@ import { getString } from "../utils/locale";
 import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { config } from "../../package.json";
 import { isWindowAlive } from "../utils/window";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-const { XPIDatabase } = ChromeUtils.import(
-  "resource://gre/modules/addons/XPIDatabase.jsm",
-);
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-const { AddonManager } = ChromeUtils.import(
-  "resource://gre/modules/AddonManager.jsm",
-);
+const { XPIDatabase } = ChromeUtils.importESModule("resource://gre/modules/addons/XPIDatabase.sys.mjs");
+const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 
 export class AddonInfoDetail {
   private static window: Window | null;
@@ -38,8 +30,15 @@ export class AddonInfoDetail {
   static async showDetailWindow(addonInfo: AddonInfo) {
     this.window?.close();
     this.addonInfo = addonInfo;
+    let resolveInit: () => void;
+    const _initPromise = new Promise<void>(resolve => {
+      resolveInit = resolve;
+    });
     const windowArgs = {
-      _initPromise: Zotero.Promise.defer(),
+      _initPromise: {
+        promise: _initPromise,
+        resolve: resolveInit!
+      },
       addonInfo: addonInfo,
       site: __env__ === 'development' ? 'Zotero Plugin Market for testing' : 'Zotero Plugin Market',
       downloadSourceAction: async (url: string) => {
@@ -47,6 +46,7 @@ export class AddonInfoDetail {
         return btoa(response.response);
       },
       openInViewAction: (url: string) => Zotero.openInViewer(url),
+      zotero: Zotero,
     };
     const win = Zotero.getMainWindow().openDialog(
       `chrome://${config.addonRef}/content/addonDetail.xhtml`,
@@ -56,7 +56,6 @@ export class AddonInfoDetail {
     );
     await windowArgs._initPromise.promise;
     this.window = win;
-    // @ts-ignore ignore keyboardevent type check
     win?.addEventListener("keypress", (e: KeyboardEvent) => {
       if (
         ((Zotero.isMac && e.metaKey && !e.ctrlKey) ||

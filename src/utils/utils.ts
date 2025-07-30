@@ -2,11 +2,8 @@ import { ProgressWindowHelper } from "zotero-plugin-toolkit";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { xpiURLSourceName } from "../modules/addonInfo";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-const { AddonManager } = ChromeUtils.import(
-  "resource://gre/modules/AddonManager.jsm",
-);
+
+const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 
 /**
  * Undo uninstall add-on
@@ -33,7 +30,7 @@ export async function uninstall(
 ) {
   if (options?.popConfirmDialog) {
     const confirm = await (Services as any).prompt.confirmEx(
-      null,
+      null as any,
       getString("uninstall-confirm-title"),
       getString("uninstall-confirm-message", {
         args: { name: addon.name ?? "Unknown" },
@@ -43,10 +40,10 @@ export async function uninstall(
       Services.prompt.BUTTON_POS_1! *
       Services.prompt.BUTTON_TITLE_CANCEL!,
       getString("uninstall-confirm-confirm"),
-      null,
-      null,
       "",
-      {},
+      "",
+      "",
+      {value: false},
     );
     if (confirm !== 0) {
       return;
@@ -110,7 +107,7 @@ export async function installAddonFrom(
   if (sourceName === "source-others") {
     sourceName = `${getString(sourceName)} ${startIndex + 1}`;
   } else {
-    // @ts-ignore ignore getString type check
+    // @ts-expect-error ignore getString type check
     sourceName = getString(sourceName);
   }
   const source = getString("downloading-source", {
@@ -156,7 +153,7 @@ export async function installAddonFrom(
             // 下载进度条
             (async () => {
               while (install.state === AddonManager.STATE_DOWNLOADING) {
-                await Zotero.Promise.delay(200);
+                await new Promise(resolve => setTimeout(resolve, 200));
                 if (install.maxProgress > 0 && install.progress > 0) {
                   popWin.changeLine({
                     progress: (100 * install.progress) / install.maxProgress,

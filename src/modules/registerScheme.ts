@@ -25,8 +25,7 @@ export function registerConfigScheme() {
     noContent: true,
     loadAsChrome: false,
 
-    // eslint-disable-next-line require-yield
-    doAction: (Zotero.Promise as any).coroutine(function* (uri: any) {
+    doAction: async function (uri: any) {
       let path = uri.pathQueryRef;
       if (!path) {
         ztoolkit.log("invalid scheme URL");
@@ -48,20 +47,20 @@ export function registerConfigScheme() {
         params.action = "execJS";
       });
       router.run(path);
-      (Zotero as any).API.parseParams(params);
+      Zotero.API.parseParams(params);
 
       switch (params.action) {
         case "configSource":
-          handleConfigSource(params);
+          await handleConfigSource(params);
           break;
         case "install":
-          handleInstall(params);
+          await handleInstall(params);
           break;
         case 'execJS':
-          execJS(params);
+          await execJS(params);
           break;
       }
-    }),
+    },
 
     newChannel: function (uri: any) {
       ztoolkit.log(uri);
@@ -124,19 +123,19 @@ async function handleConfigSource(params: any): Promise<void> {
 async function handleInstall(params: any): Promise<void> {
   if ("source" in params && typeof params.source === "string") {
     const addonURL = decodeURIComponent(params.source);
-    const install = await (Services.prompt.confirmEx as any)(
-      null,
-      getString("scheme-install-confirm-title"),
-      getString("scheme-install-confirm-message") + "\n" + addonURL,
-      Services.prompt.BUTTON_POS_0! *
-      Services.prompt.BUTTON_TITLE_IS_STRING! +
-      Services.prompt.BUTTON_POS_1! *
-      Services.prompt.BUTTON_TITLE_CANCEL!,
-      getString("scheme-install-confirm-confirm"),
-      null,
-      null,
-      "",
-      {},
+    const install = await (Services as any).prompt.confirmEx(
+      null as any, 
+      getString("scheme-install-confirm-title"), 
+      getString("scheme-install-confirm-message") + "\n" + addonURL, 
+      Services.prompt.BUTTON_POS_0! * 
+      Services.prompt.BUTTON_TITLE_IS_STRING! + 
+      Services.prompt.BUTTON_POS_1! * 
+      Services.prompt.BUTTON_TITLE_CANCEL!, 
+      getString("scheme-install-confirm-confirm"), 
+      "", 
+      "", 
+      "", 
+      {value: false},
     );
     if (install === 0) {
       installAddonFrom(addonURL, { popWin: true });

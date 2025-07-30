@@ -5,16 +5,8 @@ import {
   currentSource,
   setAutoSource,
 } from "../utils/configuration";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-const { XPIDatabase } = ChromeUtils.import(
-  "resource://gre/modules/addons/XPIDatabase.jsm",
-);
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-const { AddonManager } = ChromeUtils.import(
-  "resource://gre/modules/AddonManager.jsm",
-);
+const { XPIDatabase } = ChromeUtils.importESModule("resource://gre/modules/addons/XPIDatabase.sys.mjs");
+const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 
 /**
  * Datastruct of Remote AddonInfo
@@ -357,7 +349,7 @@ export class AddonInfoManager {
       return [];
     }
     if (url in this.sourceInfos) {
-      if (new Date().getTime() - this.sourceInfos[url][0].getTime() < 12 * 60 * 60 * 1000) {
+      if (new Date().getTime() - this.sourceInfos[url][0].getTime() >= 12 * 60 * 60 * 1000) {
         this.fetchAddonInfos(true);
       }
       return this.sourceInfos[url][1];

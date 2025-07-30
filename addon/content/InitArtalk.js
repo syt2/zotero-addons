@@ -1,5 +1,6 @@
-/* global Services, document, console, Artalk */
+/* global Services, console, Artalk */
 
+// eslint-disable-next-line no-unused-vars
 function initArtalk(window, document) {
     const addonInfo = window.arguments[0].addonInfo;
     const downloadSourceAction = window.arguments[0].downloadSourceAction;
@@ -7,7 +8,6 @@ function initArtalk(window, document) {
     const site = window.arguments[0].site;
     const zotero = window.arguments[0].zotero;
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-    const getString = window.arguments[0].getString;
     const needLogin = window.arguments[0].needLogin;
 
     let hasLogin = false;

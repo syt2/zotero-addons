@@ -16,15 +16,18 @@ type="text/css"?>
   <meta charset="utf-8" />
   <script>
     document.addEventListener("DOMContentLoaded", (ev) => {
-      Services.scriptloader.loadSubScript(
-        "chrome://zotero/content/include.js",
-        this,
-      );
+      try {
+        Services.scriptloader.loadSubScript(
+          "chrome://zotero/content/include.js",
+          this,
+        );
 
-      Services.scriptloader.loadSubScript(
-        "resource://zotero/require.js",
-        this,
-      );
+        Services.scriptloader.loadSubScript(
+          "resource://zotero/require.js",
+          this,
+        );
+      } catch (e) {
+      }
       window.arguments[0]._initPromise.resolve();
     });
   </script>
