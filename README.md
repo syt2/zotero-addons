@@ -22,7 +22,7 @@ This is a Zotero plugin designed for browsing, installing, and reviewing plugins
 
 2. Install in Zotero `(Tools) -> (Add-ons)`
 
-| For Zotero8, download pre-release version in [Releases](https://github.com/syt2/zotero-addons/releases)
+> For Zotero8, download pre-release version in [Releases](https://github.com/syt2/zotero-addons/releases)
 
 ## Usage
 
