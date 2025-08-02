@@ -22,6 +22,8 @@ This is a Zotero plugin designed for browsing, installing, and reviewing plugins
 
 2. Install in Zotero `(Tools) -> (Add-ons)`
 
+| For Zotero8, download pre-release version in [Releases](https://github.com/syt2/zotero-addons/releases)
+
 ## Usage
 
 After install this add-on in Zotero, click <img align="center" src="addon/content/icons/favicon.svg" width=20/> in Toolbar, or click `Add-on market` in `Tools` menu.
