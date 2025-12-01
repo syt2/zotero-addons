@@ -1,0 +1,20 @@
+name: Issue Bot
+
+on:
+  issues:
+    types:
+      - labeled
+  issue_comment:
+    types:
+      - created
+  schedule:
+    - cron: "30 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  issue-bot:
+    uses: zotero-plugin-dev/workflows/.github/workflows/issue-bot.yml@main

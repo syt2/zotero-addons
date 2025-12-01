@@ -14,15 +14,8 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GitHub_TOKEN }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - name: Install deps
-        run: npm install
+      - name: Setup JS
+        uses: zotero-plugin-dev/workflows/setup-js@main
       - name: Run Lint
         run: npm run lint:check
 
@@ -31,15 +24,8 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GitHub_TOKEN }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - name: Install deps
-        run: npm install
+      - name: Setup JS
+        uses: zotero-plugin-dev/workflows/setup-js@main
       - name: Run Build
         run: npm run build
       - name: Upload build result
@@ -53,10 +39,6 @@ jobs:
     needs:
       - build
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm install
+      - name: Setup JS
+        uses: zotero-plugin-dev/workflows/setup-js@main
       - run: npm run test
