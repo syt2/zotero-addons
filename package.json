@@ -30,20 +30,20 @@
   },
   "dependencies": {
     "fuse.js": "^7.1.0",
-    "zotero-plugin-toolkit": "^5.1.0-beta.4"
+    "zotero-plugin-toolkit": "^5.1.0-beta.13"
   },
   "devDependencies": {
-    "@types/chai": "^5.2.2",
+    "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^24.1.0",
+    "@types/node": "^24.10.0",
     "@zotero-plugin/eslint-config": "^0.6.7",
-    "chai": "^5.2.1",
-    "eslint": "^9.32.0",
-    "mocha": "^11.7.1",
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.3",
-    "zotero-plugin-scaffold": "^0.7.2",
-    "zotero-types": "^4.1.0-beta.1"
+    "chai": "^6.2.1",
+    "eslint": "^9.39.2",
+    "mocha": "^11.7.5",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3",
+    "zotero-plugin-scaffold": "^0.8.2",
+    "zotero-types": "^4.1.0-beta.4"
   },
   "prettier": {
     "printWidth": 80,

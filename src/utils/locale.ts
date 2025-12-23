@@ -60,6 +60,14 @@ function getString(...inputs: any[]) {
   }
 }
 
+interface Pattern {
+  value: string | null;
+  attributes: Array<{
+    name: string;
+    value: string;
+  }> | null;
+}
+
 function _getString(
   localeString: FluentMessageId,
   options: { branch?: string | undefined; args?: Record<string, unknown> } = {},
@@ -68,17 +76,16 @@ function _getString(
   const { branch, args } = options;
   const pattern = addon.data.locale?.current.formatMessagesSync([
     { id: localStringWithPrefix, args },
-  ])[0];
+  ])[0] as Pattern;
+
   if (!pattern) {
     return localStringWithPrefix;
   }
   if (branch && pattern.attributes) {
-    for (const attr of pattern.attributes) {
-      if (attr.name === branch) {
-        return attr.value;
-      }
-    }
-    return pattern.attributes[branch] || localStringWithPrefix;
+    return (
+      pattern.attributes.find((attr) => attr.name === branch)?.value ||
+      localStringWithPrefix
+    );
   } else {
     return pattern.value || localStringWithPrefix;
   }
