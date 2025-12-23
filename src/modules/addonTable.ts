@@ -26,8 +26,7 @@ import { AddonInfoDetail } from "./addonDetail";
 import { Guide } from "./guide";
 import { LargePrefHelper } from "zotero-plugin-toolkit";
 import Fuse from "fuse.js";
-const { XPIDatabase } = ChromeUtils.importESModule("resource://gre/modules/addons/XPIDatabase.sys.mjs");
-const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
+import { getXPIDatabase, getAddonManager } from "../utils/compat";
 
 type TableMenuItemID =
   | "menu-install"
@@ -257,7 +256,7 @@ export class AddonTable {
     }
     const addons = (await this.outdateAddons()).filter((e) => {
       if (options?.filterAutoUpdatableAddons) {
-        const systemUpdatable = AddonManager.updateEnabled;
+        const systemUpdatable = getAddonManager().updateEnabled;
         if (!systemUpdatable) {
           return false;
         }
@@ -267,7 +266,7 @@ export class AddonTable {
         if (e[1]?.applyBackgroundUpdates == 0) {
           return false;
         } // off
-        return AddonManager.autoUpdateDefault;
+        return getAddonManager().autoUpdateDefault;
       } else {
         return true;
       }
@@ -367,7 +366,7 @@ export class AddonTable {
         if (relatedAddon.length <= 0) {
           continue;
         }
-        const dbAddon = await XPIDatabase.getAddon(
+        const dbAddon = await getXPIDatabase().getAddon(
           (addon: any) => addon.id === relatedAddon[0][1].id,
         );
         if (dbAddon && dbAddon.path) {
@@ -518,7 +517,7 @@ export class AddonTable {
         } else {
           append("menu-reinstall", addonInfo[0]);
         }
-        const dbAddon = await XPIDatabase.getAddon(
+        const dbAddon = await getXPIDatabase().getAddon(
           (addon: any) => addon.id === relatedAddon[0][1].id,
         );
         if (dbAddon) {
@@ -857,7 +856,7 @@ export class AddonTable {
       case "menu-open-xpi-location":
         // see in https://github.com/zotero/zotero/blob/d688ebc10ff573c6faf66d0e63980044d04d4186/chrome/content/zotero/zoteroPane.js#L5081
         selectAddons.forEach(async (selectedAddon) => {
-          const dbAddon = await XPIDatabase.getAddon(
+          const dbAddon = await getXPIDatabase().getAddon(
             (addon: any) => addon.id === addonReleaseInfo(selectedAddon[0])?.id,
           );
           if (!dbAddon || !dbAddon.path) {

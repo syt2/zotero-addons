@@ -1,6 +1,6 @@
 import { AddonInfoDetail } from "./addonDetail";
 import { AddonTable } from "./addonTable";
-const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
+import { getAddonManager } from "../utils/compat";
 
 export class AddonListenerManager {
   private static addonEventListener = {
@@ -50,13 +50,13 @@ export class AddonListenerManager {
    * Add addon listener in Zotero
    */
   static addListener() {
-    AddonManager.addAddonListener(this.addonEventListener);
+    getAddonManager().addAddonListener(this.addonEventListener);
   }
 
   /**
    * Remove addon listener in Zotero
    */
   static removeListener() {
-    AddonManager.removeAddonListener(this.addonEventListener);
+    getAddonManager().removeAddonListener(this.addonEventListener);
   }
 }

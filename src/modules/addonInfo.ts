@@ -5,8 +5,7 @@ import {
   currentSource,
   setAutoSource,
 } from "../utils/configuration";
-const { XPIDatabase } = ChromeUtils.importESModule("resource://gre/modules/addons/XPIDatabase.sys.mjs");
-const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
+import { getXPIDatabase, getAddonManager } from "../utils/compat";
 
 /**
  * Datastruct of Remote AddonInfo
@@ -192,7 +191,7 @@ export function addonReleaseTime(addonInfo: AddonInfo) {
  */
 export async function relatedAddons(addonInfos: AddonInfo[]) {
   const addons: [AddonInfo, any][] = [];
-  const localAddons: any[] = (await AddonManager.getAllAddons()).filter(
+  const localAddons: any[] = (await getAddonManager().getAllAddons()).filter(
     (e: any) => e.id,
   );
 
@@ -250,7 +249,7 @@ export async function addonInstallStatus(
   if (relateAddon) {
     // has local addon
     if (relateAddon[1]) {
-      const dbAddon = await XPIDatabase.getAddon(
+      const dbAddon = await getXPIDatabase().getAddon(
         (addon: any) => addon.id === relateAddon[1].id,
       );
       if (dbAddon && dbAddon.pendingUninstall) {

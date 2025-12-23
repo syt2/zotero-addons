@@ -9,8 +9,7 @@ import { getString } from "../utils/locale";
 import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { config } from "../../package.json";
 import { isWindowAlive } from "../utils/window";
-const { XPIDatabase } = ChromeUtils.importESModule("resource://gre/modules/addons/XPIDatabase.sys.mjs");
-const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
+import { getXPIDatabase, getAddonManager } from "../utils/compat";
 
 export class AddonInfoDetail {
   private static window: Window | null;
@@ -258,7 +257,7 @@ export class AddonInfoDetail {
     windowTitle.textContent = releaseInfo?.name ?? addonInfo.name ?? "";
 
     this.addonIcon.src = localAddon
-      ? AddonManager.getPreferredIconURL(localAddon)
+      ? getAddonManager().getPreferredIconURL(localAddon)
       : "";
     this.addonIcon.hidden = !localAddon;
     this.addonName.textContent = releaseInfo?.name ?? addonInfo.name ?? "";
@@ -354,7 +353,7 @@ export class AddonInfoDetail {
       } else {
         this.reinstallButton.hidden = false;
       }
-      const dbAddon = await XPIDatabase.getAddon(
+      const dbAddon = await getXPIDatabase().getAddon(
         (addon: any) => addon.id === relatedAddon[0][1].id,
       );
       if (dbAddon) {

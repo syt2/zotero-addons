@@ -2,8 +2,7 @@ import { ProgressWindowHelper } from "zotero-plugin-toolkit";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import { xpiURLSourceName } from "../modules/addonInfo";
-
-const { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
+import { getAddonManager } from "./compat";
 
 /**
  * Undo uninstall add-on
@@ -138,10 +137,10 @@ export async function installAddonFrom(
   // > installAddonFromURL example:
   // > https://github.com/mozilla/gecko-dev/blob/fc757816ed9d8f8552dbcb96c1f89f8108f37b2a/browser/components/enterprisepolicies/Policies.sys.mjs#L2618
   // > AddonManager states and error types:
-  // > `https://github.com/mozilla/gecko-dev/blob/fc757816ed9d8f8552dbcb96c1f89f8108f37b2a/toolkit/mozapps/extensions/AddonManager.sys.mjs#L3993`
+  // > `https://github.com/mozilla/gecko-dev/blob/fc757816ed9d8f8552dbcb96c1f89f8108f37b2a/toolkit/mozapps/extensions/getAddonManager().sys.mjs#L3993`
   const actualInstall = async () => {
     try {
-      const install = await AddonManager.getInstallForURL(xpiUrl, {
+      const install = await getAddonManager().getInstallForURL(xpiUrl, {
         telemetryInfo: { source: config.addonID },
       });
       return await new Promise<boolean>((resolve) => {
@@ -152,7 +151,7 @@ export async function installAddonFrom(
             }
             // 下载进度条
             (async () => {
-              while (install.state === AddonManager.STATE_DOWNLOADING) {
+              while (install.state === getAddonManager().STATE_DOWNLOADING) {
                 await new Promise(resolve => setTimeout(resolve, 200));
                 if (install.maxProgress > 0 && install.progress > 0) {
                   popWin.changeLine({
@@ -188,7 +187,7 @@ export async function installAddonFrom(
           },
           onDownloadFailed: () => {
             ztoolkit.log(
-              `download from ${xpiUrl} failed ${AddonManager.errorToString(install.error)}`,
+              `download from ${xpiUrl} failed ${getAddonManager().errorToString(install.error)}`,
             );
             install.removeListener(listener);
             popWin
@@ -200,23 +199,23 @@ export async function installAddonFrom(
                 progress: 0,
               })
               .addDescription(
-                AddonManager.errorToString(install.error).slice(0, 45),
+                getAddonManager().errorToString(install.error).slice(0, 45),
               );
             resolve(true);
           },
           onInstallFailed: () => {
             ztoolkit.log(
-              `install failed ${AddonManager.errorToString(install.error)} from ${xpiUrl}`,
+              `install failed ${getAddonManager().errorToString(install.error)} from ${xpiUrl}`,
             );
             install.removeListener(listener);
             popWin
               ?.changeLine({
-                text: `${getString("install-failed", { args: { name: xpiName } })} [${AddonManager.errorToString(install.error)}]`,
+                text: `${getString("install-failed", { args: { name: xpiName } })} [${getAddonManager().errorToString(install.error)}]`,
                 type: "fail",
                 progress: 0,
               })
               .addDescription(
-                AddonManager.errorToString(install.error).slice(0, 45),
+                getAddonManager().errorToString(install.error).slice(0, 45),
               );
             resolve(true);
           },
