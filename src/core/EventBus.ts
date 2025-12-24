@@ -10,12 +10,6 @@ import mitt, { Emitter } from "mitt";
 export const AddonEvents = {
   /** Addon state changed (installed, uninstalled, enabled, disabled, etc.) */
   ADDON_CHANGED: "addon:changed",
-  /** UI refresh required */
-  REFRESH_REQUIRED: "ui:refresh",
-  /** Source changed */
-  SOURCE_CHANGED: "source:changed",
-  /** Data fetched */
-  DATA_FETCHED: "data:fetched",
 } as const;
 
 /**
@@ -23,9 +17,6 @@ export const AddonEvents = {
  */
 export type AddonEventMap = {
   [AddonEvents.ADDON_CHANGED]: void;
-  [AddonEvents.REFRESH_REQUIRED]: void;
-  [AddonEvents.SOURCE_CHANGED]: { sourceId: string };
-  [AddonEvents.DATA_FETCHED]: { count: number };
 };
 
 // Singleton emitter instance
