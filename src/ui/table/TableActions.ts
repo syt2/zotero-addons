@@ -9,7 +9,7 @@ import {
   relatedAddons,
   xpiDownloadUrls,
 } from "../../modules/addonInfo";
-import { installAddonFrom, uninstall, undoUninstall } from "../../utils/utils";
+import { installAddonFrom, uninstall, undoUninstall } from "../../services";
 
 export class TableActions {
   /**

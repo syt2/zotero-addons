@@ -3,7 +3,7 @@
  */
 
 import type { ColumnOptions } from "zotero-plugin-toolkit";
-import type { AddonInfo, InstallStatus } from "./addon.types";
+import type { AddonInfo } from "./addon.types";
 
 /**
  * Table menu item ID
@@ -49,46 +49,10 @@ export type TableRowData = Partial<Record<TableColumnID, string>>;
 export type AssociatedAddonInfo = [AddonInfo, TableRowData];
 
 /**
- * Extended associated addon info with status
- */
-export interface AssociatedAddonInfoEx {
-  addonInfo: AddonInfo;
-  rowData: TableRowData;
-  status: InstallStatus;
-}
-
-/**
- * Sort configuration
- */
-export interface SortConfig {
-  column: TableColumnID;
-  direction: 1 | -1;
-}
-
-/**
- * Table state
- */
-export interface TableState {
-  addonInfos: AssociatedAddonInfo[];
-  selectedIndices: Set<number>;
-  sortConfig: SortConfig | null;
-  searchText: string;
-}
-
-/**
  * Extended column options
  */
 export interface ExtendedColumnOptions extends ColumnOptions {
   ordinal?: number;
   sortDirection?: 1 | -1;
   hidden?: boolean;
-}
-
-/**
- * Menu item with addon info
- */
-export interface MenuItemWithAddon {
-  id: TableMenuItemID;
-  label: string;
-  addons?: AddonInfo[];
 }

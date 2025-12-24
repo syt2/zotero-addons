@@ -5,17 +5,19 @@
  * Zotero 8: Uses ChromeUtils.importESModule with .sys.mjs files
  */
 
+import type { IAddonManager, IXPIDatabase } from "../types";
+
 /**
  * Check if running on Zotero 8 or later (Firefox 115+)
  */
-export function isZotero8() {
+export function isZotero8(): boolean {
   return Services.vc.compare(Zotero.version, "8") > 0;
 }
 
 /**
  * Import XPIDatabase module with version compatibility
  */
-export function getXPIDatabase() {
+export function getXPIDatabase(): IXPIDatabase {
   if (isZotero8()) {
     return ChromeUtils.importESModule(
       "resource://gre/modules/addons/XPIDatabase.sys.mjs",
@@ -29,7 +31,7 @@ export function getXPIDatabase() {
 /**
  * Import AddonManager module with version compatibility
  */
-export function getAddonManager() {
+export function getAddonManager(): IAddonManager {
   if (isZotero8()) {
     return ChromeUtils.importESModule(
       "resource://gre/modules/AddonManager.sys.mjs",

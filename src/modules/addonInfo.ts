@@ -6,89 +6,11 @@ import {
   setAutoSource,
 } from "../utils/configuration";
 import { getXPIDatabase, getAddonManager } from "../utils/compat";
-import { xpiURLSourceName as _xpiURLSourceName } from "../services";
-
-// Re-export for backward compatibility
-export const xpiURLSourceName = _xpiURLSourceName;
-
-/**
- * Datastruct of Remote AddonInfo
- * Copy from https://github.com/zotero-chinese/zotero-plugins
- */
-export interface AddonInfo {
-  /**
-   * 插件名称
-   */
-  name?: string;
-  /**
-   * 插件仓库
-   *
-   * 例如：northword/zotero-format-metadata
-   *
-   * 注意前后均无 `/`
-   */
-  repo: string;
-  /**
-   * 插件的发布地址信息
-   */
-  releases?: Array<{
-    /**
-     * 当前发布版对应的 Zotero 版本
-     */
-    targetZoteroVersion: string;
-    /**
-     * 当前发布版对应的下载通道
-     *
-     * `latest`：最新正式发布；
-     * `pre`：最新预发布；
-     * `string`：发布对应的 `git.tag_name`；
-     * 注意 `git.tag_name` 有的有 `v` 而有的没有，可以通过发布链接来判断
-     * 程序执行后，`tagName` 将替换为实际的 `git.tag_name`
-     */
-    tagName: "latest" | "pre" | string;
-    /**
-     * 插件 ID，自 XPI 中提取
-     */
-    id?: string;
-    /**
-     * 插件名称， XPI 中提取
-     */
-    name?: string;
-    /**
-     * 插件descrption， XPI 中提取
-     */
-    description?: string;
-    /**
-     * 插件版本，自 XPI 中提取
-     */
-    xpiVersion?: string;
-    /**
-     * 最低需要的Zotero版本,可能带*
-     */
-    minZoteroVersion?: string;
-    /**
-     * 最高可用的Zotero版本,可能带*
-     */
-    maxZoteroVersion?: string;
-
-    xpiDownloadUrl?: {
-      github: string;
-      gitee?: string;
-      ghProxy?: string;
-      jsdeliver?: string;
-      kgithub?: string;
-    };
-    releaseDate?: string;
-  }>;
-
-  description?: string;
-  stars?: number;
-  author?: {
-    name: string;
-    url: string;
-    avatar: string;
-  };
-}
+// Re-export types from types module
+export { InstallStatus } from "../types";
+export type { AddonInfo } from "../types";
+import { InstallStatus } from "../types";
+import type { AddonInfo, LocalAddon } from "../types";
 
 /**
  * Extract download urls of xpi file from AddonInfo
@@ -140,7 +62,7 @@ export function xpiDownloadUrls(addonInfo: AddonInfo) {
  */
 export function addonReleaseInfo(addonInfo: AddonInfo) {
   const release = addonInfo.releases?.find(
-    (release) => release.targetZoteroVersion === "7",
+    (release) => Services.vc.compare(release.targetZoteroVersion, Zotero.version.split(".")[0]) >= 0
   );
   if ((release?.xpiDownloadUrl?.github?.length ?? 0) === 0) {
     return;
@@ -173,17 +95,17 @@ export function addonReleaseTime(addonInfo: AddonInfo) {
  * @returns [AddonInfo, addon][] pair which addon installed
  */
 export async function relatedAddons(addonInfos: AddonInfo[]) {
-  const addons: [AddonInfo, any][] = [];
-  const localAddons: any[] = (await getAddonManager().getAllAddons()).filter(
-    (e: any) => e.id,
+  const addons: [AddonInfo, LocalAddon][] = [];
+  const localAddons = (await getAddonManager().getAllAddons()).filter(
+    (e) => e.id,
   );
 
   for (const addonInfo of addonInfos) {
-    const relateAddon: any =
+    const relateAddon =
       localAddons.find(
-        (addon: any) => addonReleaseInfo(addonInfo)?.id === addon.id,
+        (addon) => addonReleaseInfo(addonInfo)?.id === addon.id,
       ) ??
-      localAddons.find((addon: any) => {
+      localAddons.find((addon) => {
         if (
           addon.name &&
           (addonReleaseInfo(addonInfo)?.name === addon.name ||
@@ -207,19 +129,6 @@ export async function relatedAddons(addonInfos: AddonInfo[]) {
 }
 
 /**
- * Addon install status
- */
-export enum InstallStatus {
-  unknown = 0,
-  notInstalled = 1,
-  normal = 2,
-  updatable = 3,
-  disabled = 4,
-  incompatible = 5,
-  pendingUninstall = 6,
-}
-
-/**
  * Get addon install status
  * @param addonInfo AddonInfo
  * @param relateAddon AddonInfo and its related local addon. If passed undefined, InstallStatus.unknown will return
@@ -227,13 +136,13 @@ export enum InstallStatus {
  */
 export async function addonInstallStatus(
   addonInfo: AddonInfo,
-  relateAddon?: [AddonInfo, any],
+  relateAddon?: [AddonInfo, LocalAddon],
 ) {
   if (relateAddon) {
     // has local addon
     if (relateAddon[1]) {
       const dbAddon = await getXPIDatabase().getAddon(
-        (addon: any) => addon.id === relateAddon[1].id,
+        (addon) => addon.id === relateAddon[1].id,
       );
       if (dbAddon && dbAddon.pendingUninstall) {
         // deleted
@@ -272,7 +181,7 @@ export async function addonInstallStatus(
  * @param addon local addon
  * @returns bool
  */
-export function addonCanUpdate(addonInfo: AddonInfo, addon: any) {
+export function addonCanUpdate(addonInfo: AddonInfo, addon: LocalAddon) {
   const version = addonReleaseInfo(addonInfo)?.xpiVersion;
   if (!version || !addon.version) {
     return false;
@@ -413,19 +322,5 @@ export class AddonInfoManager {
     } catch (error) {
       return [];
     }
-
-    // for (const source of Sources) {
-    //   if (!source.api) { continue; }
-    //   const infos = await AddonInfoAPI.fetchAddonInfos(source.api, timeout, () => {
-    //     ztoolkit.log(`check source from ${source.api} timeout!`);
-    //   });
-    //   if (infos.length > 0) {
-    //     this.shared.sourceInfos[source.api] = [new Date(), infos];
-    //     setAutoSource(source);
-    //     ztoolkit.log(`switch to ${source.id} automatically`);
-    //     return infos;
-    //   }
-    // }
-    // return [];
   }
 }

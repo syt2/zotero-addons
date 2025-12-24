@@ -154,12 +154,3 @@ export enum InstallStatus {
   pendingUninstall = 6,
 }
 
-/**
- * Remote addon paired with local addon
- */
-export interface AddonPair {
-  remote: AddonInfo;
-  local: LocalAddon | null;
-  dbAddon: DBAddon | null;
-  status: InstallStatus;
-}

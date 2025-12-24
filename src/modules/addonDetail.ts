@@ -6,7 +6,7 @@ import {
   xpiDownloadUrls,
 } from "./addonInfo";
 import { getString } from "../utils/locale";
-import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
+import { installAddonFrom, undoUninstall, uninstall } from "../services";
 import { config } from "../../package.json";
 import { isWindowAlive } from "../utils/window";
 import { getXPIDatabase, getAddonManager } from "../utils/compat";

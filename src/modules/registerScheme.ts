@@ -7,7 +7,7 @@ import {
   setCurrentSource,
   setCustomSourceApi,
 } from "../utils/configuration";
-import { installAddonFrom } from "../utils/utils";
+import { installAddonFrom } from "../services";
 import {
   Base64Utils,
   verifySignature,

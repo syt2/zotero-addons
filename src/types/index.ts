@@ -10,17 +10,8 @@ export type {
   AddonInfo,
   LocalAddon,
   DBAddon,
-  AddonPair,
 } from "./addon.types";
 export { InstallStatus } from "./addon.types";
-
-// Source types
-export type {
-  SourceID,
-  Source,
-  SourceFetchResult,
-  XpiSourceName,
-} from "./source.types";
 
 // Table types
 export type {
@@ -28,11 +19,7 @@ export type {
   TableColumnID,
   TableRowData,
   AssociatedAddonInfo,
-  AssociatedAddonInfoEx,
-  SortConfig,
-  TableState,
   ExtendedColumnOptions,
-  MenuItemWithAddon,
 } from "./table.types";
 
 // Zotero API types
