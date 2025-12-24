@@ -33,22 +33,6 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
     id: "source-auto",
   },
   {
-    id: "source-zotero-chinese-github",
-    api: "https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json",
-  },
-  {
-    id: "source-zotero-chinese-gitee",
-    api: "https://gitee.com/northword/zotero-plugins/raw/gh-pages/dist/plugins.json",
-  },
-  {
-    id: "source-zotero-chinese-jsdelivr",
-    api: "https://cdn.jsdelivr.net/gh/zotero-chinese/zotero-plugins@gh-pages/dist/plugins.json",
-  },
-  {
-    id: "source-zotero-chinese-ghproxy",
-    api: "https://gh-proxy.com/https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json",
-  },
-  {
     id: "source-zotero-scraper-github",
     api: "https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
   },
@@ -63,6 +47,22 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
   {
     id: "source-zotero-scraper-ghproxy",
     api: "https://gh-proxy.com/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
+  },
+  {
+    id: "source-zotero-chinese-github",
+    api: "https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json",
+  },
+  {
+    id: "source-zotero-chinese-gitee",
+    api: "https://gitee.com/northword/zotero-plugins/raw/gh-pages/dist/plugins.json",
+  },
+  {
+    id: "source-zotero-chinese-jsdelivr",
+    api: "https://cdn.jsdelivr.net/gh/zotero-chinese/zotero-plugins@gh-pages/dist/plugins.json",
+  },
+  {
+    id: "source-zotero-chinese-ghproxy",
+    api: "https://gh-proxy.com/https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json",
   },
   {
     id: "source-custom",
