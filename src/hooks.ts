@@ -8,7 +8,7 @@ import { AddonListenerManager } from "./modules/addonListenerManager";
 import { getPref } from "./utils/prefs";
 import { registerConfigScheme } from "./modules/registerScheme";
 import { Guide } from "./modules/guide";
-import { getEventBus, AddonEvents } from "./core";
+import { getEventBus, AddonEvents, clearEventBus } from "./core";
 
 async function onStartup() {
   await Promise.all([
@@ -80,7 +80,7 @@ function onShutdown(): void {
   AddonListenerManager.removeListener();
   AddonTable.unregisterAll();
   // Clear all event subscriptions
-  getEventBus().clearAll();
+  clearEventBus();
   // Remove addon object
   addon.data.alive = false;
   // @ts-expect-error - Plugin instance is not typed
