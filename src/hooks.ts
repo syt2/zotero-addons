@@ -1,5 +1,4 @@
-import { config } from "../package.json";
-import { getString, initLocale } from "./utils/locale";
+import { initLocale } from "./utils/locale";
 import { createZToolkit } from "./utils/ztoolkit";
 import { AddonTable } from "./modules/addonTable";
 import { AddonInfoManager } from "./modules/addonInfo";
@@ -9,6 +8,7 @@ import { AddonListenerManager } from "./modules/addonListenerManager";
 import { getPref } from "./utils/prefs";
 import { registerConfigScheme } from "./modules/registerScheme";
 import { Guide } from "./modules/guide";
+import { getEventBus, AddonEvents } from "./core";
 
 async function onStartup() {
   await Promise.all([
@@ -25,7 +25,6 @@ async function onStartup() {
   await Promise.all(
     Zotero.getMainWindows().map((win) => onMainWindowLoad(win)),
   );
-
 
   (async () => {
     if (currentSource().id === "source-auto") {
@@ -47,6 +46,12 @@ async function onStartup() {
 
   AddonListenerManager.addListener();
 
+  // Subscribe to addon changed events for UI refresh
+  getEventBus().on(AddonEvents.ADDON_CHANGED, () => {
+    AddonTable.refresh();
+    AddonInfoDetail.refresh();
+  });
+
   // Mark initialized as true to confirm plugin loading status
   // outside of the plugin (e.g. scaffold testing process)
   addon.data.initialized = true;
@@ -64,7 +69,7 @@ async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {
   // );
 }
 
-async function onMainWindowUnload(win: Window): Promise<void> {
+async function onMainWindowUnload(_win: Window): Promise<void> {
   ztoolkit.unregisterAll();
 }
 
@@ -74,6 +79,8 @@ function onShutdown(): void {
   AddonInfoDetail.close();
   AddonListenerManager.removeListener();
   AddonTable.unregisterAll();
+  // Clear all event subscriptions
+  getEventBus().clearAll();
   // Remove addon object
   addon.data.alive = false;
   // @ts-expect-error - Plugin instance is not typed

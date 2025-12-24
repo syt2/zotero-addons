@@ -9,7 +9,7 @@
  * Check if running on Zotero 8 or later (Firefox 115+)
  */
 export function isZotero8() {
-  return Services.vc.compare(Zotero.version, "8") > 0 
+  return Services.vc.compare(Zotero.version, "8") > 0;
 }
 
 /**
@@ -21,9 +21,8 @@ export function getXPIDatabase() {
       "resource://gre/modules/addons/XPIDatabase.sys.mjs",
     ).XPIDatabase;
   } else {
-    return ChromeUtils.import(
-      "resource://gre/modules/addons/XPIDatabase.jsm",
-    ).XPIDatabase;
+    return ChromeUtils.import("resource://gre/modules/addons/XPIDatabase.jsm")
+      .XPIDatabase;
   }
 }
 
@@ -36,8 +35,7 @@ export function getAddonManager() {
       "resource://gre/modules/AddonManager.sys.mjs",
     ).AddonManager;
   } else {
-    return ChromeUtils.import(
-      "resource://gre/modules/AddonManager.jsm",
-    ).AddonManager;
+    return ChromeUtils.import("resource://gre/modules/AddonManager.jsm")
+      .AddonManager;
   }
 }

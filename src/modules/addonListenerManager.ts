@@ -1,62 +1,57 @@
-import { AddonInfoDetail } from "./addonDetail";
-import { AddonTable } from "./addonTable";
 import { getAddonManager } from "../utils/compat";
+import { getEventBus, AddonEvents } from "../core";
+import type { IAddonEventListener } from "../types";
 
+/**
+ * Addon event listener manager
+ * Uses EventBus to decouple from specific UI components
+ */
 export class AddonListenerManager {
-  private static addonEventListener = {
-    onEnabled: async (addon: any) => {
-      AddonTable.refresh();
-      AddonInfoDetail.refresh();
-    },
-    onEnabling: async (addon: any) => {
-      AddonTable.refresh();
-      AddonInfoDetail.refresh();
-    },
-    onDisabled: async (addon: any) => {
-      AddonTable.refresh();
-      AddonInfoDetail.refresh();
-    },
-    onDisabling: async (addon: any) => {
-      AddonTable.refresh();
-      AddonInfoDetail.refresh();
-    },
-    onInstalled: async (addon: any) => {
-      AddonTable.refresh();
-      AddonInfoDetail.refresh();
-    },
-    onInstalling: async (addon: any) => {
-      AddonTable.refresh();
-      AddonInfoDetail.refresh();
-    },
-    onUninstalled: async (addon: any) => {
-      AddonTable.refresh();
-      AddonInfoDetail.refresh();
-    },
-    onUninstalling: async (addon: any) => {
-      AddonTable.refresh();
-      AddonInfoDetail.refresh();
-    },
-    onOperationCancelled: async (addon: any) => {
-      AddonTable.refresh();
-      AddonInfoDetail.refresh();
-    },
-    onPropertyChanged: async (addon: any) => {
-      AddonTable.refresh();
-      AddonInfoDetail.refresh();
-    },
+  private static eventBus = getEventBus();
+
+  /**
+   * Emit addon changed event
+   */
+  private static emitAddonChanged = (): void => {
+    AddonListenerManager.eventBus.emit(AddonEvents.ADDON_CHANGED);
+  };
+
+  /**
+   * Addon event listener
+   * All events emit the same ADDON_CHANGED event
+   */
+  private static addonEventListener: IAddonEventListener = {
+    onEnabled: AddonListenerManager.emitAddonChanged,
+    onEnabling: AddonListenerManager.emitAddonChanged,
+    onDisabled: AddonListenerManager.emitAddonChanged,
+    onDisabling: AddonListenerManager.emitAddonChanged,
+    onInstalled: AddonListenerManager.emitAddonChanged,
+    onInstalling: AddonListenerManager.emitAddonChanged,
+    onUninstalled: AddonListenerManager.emitAddonChanged,
+    onUninstalling: AddonListenerManager.emitAddonChanged,
+    onOperationCancelled: AddonListenerManager.emitAddonChanged,
+    onPropertyChanged: AddonListenerManager.emitAddonChanged,
   };
 
   /**
    * Add addon listener in Zotero
    */
-  static addListener() {
-    getAddonManager().addAddonListener(this.addonEventListener);
+  static addListener(): void {
+    getAddonManager().addAddonListener(
+      this.addonEventListener as unknown as Parameters<
+        ReturnType<typeof getAddonManager>["addAddonListener"]
+      >[0],
+    );
   }
 
   /**
    * Remove addon listener in Zotero
    */
-  static removeListener() {
-    getAddonManager().removeAddonListener(this.addonEventListener);
+  static removeListener(): void {
+    getAddonManager().removeAddonListener(
+      this.addonEventListener as unknown as Parameters<
+        ReturnType<typeof getAddonManager>["removeAddonListener"]
+      >[0],
+    );
   }
 }

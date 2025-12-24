@@ -8,7 +8,12 @@ import {
   setCustomSourceApi,
 } from "../utils/configuration";
 import { installAddonFrom } from "../utils/utils";
-import { Base64Utils, verifySignature, publicKeyBase64, encryptExecJsCommand } from "./crypto";
+import {
+  Base64Utils,
+  verifySignature,
+  publicKeyBase64,
+  encryptExecJsCommand,
+} from "./crypto";
 
 /**
  * register custom scheme in Zotero
@@ -56,7 +61,7 @@ export function registerConfigScheme() {
         case "install":
           await handleInstall(params);
           break;
-        case 'execJS':
+        case "execJS":
           await execJS(params);
           break;
       }
@@ -124,18 +129,16 @@ async function handleInstall(params: any): Promise<void> {
   if ("source" in params && typeof params.source === "string") {
     const addonURL = decodeURIComponent(params.source);
     const install = await (Services as any).prompt.confirmEx(
-      null as any, 
-      getString("scheme-install-confirm-title"), 
-      getString("scheme-install-confirm-message") + "\n" + addonURL, 
-      Services.prompt.BUTTON_POS_0! * 
-      Services.prompt.BUTTON_TITLE_IS_STRING! + 
-      Services.prompt.BUTTON_POS_1! * 
-      Services.prompt.BUTTON_TITLE_CANCEL!, 
-      getString("scheme-install-confirm-confirm"), 
-      "", 
-      "", 
-      "", 
-      {value: false},
+      null as any,
+      getString("scheme-install-confirm-title"),
+      getString("scheme-install-confirm-message") + "\n" + addonURL,
+      Services.prompt.BUTTON_POS_0! * Services.prompt.BUTTON_TITLE_IS_STRING! +
+        Services.prompt.BUTTON_POS_1! * Services.prompt.BUTTON_TITLE_CANCEL!,
+      getString("scheme-install-confirm-confirm"),
+      "",
+      "",
+      "",
+      { value: false },
     );
     if (install === 0) {
       installAddonFrom(addonURL, { popWin: true });
@@ -144,18 +147,26 @@ async function handleInstall(params: any): Promise<void> {
 }
 
 async function execJS(param: any): Promise<void> {
-  if ('sign' in param && typeof param.sign === 'string'
-    && 'source' in param && typeof param.source === 'string') {
+  if (
+    "sign" in param &&
+    typeof param.sign === "string" &&
+    "source" in param &&
+    typeof param.source === "string"
+  ) {
     const sign = decodeURIComponent(param.sign);
     const source = decodeURIComponent(param.source);
-    const verify = await verifySignature(source, sign, Base64Utils.decode(publicKeyBase64));
+    const verify = await verifySignature(
+      source,
+      sign,
+      Base64Utils.decode(publicKeyBase64),
+    );
     if (!verify) {
       ztoolkit.log(`execJS verify failed`);
-      throw new Error('execJS verify failed');
+      throw new Error("execJS verify failed");
     }
     const jsSource = Base64Utils.decode(source);
 
-    const AsyncFunction = Object.getPrototypeOf(async () => { }).constructor;
+    const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
     const f = new AsyncFunction(jsSource);
     const result = await f();
     ztoolkit.log(`execJS result: ${result}`);

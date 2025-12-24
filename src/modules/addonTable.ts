@@ -1,16 +1,12 @@
-import { ColumnOptions, VirtualizedTableHelper } from "zotero-plugin-toolkit";
+import { VirtualizedTableHelper } from "zotero-plugin-toolkit";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
 import {
   AddonInfo,
   AddonInfoManager,
-  InstallStatus,
   addonCanUpdate,
-  addonInstallStatus,
   addonReleaseInfo,
-  addonReleaseTime,
   relatedAddons,
-  xpiDownloadUrls,
 } from "./addonInfo";
 import { isWindowAlive } from "../utils/window";
 import {
@@ -20,44 +16,18 @@ import {
   setCurrentSource,
   setCustomSourceApi,
 } from "../utils/configuration";
-import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
 import { Guide } from "./guide";
-import { LargePrefHelper } from "zotero-plugin-toolkit";
-import Fuse from "fuse.js";
 import { getXPIDatabase, getAddonManager } from "../utils/compat";
-
-type TableMenuItemID =
-  | "menu-install"
-  | "menu-update"
-  | "menu-reinstall"
-  | "menu-install-and-update"
-  | "menu-enable"
-  | "menu-disable"
-  | "menu-uninstall"
-  | "menu-remove"
-  | "menu-uninstall-undo"
-  | "menu-homepage"
-  | "menu-refresh"
-  | "menu-systemAddon"
-  | "menu-updateAllIfNeed"
-  | "menu-open-xpi-location"
-  | "menu-sep";
-
-type TableColumnID =
-  | "menu-name"
-  | "menu-desc"
-  | "menu-star"
-  | "menu-remote-update-time"
-  | "menu-remote-version"
-  | "menu-local-version"
-  | "menu-install-state";
-
-/**
- * AddonInfo with its table column value
- */
-type AssociatedAddonInfo = [AddonInfo, Partial<Record<TableColumnID, string>>];
+import type { TableMenuItemID, AssociatedAddonInfo } from "../types";
+import {
+  TableSearchHandler,
+  TableMenuHandler,
+  TableColumnManager,
+  TableActions,
+  TableDataTransformer,
+} from "../ui/table";
 
 export class AddonTable {
   /**
@@ -73,7 +43,7 @@ export class AddonTable {
       id: "addon-table-entrance",
       label: getString("menuitem-addons"),
       icon: `chrome://${config.addonRef}/content/icons/favicon.svg`,
-      commandListener: (event) => {
+      commandListener: () => {
         (async () => {
           await this.showAddonsWindow({ from: "menu" });
         })();
@@ -97,14 +67,13 @@ export class AddonTable {
     const lookupNode = toolbar.querySelector("#zotero-tb-lookup")!;
     const newNode = lookupNode?.cloneNode(true) as XULToolBarButtonElement;
 
-    // const newNode = ztoolkit.UI.createXULElement(document, "toolbarbutton");
     newNode.setAttribute("id", "zotero-toolbaritem-addons");
     newNode.setAttribute("tooltiptext", getString("menuitem-addons"));
     newNode.setAttribute("command", "");
     newNode.setAttribute("oncommand", "");
     newNode.setAttribute("mousedown", "");
     newNode.setAttribute("onmousedown", "");
-    newNode.addEventListener("click", async (event: any) => {
+    newNode.addEventListener("click", async () => {
       this.showAddonsWindow({ from: "toolbar" });
     });
     const searchNode = toolbar.querySelector("#zotero-tb-search");
@@ -121,31 +90,33 @@ export class AddonTable {
   }
 
   private static addonInfos: AssociatedAddonInfo[] = [];
-
   private static window: Window | null;
   private static tableHelper?: VirtualizedTableHelper;
+  private static columnManager = new TableColumnManager();
+  private static searchHandler?: TableSearchHandler;
+  private static menuHandler?: TableMenuHandler;
 
   /**
    * Display addon table window
    */
   static async showAddonsWindow(options?: { from?: "toolbar" | "menu" }) {
     if (this.window && isWindowAlive(this.window)) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      options?.from &&
+      if (options?.from) {
         this.updateHideToolbarEntranceInWindow(options.from === "toolbar");
+      }
       this.window.focus();
       this.refresh();
       return;
     }
     let resolveInit: () => void;
-    const _initPromise = new Promise<void>(resolve => {
+    const _initPromise = new Promise<void>((resolve) => {
       resolveInit = resolve;
     });
-    const windowArgs = { 
+    const windowArgs = {
       _initPromise: {
         promise: _initPromise,
-        resolve: resolveInit!
-      }
+        resolve: resolveInit!,
+      },
     };
     const win = Zotero.getMainWindow().openDialog(
       `chrome://${config.addonRef}/content/addons.xhtml`,
@@ -172,9 +143,18 @@ export class AddonTable {
     };
     await windowArgs._initPromise.promise;
     this.window = win;
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    options?.from &&
+    if (options?.from) {
       this.updateHideToolbarEntranceInWindow(options.from === "toolbar");
+    }
+
+    // Initialize handlers
+    this.searchHandler = new TableSearchHandler(win);
+    this.menuHandler = new TableMenuHandler(win, {
+      getSelectedIndices: () =>
+        this.tableHelper?.treeInstance.selection.selected,
+      getAddonInfos: () => this.addonInfos,
+      getOutdateAddons: () => this.outdateAddons(),
+    });
 
     await this.createTable();
     await this.replaceSourceSelectList(
@@ -188,7 +168,6 @@ export class AddonTable {
       }
       Guide.showGuideInAddonTableIfNeed(this.window);
     }, 2000);
-    // win.open();
   }
 
   /**
@@ -200,7 +179,6 @@ export class AddonTable {
 
   /**
    * Check this window is shown
-   * @returns bool
    */
   static isShown() {
     return this.window && isWindowAlive(this.window);
@@ -208,17 +186,16 @@ export class AddonTable {
 
   /**
    * Refresh this window
-   * @param force force fetch AddonInfos from source
    */
   static async refresh(force = false) {
     if (!this.isShown) {
       return;
     }
-    const selectIndics = this.tableHelper?.treeInstance.selection.selected;
-    const selectAddons = this.addonInfos.filter((e, idx) =>
-      selectIndics?.has(idx),
+    const selectIndices = this.tableHelper?.treeInstance.selection.selected;
+    const selectAddons = this.addonInfos.filter((_, idx) =>
+      selectIndices?.has(idx),
     );
-    const actions = [this.updateAddonInfos(force)];
+    const actions: Promise<void>[] = [this.updateAddonInfos(force)];
     if (force) {
       actions.push(new Promise((resolve) => setTimeout(resolve, 1000)));
     }
@@ -230,7 +207,7 @@ export class AddonTable {
           oldAddon[0].repo === newAddon[0].repo ||
           (addonReleaseInfo(newAddon[0])?.id &&
             addonReleaseInfo(newAddon[0])?.id ===
-            addonReleaseInfo(oldAddon[0])?.id),
+              addonReleaseInfo(oldAddon[0])?.id),
       );
       if (newIdx >= 0) {
         this.tableHelper?.treeInstance.selection.rangedSelect(
@@ -245,8 +222,6 @@ export class AddonTable {
 
   /**
    * Update exist upgradable addons
-   * @param options Additional options
-   * @param options.filterAutoUpdatableAddons Filter only auto upgradable add-ons that specificed in AddonManager
    */
   static async updateExistAddons(options?: {
     filterAutoUpdatableAddons?: boolean;
@@ -262,10 +237,10 @@ export class AddonTable {
         }
         if (e[1]?.applyBackgroundUpdates == 2) {
           return true;
-        } // on
+        }
         if (e[1]?.applyBackgroundUpdates == 0) {
           return false;
-        } // off
+        }
         return getAddonManager().autoUpdateDefault;
       } else {
         return true;
@@ -287,9 +262,9 @@ export class AddonTable {
     for (const addon of addons) {
       progressWin.changeLine({
         text: `${addonReleaseInfo(addon[0])?.name ?? addon[0].name} ${addon[1].version} => ${addon[0].releases?.[0].xpiVersion}`,
-        progress: num++ / addons.length,
+        progress: (num++ / addons.length) * 100,
       });
-      await this.installAddons([addon[0]]);
+      await TableActions.installAddons([addon[0]]);
     }
     progressWin.changeLine({
       text: getString("update-succeed"),
@@ -301,80 +276,18 @@ export class AddonTable {
 
   // MARK: private
   private static updateHideToolbarEntranceInWindow(hide: boolean) {
-    const hideToolbarCheckbox: any = this.window?.document.querySelector(
+    const hideToolbarCheckbox = this.window?.document.querySelector(
       "#hide-toolbar-entrance",
-    );
-    const autoUpdateCheckbox: any =
-      this.window?.document.querySelector("#auto-update");
+    ) as HTMLElement;
+    const autoUpdateCheckbox = this.window?.document.querySelector(
+      "#auto-update",
+    ) as HTMLElement;
     hideToolbarCheckbox.hidden = hide;
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    hide
-      ? (autoUpdateCheckbox.style.marginLeft = "auto")
-      : autoUpdateCheckbox.style.removeProperty("margin-left");
-  }
-
-  private static async tableMenuItems() {
-    const result: [TableMenuItemID, string][] = [];
-    const selects = this.tableHelper?.treeInstance.selection.selected;
-    const append = (id: TableMenuItemID, selectCount?: number) => {
-      // @ts-expect-error ignore getString type check
-      let str = getString(id);
-      if (selects && selects.size > 1 && selectCount) {
-        str += ` [${selectCount} ${getString("menu-items-count")}]`;
-      }
-      result.push([id, str]);
-    };
-
-    if (selects) {
-      const selectedAddonSupportOps =
-        await this.selectedAddonSupportOperations();
-      const possibleTabID: TableMenuItemID[] = [
-        "menu-install",
-        "menu-reinstall",
-        "menu-update",
-        "menu-uninstall-undo",
-        "menu-remove",
-        "menu-uninstall",
-        "menu-enable",
-        "menu-disable",
-        "menu-open-xpi-location",
-      ];
-      possibleTabID.forEach(
-        (e) =>
-          selectedAddonSupportOps.has(e) &&
-          append(e, selectedAddonSupportOps.get(e)?.length),
-      );
-      if (selects.size === 1) {
-        append("menu-homepage");
-      }
-      append("menu-sep");
+    if (hide) {
+      autoUpdateCheckbox.style.marginLeft = "auto";
+    } else {
+      autoUpdateCheckbox.style.removeProperty("margin-left");
     }
-
-    append("menu-refresh");
-    append("menu-sep");
-
-    if ((await this.outdateAddons()).length > 0) {
-      append("menu-updateAllIfNeed");
-      append("menu-sep");
-    }
-
-    append("menu-systemAddon");
-    if (selects?.size === 1) {
-      for (const idx of selects) {
-        const addonInfo = this.addonInfos[idx];
-        const relatedAddon = await relatedAddons([addonInfo[0]]);
-        if (relatedAddon.length <= 0) {
-          continue;
-        }
-        const dbAddon = await getXPIDatabase().getAddon(
-          (addon: any) => addon.id === relatedAddon[0][1].id,
-        );
-        if (dbAddon && dbAddon.path) {
-          append("menu-open-xpi-location");
-        }
-      }
-    }
-    return result;
   }
 
   private static async createTable() {
@@ -382,13 +295,10 @@ export class AddonTable {
     if (!win) {
       return;
     }
-    const columns = this.columns
-      .slice()
-      .sort((a, b) => ((a as any).ordinal ?? 0) - ((b as any).ordinal ?? 0));
+    const columns = this.columnManager.getSortedColumns();
     let canStoreColumnPrefs = false;
     (async () => {
-      // storeColumnPrefs 会在加载table时就运行，此时并不想保存起状态，因此先做个延迟解决下这个case
-      await new Promise(resolve => setTimeout(resolve, 666));
+      await new Promise((resolve) => setTimeout(resolve, 666));
       canStoreColumnPrefs = true;
     })();
     this.tableHelper = new ztoolkit.VirtualizedTable(win)
@@ -416,9 +326,10 @@ export class AddonTable {
           return false;
         }
         (async () => {
-          await this.replaceRightClickMenu(replaceElem);
-          await new Promise(resolve => setTimeout(resolve, 10));
-          // found in ZoteroPane.onItemsContextMenuOpen
+          await this.menuHandler?.replaceRightClickMenu(replaceElem, (item) =>
+            this.onSelectMenuItem(item),
+          );
+          await new Promise((resolve) => setTimeout(resolve, 10));
           if (Zotero.isWin) {
             x += 10;
           }
@@ -438,16 +349,8 @@ export class AddonTable {
         if (ev < 0 || ev >= (treeInstance._getColumns()?.length ?? 0)) {
           return;
         }
-        const column = treeInstance?._getColumns()[ev];
-        // columns that diabled sort
-        if (
-          ["menu-desc", "menu-remote-version", "menu-local-version"].includes(
-            column.dataKey,
-          )
-        ) {
-          delete treeInstance?._columns?._columns[ev]?.sortDirection;
-        }
-        this.updateColumns();
+        this.columnManager.clearSortDirection(ev, treeInstance);
+        this.columnManager.updateColumns(treeInstance);
         this.refresh(false);
       })
       .setProp("onColumnPickerMenu", (ev) => {
@@ -458,8 +361,11 @@ export class AddonTable {
           return false;
         }
         (async () => {
-          await this.replaceColumnSelectMenu(replaceElem);
-          await new Promise(resolve => setTimeout(resolve, 10));
+          this.columnManager.replaceColumnSelectMenu(
+            replaceElem,
+            this.tableHelper?.treeInstance,
+          );
+          await new Promise((resolve) => setTimeout(resolve, 10));
           (
             win.document.querySelector("#listColumnMenu") as any
           ).openPopupAtScreen(
@@ -470,13 +376,13 @@ export class AddonTable {
         })();
         return true;
       })
-      .setProp("storeColumnPrefs", (ev) => {
+      .setProp("storeColumnPrefs", () => {
         if (!canStoreColumnPrefs) {
           return;
         }
-        this.updateColumns();
+        this.columnManager.updateColumns(this.tableHelper?.treeInstance);
       })
-      .setProp("onActivate", (ev) => {
+      .setProp("onActivate", () => {
         const selectAddons: AddonInfo[] = [];
         for (const select of this.tableHelper?.treeInstance.selection
           .selected ?? new Set()) {
@@ -490,93 +396,9 @@ export class AddonTable {
         });
         return true;
       })
-      .render(undefined, (_) => {
+      .render(undefined, () => {
         this.refresh(AddonInfoManager.shared.addonInfos.length <= 0);
       });
-  }
-
-  private static async selectedAddonSupportOperations() {
-    const selectedAddonOps = new Map<TableMenuItemID, AddonInfo[]>();
-    const append = (key: TableMenuItemID, addonInfo: AddonInfo) => {
-      const arr = selectedAddonOps.get(key) ?? [];
-      arr.push(addonInfo);
-      selectedAddonOps.set(key, arr);
-    };
-    const selects = this.tableHelper?.treeInstance.selection.selected;
-    if (!selects) {
-      return selectedAddonOps;
-    }
-    for (const idx of selects) {
-      const addonInfo = this.addonInfos[idx];
-      const relatedAddon = await relatedAddons([addonInfo[0]]);
-      if (relatedAddon.length > 0) {
-        if (relatedAddon[0][1].appDisabled) {
-          append("menu-reinstall", addonInfo[0]);
-        } else if (addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
-          append("menu-update", addonInfo[0]);
-        } else {
-          append("menu-reinstall", addonInfo[0]);
-        }
-        const dbAddon = await getXPIDatabase().getAddon(
-          (addon: any) => addon.id === relatedAddon[0][1].id,
-        );
-        if (dbAddon) {
-          if (dbAddon.pendingUninstall) {
-            append("menu-uninstall-undo", addonInfo[0]);
-            append("menu-remove", addonInfo[0]);
-          } else {
-            append("menu-uninstall", addonInfo[0]);
-          }
-        }
-        if (
-          !relatedAddon[0][1].appDisabled &&
-          !(dbAddon && dbAddon.pendingUninstall)
-        ) {
-          if (relatedAddon[0][1].userDisabled) {
-            append("menu-enable", addonInfo[0]);
-          } else {
-            append("menu-disable", addonInfo[0]);
-          }
-        }
-      } else {
-        append("menu-install", addonInfo[0]);
-      }
-    }
-    return selectedAddonOps;
-  }
-
-  private static async replaceRightClickMenu(oldNode: Element) {
-    ztoolkit.UI.replaceElement(
-      {
-        tag: "menupopup",
-        id: "listMenu",
-        listeners: [
-          {
-            type: "command",
-            listener: async (ev) => {
-              const selectValue = (ev.target as any).getAttribute("value");
-              await this.onSelectMenuItem(selectValue);
-            },
-          },
-        ],
-        children: (await this.tableMenuItems()).map((item) => {
-          if (item[0] === "menu-sep") {
-            return {
-              tag: "menuseparator",
-            };
-          } else {
-            return {
-              tag: "menuitem",
-              attributes: {
-                label: item[1],
-                value: item[0],
-              },
-            };
-          }
-        }),
-      },
-      oldNode,
-    );
   }
 
   private static async replaceSourceSelectList(oldNode: Element) {
@@ -594,7 +416,7 @@ export class AddonTable {
         listeners: [
           {
             type: "command",
-            listener: (ev) => {
+            listener: () => {
               const selectSource = (
                 this.window?.document.querySelector(
                   "#sources",
@@ -652,125 +474,28 @@ export class AddonTable {
     });
   }
 
-  private static async replaceColumnSelectMenu(oldNode: Element) {
-    const columns = this.columns
-      .slice()
-      .sort((a, b) => ((a as any).ordinal ?? 0) - ((b as any).ordinal ?? 0));
-    const allColumnSelectMenus = columns
-      .filter((c) => c.dataKey !== "menu-name")
-      .map((c) => c.dataKey);
-    ztoolkit.UI.replaceElement(
-      {
-        tag: "menupopup",
-        id: "listColumnMenu",
-        listeners: [
-          {
-            type: "command",
-            listener: async (ev) => {
-              const selectValue = (ev.target as any).getAttribute("value");
-              const idx = (this.tableHelper?.treeInstance as any)
-                ._getColumns()
-                .findIndex((c: any) => c.dataKey === selectValue);
-              if (idx >= 0) {
-                (this.tableHelper?.treeInstance as any)._columns.toggleHidden(
-                  idx,
-                );
-              }
-            },
-          },
-        ],
-        children: allColumnSelectMenus.map((menuItem) => ({
-          tag: "menuitem",
-          attributes: {
-            // @ts-expect-error ignore getString type check
-            label: getString(menuItem),
-            value: menuItem,
-            checked: !(
-              this.columns.find((column) => column.dataKey === menuItem) as any
-            )?.hidden,
-            // disabled: this.columnSelectMenus.length <= 1 && this.columnSelectMenus.includes(menuItem),
-          },
-        })),
-      },
-      oldNode,
-    );
-  }
-
   private static async initFooterContainer(win: Window) {
-    this.initSearch(win);
+    this.searchHandler?.initSearch(async () => {
+      await this.updateAddonInfos();
+      this.updateTable();
+    });
     this.initRefreshButton(win);
     this.initAutoUpdate(win);
     this.initHideEntrance(win);
-  }
-
-  private static initSearch(win: Window) {
-    const searchButton = win.document.querySelector(
-      "#search-button",
-    ) as HTMLElement;
-    const searchField = win.document.querySelector(
-      "#search-field",
-    ) as XULTextBoxElement;
-    searchField.style.visibility = "hidden";
-    searchField.addEventListener("blur", () => AddonTable.hideSearch());
-    searchButton.addEventListener("click", (_) => {
-      if (!searchField.classList.contains("visible")) {
-        searchButton.style.display = "none";
-        // If the collectionPane is narrow, set smaller max-width
-        const maxWidth = searchField.getAttribute("data-expanded-width");
-        if (maxWidth) {
-          searchField.style.maxWidth = `${maxWidth}px`;
-        }
-        searchField.style.visibility = "visible";
-        searchField.classList.add("visible", "expanding");
-        // Enable and focus the field only after it was revealed to prevent the cursor
-        // from changing between 'text' and 'pointer' back and forth as the input field expands
-        setTimeout(() => {
-          searchField.removeAttribute("disabled");
-          searchField.classList.remove("expanding");
-          searchField.focus();
-        }, 250);
-        return;
-      }
-      searchField.focus();
-    });
-    searchField.addEventListener("command", async function () {
-      await AddonTable.updateAddonInfos();
-      AddonTable.updateTable();
-    });
-  }
-
-  private static hideSearch() {
-    const searchField = this.window?.document.getElementById(
-      "search-field",
-    ) as HTMLInputElement;
-    const searchButton = this.window?.document.getElementById(
-      "search-button",
-    ) as HTMLElement;
-    if (
-      !searchField.value.length &&
-      searchField.classList.contains("visible")
-    ) {
-      searchField.classList.remove("visible");
-      searchField.setAttribute("disabled", "true");
-      setTimeout(() => {
-        searchButton.style.display = "";
-        searchField.style.visibility = "hidden";
-        searchField.style.removeProperty("max-width");
-      }, 50);
-    }
   }
 
   private static initRefreshButton(win: Window) {
     const refreshButton = win.document.querySelector(
       "#refresh",
     ) as XULToolBarButtonElement;
-    refreshButton.addEventListener("click", async (e) => {
+    refreshButton.addEventListener("click", async () => {
       if (refreshButton.disabled) {
         return;
       }
       await this.refresh(true);
     });
   }
+
   private static async actionWithRefreshAnimate(actions: Promise<void>[]) {
     const refreshButton =
       this.window?.document.querySelector<XULToolBarButtonElement>("#refresh");
@@ -820,30 +545,46 @@ export class AddonTable {
       }
       selectAddons.push(this.addonInfos[select]);
     }
-    const selectedAddonSupportOps = await this.selectedAddonSupportOperations();
+    const selectedAddonSupportOps =
+      await this.menuHandler?.getSelectedAddonSupportOperations();
+
     switch (item) {
       case "menu-install":
       case "menu-reinstall":
       case "menu-update":
       case "menu-install-and-update":
-        this.installAddons(selectedAddonSupportOps.get(item) ?? [], {
+        TableActions.installAddons(selectedAddonSupportOps?.get(item) ?? [], {
           popWin: true,
         });
         break;
       case "menu-uninstall":
-        this.uninstallAddons(selectedAddonSupportOps.get(item) ?? [], true);
+        TableActions.uninstallAddons(
+          selectedAddonSupportOps?.get(item) ?? [],
+          true,
+        );
         break;
       case "menu-remove":
-        this.uninstallAddons(selectedAddonSupportOps.get(item) ?? [], false);
+        TableActions.uninstallAddons(
+          selectedAddonSupportOps?.get(item) ?? [],
+          false,
+        );
         break;
       case "menu-uninstall-undo":
-        this.undoUninstallAddons(selectedAddonSupportOps.get(item) ?? []);
+        TableActions.undoUninstallAddons(
+          selectedAddonSupportOps?.get(item) ?? [],
+        );
         break;
       case "menu-enable":
-        this.enableAddons(selectedAddonSupportOps.get(item) ?? [], true);
+        TableActions.enableAddons(
+          selectedAddonSupportOps?.get(item) ?? [],
+          true,
+        );
         break;
       case "menu-disable":
-        this.enableAddons(selectedAddonSupportOps.get(item) ?? [], false);
+        TableActions.enableAddons(
+          selectedAddonSupportOps?.get(item) ?? [],
+          false,
+        );
         break;
       case "menu-homepage":
         selectAddons.forEach((addon) => {
@@ -854,7 +595,6 @@ export class AddonTable {
         });
         break;
       case "menu-open-xpi-location":
-        // see in https://github.com/zotero/zotero/blob/d688ebc10ff573c6faf66d0e63980044d04d4186/chrome/content/zotero/zoteroPane.js#L5081
         selectAddons.forEach(async (selectedAddon) => {
           const dbAddon = await getXPIDatabase().getAddon(
             (addon: any) => addon.id === addonReleaseInfo(selectedAddon[0])?.id,
@@ -874,7 +614,6 @@ export class AddonTable {
         this.refresh(true);
         break;
       case "menu-systemAddon":
-        // see in https://github.com/zotero/zotero/blob/c27bac2ad629b2ff216462515c220e2d5ce148ba/chrome/content/zotero/zoteroPane.xhtml#L559
         (
           Zotero.getMainWindow().document.getElementById("menu_addons") as any
         ).doCommand();
@@ -885,177 +624,31 @@ export class AddonTable {
     }
   }
 
-  private static async enableAddons(addons: AddonInfo[], enable: boolean) {
-    const relatedAddon = await relatedAddons(addons);
-    for (const [addonInfo, addon] of relatedAddon) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      enable ? await addon.enable() : await addon.disable();
-    }
-  }
-
-  private static async uninstallAddons(
-    addons: AddonInfo[],
-    popConfirmDialog: boolean,
-  ) {
-    const relatedAddon = await relatedAddons(addons);
-    for (const [addonInfo, addon] of relatedAddon) {
-      await uninstall(addon, { popConfirmDialog: popConfirmDialog });
-    }
-  }
-
-  private static async undoUninstallAddons(addons: AddonInfo[]) {
-    const relatedAddon = await relatedAddons(addons);
-    for (const [addonInfo, addon] of relatedAddon) {
-      await undoUninstall(addon);
-    }
-  }
-
-  private static async installAddons(
-    addons: AddonInfo[],
-    options?: {
-      popWin?: boolean;
-    },
-  ) {
-    await Promise.all(
-      addons.map(async (addon) => {
-        const urls = xpiDownloadUrls(addon).filter((x) => {
-          return (x?.length ?? 0) > 0;
-        }) as string[];
-        await installAddonFrom(urls, {
-          name: addonReleaseInfo(addon)?.name ?? addon.name,
-          popWin: options?.popWin,
-        });
-      }),
-    );
-  }
-
   private static refreshTag = 0;
   private static async updateAddonInfos(force = false) {
     this.refreshTag += 1;
     const curRefreshTag = this.refreshTag;
-    const addonInfos = await AddonInfoManager.shared.fetchAddonInfos(force);
+
+    let addonInfos = await TableDataTransformer.transformAddonInfos(force);
     if (curRefreshTag !== this.refreshTag) {
       return;
-    } // 不是本次刷新
-    const relateAddons = await relatedAddons(addonInfos);
-    this.addonInfos = await Promise.all(
-      addonInfos.map(async (addonInfo) => {
-        const result: Partial<Record<TableColumnID, string>> = {};
-        const releaseInfo = addonReleaseInfo(addonInfo);
-        result["menu-name"] = releaseInfo?.name ?? addonInfo.name;
-        result["menu-desc"] =
-          releaseInfo?.description ?? addonInfo.description ?? "";
-        result["menu-star"] =
-          addonInfo.stars === 0
-            ? "0"
-            : addonInfo.stars
-              ? String(addonInfo.stars)
-              : "?";
-        const remoteVersion =
-          releaseInfo?.xpiVersion?.toLowerCase().replace("v", "") ?? "";
-        result["menu-remote-version"] = remoteVersion;
-        // if (remoteVersion && releaseInfo?.minZoteroVersion && releaseInfo.maxZoteroVersion) {
-        //   if (Services.vc.compare(Zotero.version, releaseInfo.minZoteroVersion.replace('*', '0')) < 0 || Services.vc.compare(Zotero.version, releaseInfo.maxZoteroVersion.replace('*', '999')) > 0) {
-        //     result["menu-remote-version"] = `❌ ${remoteVersion}`
-        //   }
-        // }
-        result["menu-local-version"] = "";
-        const releaseTime = addonReleaseTime(addonInfo);
-        if (releaseTime) {
-          result["menu-remote-update-time"] = releaseTime;
-        }
-        const relateAddon = relateAddons.find((addonPair) => {
-          const addonID = addonReleaseInfo(addonInfo)?.id;
-          if (addonID) {
-            return addonID == addonPair[1].id;
-          } else {
-            return addonInfo.repo === addonPair[0].repo;
-          }
-        });
-        result["menu-local-version"] = relateAddon?.[1].version ?? "";
-        const installState = await addonInstallStatus(addonInfo, relateAddon);
-        result["menu-install-state"] =
-          this.installStatusDescription(installState);
-        return [addonInfo, result];
-      }),
-    );
-
-    const stateMap: { [key: string]: number } = {};
-    const installStates: InstallStatus[] = [
-      InstallStatus.unknown,
-      InstallStatus.notInstalled,
-      InstallStatus.incompatible,
-      InstallStatus.disabled,
-      InstallStatus.pendingUninstall,
-      InstallStatus.normal,
-      InstallStatus.updatable,
-    ];
-    installStates.forEach(
-      (status, idx) => (stateMap[this.installStatusDescription(status)] = idx),
-    );
-
-    const sortColumn = this.columns.find((column) => "sortDirection" in column);
-    this.addonInfos = this.filterAddonsBySearch(this.addonInfos);
-    if (sortColumn) {
-      const sortOrder = (sortColumn as any).sortDirection;
-      this.addonInfos = this.addonInfos.sort((infoA, infoB) => {
-        const [a, b] = [infoA[0], infoB[0]];
-        let l, r;
-        switch (sortColumn.dataKey) {
-          case "menu-name":
-            [l, r] = [
-              (addonReleaseInfo(a)?.name ?? a.name ?? "").toLowerCase(),
-              (addonReleaseInfo(b)?.name ?? b.name ?? "").toLowerCase(),
-            ];
-            if (l == r) {
-              break;
-            }
-            return l > r ? sortOrder : -sortOrder;
-          case "menu-star":
-            [l, r] = [a.stars ?? 0, b.stars ?? 0];
-            if (l == r) {
-              break;
-            }
-            return l > r ? sortOrder : -sortOrder;
-          case "menu-install-state":
-            [l, r] = [
-              stateMap[
-              infoA[1]["menu-install-state"] ??
-              this.installStatusDescription(InstallStatus.unknown)
-              ] ?? 0,
-              stateMap[
-              infoB[1]["menu-install-state"] ??
-              this.installStatusDescription(InstallStatus.unknown)
-              ] ?? 0,
-            ];
-            if (l === r) {
-              break;
-            }
-            if (l === 0) {
-              return -1;
-            }
-            if (r === 0) {
-              return 1;
-            }
-            return l > r ? sortOrder : -sortOrder;
-          case "menu-remote-update-time":
-            [l, r] = [
-              addonReleaseInfo(a)?.releaseDate ?? "",
-              addonReleaseInfo(b)?.releaseDate ?? "",
-            ];
-            if (l == r) {
-              break;
-            }
-            return l > r ? sortOrder : -sortOrder;
-        }
-        return 0;
-      });
     }
+
+    // Filter by search
+    if (this.searchHandler) {
+      addonInfos = this.searchHandler.filterAddons(addonInfos);
+    }
+
+    // Sort
+    const sortColumn = this.columnManager.getSortColumn();
+    addonInfos = TableDataTransformer.sortAddonInfos(addonInfos, sortColumn);
+
+    this.addonInfos = addonInfos;
   }
 
   private static async updateTable() {
     return new Promise<void>((resolve) => {
-      this.tableHelper?.render(undefined, (_) => {
+      this.tableHelper?.render(undefined, () => {
         resolve();
       });
     });
@@ -1068,166 +661,5 @@ export class AddonTable {
     return addons.filter(([addonInfo, addon]) =>
       addonCanUpdate(addonInfo, addon),
     );
-  }
-
-  private static installStatusDescription(status: InstallStatus) {
-    switch (status) {
-      case InstallStatus.unknown:
-        return getString("state-unknown");
-      case InstallStatus.notInstalled:
-        return getString("state-notInstalled");
-      case InstallStatus.normal:
-        return getString("state-installed");
-      case InstallStatus.updatable:
-        return getString("state-outdate");
-      case InstallStatus.disabled:
-        return getString("state-disabled");
-      case InstallStatus.incompatible:
-        return getString("state-uncompatible");
-      case InstallStatus.pendingUninstall:
-        return getString("state-pendingUninstall");
-    }
-  }
-
-  private static filterAddonsBySearch(addonInfos: AssociatedAddonInfo[]) {
-    const searchInput = this.window?.document.querySelector(
-      "#search-field",
-    ) as HTMLInputElement;
-    if (searchInput == null) {
-      return addonInfos;
-    }
-    const searchText = searchInput.value.toLowerCase().trim();
-    if (searchText.length == 0) {
-      return addonInfos;
-    }
-
-    const fuse = new Fuse(addonInfos, {
-      keys: [
-        {
-          name: "addonInfoName",
-          weight: 0.3,
-          getFn: (e) => e[0].name || "",
-        },
-        {
-          name: "addonName",
-          weight: 0.3,
-          getFn: (e) => e[1]["menu-name"] || "",
-        },
-        {
-          name: "addonInfoDescription",
-          weight: 0.2,
-          getFn: (e) => e[0].description || "",
-        },
-        {
-          name: "addonDescription",
-          weight: 0.2,
-          getFn: (e) => e[1]["menu-desc"] || "",
-        },
-      ],
-      includeScore: true,
-      threshold: 0.3,
-      ignoreLocation: true,
-      // minMatchCharLength: 2,
-      shouldSort: true,
-      isCaseSensitive: false,
-    });
-    const result = fuse.search(searchText);
-    return result.map((e) => e.item);
-  }
-
-  private static largePrefHelper = new LargePrefHelper(
-    "zotero.addons.ui",
-    config.prefsPrefix,
-    "parser",
-  );
-  private static _columns: ColumnOptions[] = [];
-  private static get columns(): ColumnOptions[] {
-    if (this._columns.length > 0) {
-      return this._columns;
-    }
-    const oriCol = [
-      {
-        dataKey: "menu-name",
-        label: "menu-name",
-        staticWidth: true,
-        hidden: false,
-      },
-      {
-        dataKey: "menu-desc",
-        label: "menu-desc",
-        fixedWidth: false,
-        hidden: false,
-      },
-      {
-        dataKey: "menu-star",
-        label: "menu-star",
-        staticWidth: true,
-        width: 50,
-        hidden: false,
-      },
-      {
-        dataKey: "menu-remote-update-time",
-        label: "menu-remote-update-time",
-        staticWidth: true,
-        width: 150,
-        hidden: false,
-      },
-      {
-        dataKey: "menu-remote-version",
-        label: "menu-remote-version",
-        staticWidth: true,
-        width: 100,
-        hidden: false,
-      },
-      {
-        dataKey: "menu-local-version",
-        label: "menu-local-version",
-        staticWidth: true,
-        width: 85,
-        hidden: false,
-      },
-      {
-        dataKey: "menu-install-state",
-        label: "menu-install-state",
-        staticWidth: true,
-        width: 95,
-        hidden: false,
-      },
-    ];
-    this._columns = oriCol;
-    try {
-      const result = this.largePrefHelper.getValue(
-        "columns",
-      ) as ColumnOptions[];
-      if (result.length === this._columns.length) {
-        this._columns = result;
-      }
-    } catch (error) {
-      //
-    }
-    this._columns.map((column) =>
-      // @ts-expect-error ignore getString type check
-      Object.assign(column, { label: getString(column.dataKey) }),
-    );
-    return this._columns;
-  }
-  private static updateColumns() {
-    try {
-      this._columns = (
-        this.tableHelper?.treeInstance as any
-      )?._getColumns() as ColumnOptions[];
-      if (this._columns.length > 0) {
-        this._columns = this._columns.map((column: any) => {
-          const {
-            ["className"]: removedClassNameAttr,
-            ...newObjWithourClassName
-          } = column;
-          return newObjWithourClassName;
-        });
-        this.largePrefHelper.setValue("columns", this._columns);
-      }
-    } catch (error) {
-      ztoolkit.log(`updateColumns failed: ${error}`);
-    }
   }
 }

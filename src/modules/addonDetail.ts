@@ -10,6 +10,7 @@ import { installAddonFrom, undoUninstall, uninstall } from "../utils/utils";
 import { config } from "../../package.json";
 import { isWindowAlive } from "../utils/window";
 import { getXPIDatabase, getAddonManager } from "../utils/compat";
+import { DetailButtonHandler } from "../ui/detail";
 
 export class AddonInfoDetail {
   private static window: Window | null;
@@ -30,16 +31,19 @@ export class AddonInfoDetail {
     this.window?.close();
     this.addonInfo = addonInfo;
     let resolveInit: () => void;
-    const _initPromise = new Promise<void>(resolve => {
+    const _initPromise = new Promise<void>((resolve) => {
       resolveInit = resolve;
     });
     const windowArgs = {
       _initPromise: {
         promise: _initPromise,
-        resolve: resolveInit!
+        resolve: resolveInit!,
       },
       addonInfo: addonInfo,
-      site: __env__ === 'development' ? 'Zotero Plugin Market for testing' : 'Zotero Plugin Market',
+      site:
+        __env__ === "development"
+          ? "Zotero Plugin Market for testing"
+          : "Zotero Plugin Market",
       downloadSourceAction: async (url: string) => {
         const response = await Zotero.HTTP.request("GET", url);
         return btoa(response.response);
@@ -66,95 +70,56 @@ export class AddonInfoDetail {
       }
     });
 
-    this.installButton.addEventListener("click", async (e) => {
-      if (this.installButton.disabled) {
-        return;
-      }
-      this.installButton.disabled = true;
-      await this.installAddon(addonInfo);
-      this.installButton.disabled = false;
-    });
-    this.updateButton.addEventListener("click", async (e) => {
-      if (this.updateButton.disabled) {
-        return;
-      }
-      this.updateButton.disabled = true;
-      await this.installAddon(addonInfo);
-      this.updateButton.disabled = false;
-    });
-    this.reinstallButton.addEventListener("click", async (e) => {
-      if (this.reinstallButton.disabled) {
-        return;
-      }
-      this.reinstallButton.disabled = true;
-      await this.installAddon(addonInfo);
-      this.reinstallButton.disabled = false;
-    });
-    this.uninstallButton.addEventListener("click", async (e) => {
-      if (this.uninstallButton.disabled) {
-        return;
-      }
-      this.uninstallButton.disabled = true;
-      await uninstall(await this.localAddon(), { popConfirmDialog: true });
-      this.uninstallButton.disabled = false;
-    });
-    this.removeButton.addEventListener("click", async (e) => {
-      if (this.removeButton.disabled) {
-        return;
-      }
-      this.removeButton.disabled = true;
-      await uninstall(await this.localAddon());
-      this.removeButton.disabled = false;
-    });
-    this.uninstallUndoButton.addEventListener("click", async (e) => {
-      if (this.uninstallUndoButton.disabled) {
-        return;
-      }
-      this.uninstallUndoButton.disabled = true;
-      await undoUninstall(await this.localAddon());
-      this.uninstallUndoButton.disabled = false;
-    });
-    this.enableButton.addEventListener("click", async (e) => {
-      if (this.enableButton.disabled) {
-        return;
-      }
-      this.enableButton.disabled = true;
-      await (await this.localAddon()).enable();
-      this.enableButton.disabled = false;
-    });
-    this.disableButton.addEventListener("click", async (e) => {
-      if (this.disableButton.disabled) {
-        return;
-      }
-      this.disableButton.disabled = true;
-      await (await this.localAddon()).disable();
-      this.disableButton.disabled = false;
-    });
+    // Bind action buttons using DetailButtonHandler
+    if (!win) return;
+    const buttonHandler = new DetailButtonHandler(win);
+    buttonHandler.bindButtons([
+      { selector: "#install", action: () => this.installAddon(addonInfo) },
+      { selector: "#update", action: () => this.installAddon(addonInfo) },
+      { selector: "#reinstall", action: () => this.installAddon(addonInfo) },
+      {
+        selector: "#uninstall",
+        action: async () => {
+          await uninstall(await this.localAddon(), { popConfirmDialog: true });
+        },
+      },
+      {
+        selector: "#remove",
+        action: async () => {
+          await uninstall(await this.localAddon());
+        },
+      },
+      {
+        selector: "#uninstallUndo",
+        action: async () => {
+          await undoUninstall(await this.localAddon());
+        },
+      },
+      {
+        selector: "#enable",
+        action: async () => {
+          await (await this.localAddon()).enable();
+        },
+      },
+      {
+        selector: "#disable",
+        action: async () => {
+          await (await this.localAddon()).disable();
+        },
+      },
+    ]);
 
-    this.authorName.addEventListener("click", (e) => {
-      if (!addonInfo.author?.url) {
-        return;
-      }
-      Zotero.launchURL(`${addonInfo.author.url}`);
-    });
-    this.authorIcon.addEventListener("click", (e) => {
-      if (!addonInfo.author?.url) {
-        return;
-      }
-      Zotero.launchURL(`${addonInfo.author.url}`);
-    });
-    this.addonName.addEventListener("click", (e) => {
-      if (!addonInfo.repo) {
-        return;
-      }
-      Zotero.launchURL(`https://github.com/${addonInfo.repo}`);
-    });
-    this.addonIcon.addEventListener("click", (e) => {
-      if (!addonInfo.repo) {
-        return;
-      }
-      Zotero.launchURL(`https://github.com/${addonInfo.repo}`);
-    });
+    // Bind link elements
+    buttonHandler.bindLinkElement("#author-name", () => addonInfo.author?.url);
+    buttonHandler.bindLinkElement("#avatar-icon", () => addonInfo.author?.url);
+    buttonHandler.bindLinkElement(
+      "#addon-name",
+      () => addonInfo.repo && `https://github.com/${addonInfo.repo}`,
+    );
+    buttonHandler.bindLinkElement(
+      "#addon-icon",
+      () => addonInfo.repo && `https://github.com/${addonInfo.repo}`,
+    );
 
     await this.refresh();
   }

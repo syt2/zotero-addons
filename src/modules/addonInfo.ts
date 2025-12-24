@@ -6,6 +6,10 @@ import {
   setAutoSource,
 } from "../utils/configuration";
 import { getXPIDatabase, getAddonManager } from "../utils/compat";
+import { xpiURLSourceName as _xpiURLSourceName } from "../services";
+
+// Re-export for backward compatibility
+export const xpiURLSourceName = _xpiURLSourceName;
 
 /**
  * Datastruct of Remote AddonInfo
@@ -127,27 +131,6 @@ export function xpiDownloadUrls(addonInfo: AddonInfo) {
     }
   }
   return result.filter((e) => e);
-}
-
-/**
- *
- * @param url Source name of the xpi url
- * @returns source name key
- */
-export function xpiURLSourceName(url: string) {
-  if (url.startsWith("https://github.com")) {
-    return "source-github";
-  } else if (url.startsWith("https://gitee.com")) {
-    return "source-gitee";
-  } else if (url.startsWith("https://ghproxy.com")) {
-    return "source-ghproxy";
-  } else if (url.startsWith("https://cdn.jsdelivr.net")) {
-    return "source-jsdelivr";
-  } else if (url.startsWith("https://kkgithub.com")) {
-    return "source-kgithub";
-  } else {
-    return "source-others";
-  }
 }
 
 /**
@@ -348,7 +331,10 @@ export class AddonInfoManager {
       return [];
     }
     if (url in this.sourceInfos) {
-      if (new Date().getTime() - this.sourceInfos[url][0].getTime() >= 12 * 60 * 60 * 1000) {
+      if (
+        new Date().getTime() - this.sourceInfos[url][0].getTime() >=
+        12 * 60 * 60 * 1000
+      ) {
         this.fetchAddonInfos(true);
       }
       return this.sourceInfos[url][1];
