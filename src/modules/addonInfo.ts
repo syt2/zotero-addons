@@ -278,49 +278,38 @@ export class AddonInfoManager {
   }
 
   /**
-   * Switch to a connectable source
-   * @param timeout Check next source if current source exceed timeout
-   * @returns AddonInfos from automatic source
+   * Switch to a connectable source (sequential)
+   * @param timeout Timeout for each source request in ms
+   * @returns AddonInfos from first available source
    */
   static async autoSwitchAvaliableApi(timeout = 3000) {
-    interface ApiResult {
-      source: Source & { api: string };
-      infos: AddonInfo[];
-    }
     const sourcesWithApi = Sources.filter(
       (source): source is Source & { api: string } => !!source.api,
     );
-    const sourcePromises: Promise<ApiResult>[] = sourcesWithApi.map(
-      async (source): Promise<ApiResult> => {
-        try {
-          const infos = await AddonInfoAPI.fetchAddonInfos(
-            source.api,
-            timeout,
-            () => {
-              ztoolkit.log(`check source from ${source.api} timeout!`);
-            },
-          );
 
-          if (infos.length > 0) {
-            return { source, infos };
-          } else {
-            throw new Error("No infos");
-          }
-        } catch (error) {
-          ztoolkit.log(`Error fetching from ${source.api}: ${error}`);
-          throw error;
+    for (const source of sourcesWithApi) {
+      try {
+        ztoolkit.log(`trying source: ${source.id}`);
+        const infos = await AddonInfoAPI.fetchAddonInfos(
+          source.api,
+          timeout,
+          () => {
+            ztoolkit.log(`source ${source.id} timeout after ${timeout}ms`);
+          },
+        );
+
+        if (infos.length > 0) {
+          this.shared.sourceInfos[source.api] = [new Date(), infos];
+          setAutoSource(source);
+          ztoolkit.log(`switched to ${source.id} automatically`);
+          return infos;
         }
-      },
-    );
-    try {
-      const result: ApiResult = await Promise.any(sourcePromises);
-      const { source, infos } = result;
-      this.shared.sourceInfos[source.api] = [new Date(), infos];
-      setAutoSource(source);
-      ztoolkit.log(`switch to ${source.id} automatically`);
-      return infos;
-    } catch (error) {
-      return [];
+      } catch (error) {
+        ztoolkit.log(`source ${source.id} failed: ${error}`);
+      }
     }
+
+    ztoolkit.log("all sources failed");
+    return [];
   }
 }
