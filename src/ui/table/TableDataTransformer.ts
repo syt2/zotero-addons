@@ -58,7 +58,7 @@ export class TableDataTransformer {
             return addonInfo.repo === addonPair[0].repo;
           }
         });
-        result["menu-local-version"] = relateAddon?.[1].version ?? "";
+        result["menu-local-version"] = relateAddon?.[1].version ?? "-";
         const installState = await addonInstallStatus(addonInfo, relateAddon);
         result["menu-install-state"] =
           TableDataTransformer.installStatusDescription(installState);

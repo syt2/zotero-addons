@@ -214,7 +214,9 @@ export class AddonInfoDetail {
     const tagName = releaseInfo?.tagName;
     const version = releaseInfo?.xpiVersion;
     const releaseTime = addonReleaseTime(addonInfo);
-    const localAddon = await this.localAddon();
+    // Get related addon info once (avoid duplicate relatedAddons calls)
+    const relatedAddonList = await relatedAddons([addonInfo]);
+    const localAddon = relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;
 
     const windowTitle = win.document.querySelector(
       "#win-title",
@@ -238,7 +240,7 @@ export class AddonInfoDetail {
       "#download-latest-count-icon",
     ) as HTMLImageElement;
     downloadLatestCountIcon.src = tagName
-      ? `https://img.shields.io/github/downloads/${addonInfo.repo}/${tagName!}/total?label=${getString("menu-download-latest-count")}`
+      ? `https://img.shields.io/github/downloads/${addonInfo.repo}/${tagName}/total?label=${getString("menu-download-latest-count")}`
       : "";
     const remoteVersionIcon = win.document.querySelector(
       "#remote-version-icon",
@@ -248,7 +250,7 @@ export class AddonInfoDetail {
       "#local-version-icon",
     ) as HTMLImageElement;
     localVersionIcon.src = localAddon?.version
-      ? `https://img.shields.io/badge/${getString("menu-local-version")}-${localAddon!.version!.replace("-", "--")}-red`
+      ? `https://img.shields.io/badge/${getString("menu-local-version")}-${localAddon.version.replace("-", "--")}-red`
       : "";
     const releaseTimeIcon = win.document.querySelector(
       "#release-time-icon",
@@ -301,8 +303,7 @@ export class AddonInfoDetail {
     this.enableButton.hidden = true;
     this.disableButton.hidden = true;
 
-    const relatedAddon = await relatedAddons([addonInfo]);
-
+    // Use relatedAddonList from above (already fetched)
     const addonCanUpdate = (addonInfo: AddonInfo, addon: any) => {
       const version = addonReleaseInfo(addonInfo)?.xpiVersion;
       if (!version || !addon.version) {
@@ -310,29 +311,30 @@ export class AddonInfoDetail {
       }
       return Services.vc.compare(addon.version, version) < 0;
     };
-    if (relatedAddon.length > 0) {
-      if (relatedAddon[0][1].appDisabled) {
+    if (relatedAddonList.length > 0) {
+      if (relatedAddonList[0][1].appDisabled) {
         this.reinstallButton.hidden = false;
-      } else if (addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
+      } else if (addonCanUpdate(relatedAddonList[0][0], relatedAddonList[0][1])) {
         this.updateButton.hidden = false;
       } else {
         this.reinstallButton.hidden = false;
       }
       const dbAddon = await getXPIDatabase().getAddon(
-        (addon: any) => addon.id === relatedAddon[0][1].id,
+        (addon) => addon.id === relatedAddonList[0][1].id,
       );
       if (dbAddon) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        dbAddon.pendingUninstall
-          ? (this.uninstallUndoButton.hidden = false)
-          : (this.uninstallButton.hidden = false);
+        if (dbAddon.pendingUninstall) {
+          this.uninstallUndoButton.hidden = false;
+        } else {
+          this.uninstallButton.hidden = false;
+        }
         this.removeButton.hidden = !dbAddon.pendingUninstall;
       }
       if (
-        !relatedAddon[0][1].appDisabled &&
+        !relatedAddonList[0][1].appDisabled &&
         !(dbAddon && dbAddon.pendingUninstall)
       ) {
-        if (relatedAddon[0][1].userDisabled) {
+        if (relatedAddonList[0][1].userDisabled) {
           this.enableButton.hidden = false;
         } else {
           this.disableButton.hidden = false;

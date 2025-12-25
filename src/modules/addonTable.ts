@@ -398,7 +398,26 @@ export class AddonTable {
       })
       .render(undefined, () => {
         this.refresh(AddonInfoManager.shared.addonInfos.length <= 0);
+        this.setupCellTooltips();
       });
+  }
+
+  /**
+   * Setup tooltip for cells (especially description column)
+   * Uses mouseover event to dynamically set title attribute
+   */
+  private static setupCellTooltips() {
+    const container = this.window?.document.querySelector("#table-container");
+    if (!container) return;
+
+    container.addEventListener("mouseover", (event: Event) => {
+      const target = event.target as HTMLElement;
+      // Check if hovering over a cell with text content
+      if (target.classList.contains("cell") && target.textContent) {
+        // Set title attribute for tooltip
+        target.setAttribute("title", target.textContent);
+      }
+    });
   }
 
   private static async replaceSourceSelectList(oldNode: Element) {

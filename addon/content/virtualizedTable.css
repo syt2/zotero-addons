@@ -1,0 +1,33 @@
+/* VirtualizedTable custom styles */
+
+/* Alternating row colors */
+/* .virtualized-table-body .row:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.virtualized-table-body .row:nth-child(even) {
+  background-color: #f5f5f5;
+} */
+
+/* Dark mode support */
+/* @media (prefers-color-scheme: dark) {
+  .virtualized-table-body .row:nth-child(odd) {
+    background-color: #2d2d2d;
+  }
+
+  .virtualized-table-body .row:nth-child(even) {
+    background-color: #252525;
+  }
+} */
+
+/* Ensure description cells truncate properly and show native tooltip */
+.virtualized-table .cell.menu-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Style for cells with title attribute - native browser tooltip will show on hover */
+.virtualized-table .cell[title] {
+  cursor: default;
+}
