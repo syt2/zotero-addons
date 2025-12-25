@@ -1,7 +1,7 @@
 {
   "name": "zotero-addons",
   "type": "module",
-  "version": "8.0.2",
+  "version": "8.0.3",
   "config": {
     "addonName": "Add-on Market for Zotero",
     "addonID": "zoteroAddons@ytshen.com",
