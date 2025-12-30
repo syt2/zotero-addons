@@ -212,9 +212,10 @@ class AddonInfoAPI {
       const response = await Zotero.HTTP.request("GET", url, options);
       const addons = JSON.parse(response.response) as AddonInfo[];
       const validAddons = addons.filter((addon) => addonReleaseInfo(addon));
-      return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
-        return (b.stars ?? 0) - (a.stars ?? 0);
-      });
+      // return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
+      //   return (b.stars ?? 0) - (a.stars ?? 0);
+      // });
+      return validAddons;
     } catch (error) {
       ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);
       if (error instanceof (Zotero.HTTP as any).TimeoutException) {
