@@ -62,8 +62,10 @@ export function xpiDownloadUrls(addonInfo: AddonInfo) {
  */
 export function addonReleaseInfo(addonInfo: AddonInfo) {
   const release = addonInfo.releases?.find(
-    (release) => Services.vc.compare(release.targetZoteroVersion, Zotero.version.split(".")[0]) >= 0 
-  );
+    (release) => Services.vc.compare(release.targetZoteroVersion, Zotero.version.split(".")[0]) == 0 
+  ) ?? addonInfo.releases?.find(
+    (release) => Services.vc.compare(release.targetZoteroVersion, Zotero.version) >= 0,
+  )
   if ((release?.xpiDownloadUrl?.github?.length ?? 0) === 0) {
     return;
   }
