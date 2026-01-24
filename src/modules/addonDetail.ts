@@ -40,10 +40,11 @@ export class AddonInfoDetail {
         resolve: resolveInit!,
       },
       addonInfo: addonInfo,
-      site:
-        __env__ === "development"
-          ? "Zotero Plugin Market for testing"
-          : "Zotero Plugin Market",
+      // site:
+      //   __env__ === "development"
+      //     ? "Zotero Plugin Market"
+      //     : "Zotero Plugin Market",
+      site: "Zotero Plugin Market",
       downloadSourceAction: async (url: string) => {
         const response = await Zotero.HTTP.request("GET", url);
         return btoa(response.response);
