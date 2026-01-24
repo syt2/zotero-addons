@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Hide Artalk powered by link */
+.atk-link {
+  display: none !important;
+}
