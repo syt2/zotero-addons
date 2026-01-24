@@ -28,20 +28,21 @@
 
 ## 插件数据源
 
-对于国内用户，若遇到插件页面空白、加载不出插件的情况，请尝试切换不同的数据源  
+对于国内用户，若遇到插件页面空白、加载不出插件的情况，请尝试切换不同的数据源
 插件提供**自动源**选项，将会自动选择可连接的源
-
-### [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)
-
-插件主数据源来自Zotero中文社区 **[zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)**.
-
-在插件市场界面选择 `(zotero中文社区)` 即可使用该数据源
-
-> 若你有新的插件想要添加到插件源内，请提交至 [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
 
 ### [syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper)
 
+插件主数据源来自 **[syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper)**
+
 在插件市场界面选择 `(插件爬虫)` 即可使用该数据源
+
+### [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)
+
+在插件市场界面选择 `(zotero中文社区)` 即可使用该数据源
+
+
+> 若你有新的插件想要添加到插件源内，请提交至 [syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper) 或 [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)
 
 ### 自定义源
 

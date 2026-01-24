@@ -29,17 +29,18 @@ After install this add-on in Zotero, click <img align="center" src="addon/conten
 
 ## Add-on Data Source
 
-### [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)
+### [syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper)
 
-The main data source for add-ons comes from **[zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)**.
+The main data source for add-ons comes from **[syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper)**.
+
+Switch the source to `(addon-scraper)` in Add-on Market to use this source.
+
+### [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins)
 
 Switch the source to `(zotero-chinese)` in Add-on Market to use this source.
 
-> If you have new add-ons to add, submit it to [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
 
-### [syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper)
-
-Switch the source to `(addon-scraper)` in Add-on Market to use this source.
+> If you have new add-ons to add, submit it to [syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper) or [zotero-chinese/zotero-plugins](https://github.com/zotero-chinese/zotero-plugins).
 
 ### Custom Source
 
