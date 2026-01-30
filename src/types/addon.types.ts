@@ -154,3 +154,26 @@ export enum InstallStatus {
   pendingUninstall = 6,
 }
 
+/**
+ * Historical release information from release cache
+ */
+export interface HistoricalRelease {
+  tag: string;
+  published_at: string;
+  xpi_download_url: string;
+  addon_id?: string;
+  addon_name?: string;
+  addon_version: string;
+  addon_description?: string;
+  min_zotero_version?: string;
+  max_zotero_version?: string;
+}
+
+/**
+ * Release cache data structure
+ */
+export interface ReleaseCacheData {
+  last_checked: string;
+  checked_releases: HistoricalRelease[];
+}
+

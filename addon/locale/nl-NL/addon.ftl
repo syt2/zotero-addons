@@ -86,3 +86,13 @@ guide-addons-table-switch-source-title = Wissel bron
 guide-addons-table-switch-source-message = Wissel van add-on gegevensbron als de pagina leeg is, een fout tegenkomt of geen add-ons kan ophalen.
 
 send-button-status-login = Inloggen
+
+history-version-title = Historische Versies
+column-version = Versie
+column-release-date = Releasedatum
+column-compatibility = Compatibiliteit
+compatibility-unknown = ❓
+compatibility-compatible = ✅ ({ $minVersion } - { $maxVersion })
+compatibility-incompatible = ⚠️ ({ $minVersion } - { $maxVersion })
+menu-install-version = Installeer Deze Versie
+menu-goto-release = Ga naar Releasepagina

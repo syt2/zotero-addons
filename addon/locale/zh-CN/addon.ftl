@@ -86,3 +86,13 @@ guide-addons-table-switch-source-title = 切换插件源
 guide-addons-table-switch-source-message = 如果插件页面空白、出现异常、获取不到插件，可以尝试在此切换插件源
 
 send-button-status-login = 登录
+
+history-version-title = 历史版本
+column-version = 版本
+column-release-date = 发布时间
+column-compatibility = 兼容性
+compatibility-unknown = ❓
+compatibility-compatible = ✅ ({ $minVersion } - { $maxVersion })
+compatibility-incompatible = ⚠️ ({ $minVersion } - { $maxVersion })
+menu-install-version = 安装此版本
+menu-goto-release = 跳转到发布页面

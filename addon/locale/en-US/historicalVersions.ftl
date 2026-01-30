@@ -1,0 +1,2 @@
+close-button =
+    .label = Close

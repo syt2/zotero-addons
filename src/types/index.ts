@@ -10,6 +10,8 @@ export type {
   AddonInfo,
   LocalAddon,
   DBAddon,
+  HistoricalRelease,
+  ReleaseCacheData,
 } from "./addon.types";
 export { InstallStatus } from "./addon.types";
 

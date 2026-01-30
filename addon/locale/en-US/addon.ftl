@@ -86,3 +86,13 @@ guide-addons-table-switch-source-title = Switch source
 guide-addons-table-switch-source-message = Switch Add-on data source if page is blank, encounters an error, or fails to retrieve add-ons.
 
 send-button-status-login = login
+
+history-version-title = Historical Versions
+column-version = Version
+column-release-date = Release Date
+column-compatibility = Compatibility
+compatibility-unknown = ❓
+compatibility-compatible = ✅ ({ $minVersion } - { $maxVersion })
+compatibility-incompatible = ⚠️ ({ $minVersion } - { $maxVersion })
+menu-install-version = Install This Version
+menu-goto-release = Go to Release Page

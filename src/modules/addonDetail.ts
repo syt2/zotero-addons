@@ -4,7 +4,9 @@ import {
   addonReleaseTime,
   relatedAddons,
   xpiDownloadUrls,
+  isScraperSource,
 } from "./addonInfo";
+import { HistoricalVersions } from "./historicalVersions";
 import { getString } from "../utils/locale";
 import { installAddonFrom, undoUninstall, uninstall } from "../services";
 import { config } from "../../package.json";
@@ -21,6 +23,7 @@ export class AddonInfoDetail {
    */
   static async close() {
     this.window?.close();
+    HistoricalVersions.close();
   }
 
   /**
@@ -28,7 +31,7 @@ export class AddonInfoDetail {
    * @param addonInfo AddonInfo specified
    */
   static async showDetailWindow(addonInfo: AddonInfo) {
-    this.window?.close();
+    this.close();
     this.addonInfo = addonInfo;
     let resolveInit: () => void;
     const _initPromise = new Promise<void>((resolve) => {
@@ -70,6 +73,11 @@ export class AddonInfoDetail {
         this.close();
       }
     });
+    if (win) {
+      win.onclose = () => {
+        HistoricalVersions.close();
+      };
+    }
 
     // Bind action buttons using DetailButtonHandler
     if (!win) return;
@@ -135,6 +143,7 @@ export class AddonInfoDetail {
     });
   }
 
+
   private static get installButton() {
     return this.window?.document.querySelector("#install") as HTMLButtonElement;
   }
@@ -189,6 +198,11 @@ export class AddonInfoDetail {
     return this.window?.document.querySelector(
       "#uncompatibleDescription",
     ) as HTMLLabelElement;
+  }
+  private static get historyVersionsButton() {
+    return this.window?.document.querySelector(
+      "#history-versions",
+    ) as HTMLButtonElement;
   }
   private static async localAddon(): Promise<any | undefined> {
     if (!this.addonInfo) {
@@ -344,5 +358,36 @@ export class AddonInfoDetail {
     } else {
       this.installButton.hidden = false;
     }
+
+    // Historical versions button (only for scraper sources)
+    this.setupHistoryVersionsButton(addonInfo);
+  }
+
+  /**
+   * Set up the historical versions button
+   */
+  private static setupHistoryVersionsButton(addonInfo: AddonInfo) {
+    const button = this.historyVersionsButton;
+    if (!button) {
+      return;
+    }
+
+    // Only show for scraper sources
+    if (!isScraperSource()) {
+      button.hidden = true;
+      return;
+    }
+
+    button.hidden = false;
+
+    // Remove existing event listener by cloning
+    const newButton = button.cloneNode(true) as HTMLButtonElement;
+    button.parentNode?.replaceChild(newButton, button);
+
+    // Add click event listener
+    newButton.addEventListener("click", () => {
+      const name = addonReleaseInfo(addonInfo)?.name ?? addonInfo.name ?? "";
+      HistoricalVersions.showWindow(name, addonInfo.repo);
+    });
   }
 }

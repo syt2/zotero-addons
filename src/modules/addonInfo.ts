@@ -8,9 +8,9 @@ import {
 import { getXPIDatabase, getAddonManager } from "../utils/compat";
 // Re-export types from types module
 export { InstallStatus } from "../types";
-export type { AddonInfo } from "../types";
+export type { AddonInfo, HistoricalRelease, ReleaseCacheData } from "../types";
 import { InstallStatus } from "../types";
-import type { AddonInfo, LocalAddon } from "../types";
+import type { AddonInfo, LocalAddon, HistoricalRelease, ReleaseCacheData, XpiDownloadUrls } from "../types";
 
 /**
  * Extract download urls of xpi file from AddonInfo
@@ -191,6 +191,22 @@ export function addonCanUpdate(addonInfo: AddonInfo, addon: LocalAddon) {
   return Services.vc.compare(addon.version, version) < 0;
 }
 
+/**
+ * Check if a version is compatible with current Zotero version
+ * @param minVersion Minimum Zotero version (e.g., "7.0")
+ * @param maxVersion Maximum Zotero version (e.g., "8.*")
+ * @returns true if compatible, false otherwise
+ */
+export function isVersionCompatible(minVersion?: string, maxVersion?: string): boolean {
+  if (!minVersion || !maxVersion) {
+    return true; // If no version info, assume compatible
+  }
+  const currentVersion = Zotero.version;
+  const minCompare = Services.vc.compare(currentVersion, minVersion.replace("*", "0"));
+  const maxCompare = Services.vc.compare(currentVersion, maxVersion.replace("*", "999"));
+  return minCompare >= 0 && maxCompare <= 0;
+}
+
 class AddonInfoAPI {
   /**
    * Fetch AddonInfo from url
@@ -315,4 +331,136 @@ export class AddonInfoManager {
     ztoolkit.log("all sources failed");
     return [];
   }
+}
+
+/**
+ * Check if current source is a scraper source (supports historical releases)
+ * @returns true if source is scraper-based
+ */
+export function isScraperSource(): boolean {
+  const sourceID =
+    currentSource().id === "source-auto"
+      ? autoSource()?.id
+      : currentSource().id;
+  return (
+    sourceID === "source-zotero-scraper-github" ||
+    sourceID === "source-zotero-scraper-gitee" ||
+    sourceID === "source-zotero-scraper-ghproxy" ||
+    sourceID === "source-zotero-scraper-jsdelivr"
+  );
+}
+
+/**
+ * Build release cache URL for a given repo based on current source
+ * @param repo Repository name (e.g., "syt2/zotero-addons")
+ * @returns URL to fetch release cache JSON
+ */
+function buildReleaseCacheUrl(repo: string): string | undefined {
+  const sourceID =
+    currentSource().id === "source-auto"
+      ? autoSource()?.id
+      : currentSource().id;
+
+  // Release cache uses # as separator instead of /
+  // e.g., "windingwind/zotero-pdf-translate" -> "windingwind%23zotero-pdf-translate"
+  const encodedRepo = encodeURIComponent(repo.replace("/", "#"));
+
+  switch (sourceID) {
+    case "source-zotero-scraper-github":
+      return `https://raw.githubusercontent.com/syt2/zotero-addons-scraper/refs/heads/publish/release_cache/${encodedRepo}.json`;
+    case "source-zotero-scraper-gitee":
+      return `https://gitee.com/ytshen/zotero-addon-scraper/raw/publish/release_cache/${encodedRepo}.json`;
+    case "source-zotero-scraper-jsdelivr":
+      return `https://cdn.jsdelivr.net/gh/syt2/zotero-addons-scraper@publish/release_cache/${encodedRepo}.json`;
+    case "source-zotero-scraper-ghproxy":
+      return `https://gh-proxy.com/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/refs/heads/publish/release_cache/${encodedRepo}.json`;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Fetch historical releases for a given repo
+ * @param repo Repository name (e.g., "syt2/zotero-addons")
+ * @returns Array of historical releases, sorted by published_at descending
+ */
+export async function fetchHistoricalReleases(repo: string): Promise<HistoricalRelease[]> {
+  if (!isScraperSource()) {
+    return [];
+  }
+
+  const url = buildReleaseCacheUrl(repo);
+  if (!url) {
+    return [];
+  }
+
+  ztoolkit.log(`Fetching historical releases from ${url}`);
+
+  try {
+    const response = await Zotero.HTTP.request("GET", url, { timeout: 10000 });
+    const data = JSON.parse(response.response) as ReleaseCacheData;
+
+    // Sort by published_at descending (newest first)
+    const releases = data.checked_releases || [];
+    releases.sort((a, b) => {
+      return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+    });
+
+    return releases;
+  } catch (error) {
+    ztoolkit.log(`Failed to fetch historical releases: ${error}`);
+    return [];
+  }
+}
+
+/**
+ * Build download URLs for a historical release based on the GitHub URL
+ * @param githubUrl The original GitHub download URL
+ * @returns XpiDownloadUrls object with various mirror URLs
+ */
+export function buildHistoricalDownloadUrls(githubUrl: string): XpiDownloadUrls {
+  return {
+    github: githubUrl,
+    ghProxy: `https://gh-proxy.com/?q=${encodeURIComponent(githubUrl)}`,
+    kgithub: githubUrl.replace("github.com", "kkgithub.com"),
+  };
+}
+
+/**
+ * Get prioritized download URLs for a historical release based on current source
+ * @param historicalRelease The historical release
+ * @returns Array of download URLs, ordered by preference based on current source
+ */
+export function historicalReleaseDownloadUrls(historicalRelease: HistoricalRelease): string[] {
+  const urls = buildHistoricalDownloadUrls(historicalRelease.xpi_download_url);
+  const sourceID =
+    currentSource().id === "source-auto"
+      ? autoSource()?.id
+      : currentSource().id;
+
+  const result = Object.values(urls).filter((e) => !!e) as string[];
+  let firstElement: string | undefined = undefined;
+
+  switch (sourceID) {
+    case "source-zotero-scraper-github":
+      firstElement = urls.github;
+      break;
+    case "source-zotero-scraper-ghproxy":
+      firstElement = urls.ghProxy;
+      break;
+    case "source-zotero-scraper-jsdelivr":
+    case "source-zotero-scraper-gitee":
+      // For jsdelivr and gitee, prefer ghProxy as they don't have direct XPI mirrors
+      firstElement = urls.ghProxy;
+      break;
+  }
+
+  if (firstElement) {
+    const index = result.indexOf(firstElement);
+    if (index >= 0) {
+      result.unshift(result.splice(index, 1)[0]);
+    }
+  }
+
+  return result.filter((e) => e);
 }

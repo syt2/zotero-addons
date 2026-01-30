@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?> <?xml-stylesheet
+href="chrome://zotero/skin/zotero.css" type="text/css"?> <?xml-stylesheet
+href="chrome://zotero-platform/content/zotero-react-client.css"
+type="text/css"?> <?xml-stylesheet
+href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://__addonRef__/content/virtualizedTable.css"
+type="text/css"?>
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:html="http://www.w3.org/1999/xhtml"
+  windowtype="__addonRef__-historicalVersions" sizemode="normal" scrolling="false" persist="screenX screenY width height sizemode">
+
+<head>
+  <title data-l10n-id="history-version-title"></title>
+  <meta charset="utf-8" />
+  <script>
+    document.addEventListener("DOMContentLoaded", (ev) => {
+      try {
+        Services.scriptloader.loadSubScript(
+          "chrome://zotero/content/include.js",
+          this,
+        );
+
+        Services.scriptloader.loadSubScript(
+          "resource://zotero/require.js",
+          this,
+        );
+      } catch (e) {
+      }
+      window.arguments[0]._initPromise.resolve();
+    });
+  </script>
+  <style>
+    html,
+    body,
+    .viewport {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      word-wrap: break-word;
+      font-family: initial;
+    }
+
+    .viewport {
+      margin: 0 5px 0 5px;
+    }
+
+    .viewport-container {
+      padding: 0;
+      margin: 0;
+      height: calc(100% - 40px);
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+    }
+
+    .list-viewport {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    #table-container {
+      height: 100%;
+      width: 100%;
+      overflow-x: hidden;
+      overflow-y: scroll;
+    }
+
+    .compatible {
+      color: green;
+    }
+
+    .incompatible {
+      color: firebrick;
+    }
+  </style>
+  <link rel="localization" href="__addonRef__-historicalVersions.ftl" />
+</head>
+
+<body>
+  <div class="viewport-container">
+    <div id="list-container" class="viewport list-viewport">
+      <div id="listContainerPlaceholder"></div>
+      <div id="table-container"></div>
+    </div>
+  </div>
+  <div class="footer-container" style="
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 8px;
+      " xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <button id="close-button" data-l10n-id="close-button" style="cursor: pointer"></button>
+  </div>
+</body>
+
+</html>
