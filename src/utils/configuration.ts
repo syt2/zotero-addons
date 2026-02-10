@@ -46,7 +46,7 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
   },
   {
     id: "source-zotero-scraper-ghproxy",
-    api: "https://gh-proxy.com/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
+    api: "https://gh-proxy.org/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
   },
   {
     id: "source-zotero-chinese-github",
@@ -62,7 +62,7 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
   },
   {
     id: "source-zotero-chinese-ghproxy",
-    api: "https://gh-proxy.com/https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json",
+    api: "https://gh-proxy.org/https://raw.githubusercontent.com/zotero-chinese/zotero-plugins/gh-pages/dist/plugins.json",
   },
   {
     id: "source-custom",

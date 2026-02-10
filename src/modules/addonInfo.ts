@@ -373,7 +373,7 @@ function buildReleaseCacheUrl(repo: string): string | undefined {
     case "source-zotero-scraper-jsdelivr":
       return `https://cdn.jsdelivr.net/gh/syt2/zotero-addons-scraper@publish/release_cache/${encodedRepo}.json`;
     case "source-zotero-scraper-ghproxy":
-      return `https://gh-proxy.com/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/refs/heads/publish/release_cache/${encodedRepo}.json`;
+      return `https://gh-proxy.org/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/refs/heads/publish/release_cache/${encodedRepo}.json`;
     default:
       return undefined;
   }
@@ -421,7 +421,7 @@ export async function fetchHistoricalReleases(repo: string): Promise<HistoricalR
 export function buildHistoricalDownloadUrls(githubUrl: string): XpiDownloadUrls {
   return {
     github: githubUrl,
-    ghProxy: `https://gh-proxy.com/?q=${encodeURIComponent(githubUrl)}`,
+    ghProxy: `https://gh-proxy.org/${githubUrl}`,
     kgithub: githubUrl.replace("github.com", "kkgithub.com"),
   };
 }
