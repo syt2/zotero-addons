@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "Zotero 부가기능 마켓"
+  },
+  "description": {
+    "description": "description",
+    "message": "Zotero에서 플러그인 탐색, 설치 및 검토"
+  }
+}

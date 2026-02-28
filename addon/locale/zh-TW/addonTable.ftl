@@ -1,0 +1,11 @@
+title = 外掛市場
+refresh =
+    .label = 重新整理
+selectSource = 選擇來源：
+customSource = 自訂來源：
+autoUpdate =
+    .label = 自動更新外掛
+hideToolbarEntrance =
+    .label = 隱藏工具列入口
+search-field =
+    .placeholder = 搜尋...

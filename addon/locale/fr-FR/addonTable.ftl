@@ -1,0 +1,11 @@
+title = Marché d'extensions
+refresh =
+    .label = Actualiser
+selectSource = Sélectionner la source :
+customSource = Source personnalisée :
+autoUpdate =
+    .label = Mettre à jour automatiquement les extensions
+hideToolbarEntrance =
+    .label = Masquer l'entrée de la barre d'outils
+search-field =
+    .placeholder = Rechercher...

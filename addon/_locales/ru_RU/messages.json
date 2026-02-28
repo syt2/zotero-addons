@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "Магазин дополнений для Zotero"
+  },
+  "description": {
+    "description": "description",
+    "message": "Просмотр, установка и обзор плагинов в Zotero"
+  }
+}

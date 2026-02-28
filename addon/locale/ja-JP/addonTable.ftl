@@ -1,0 +1,11 @@
+title = アドオンマーケット
+refresh =
+    .label = 再読み込み
+selectSource = ソースを選択：
+customSource = カスタムソース：
+autoUpdate =
+    .label = アドオンを自動更新
+hideToolbarEntrance =
+    .label = ツールバーの入口を非表示
+search-field =
+    .placeholder = 検索...

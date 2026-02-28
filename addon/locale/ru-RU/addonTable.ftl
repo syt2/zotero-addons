@@ -1,0 +1,11 @@
+title = Магазин дополнений
+refresh =
+    .label = Обновить
+selectSource = Выбрать источник:
+customSource = Пользовательский источник:
+autoUpdate =
+    .label = Автоматически обновлять дополнения
+hideToolbarEntrance =
+    .label = Скрыть вход на панели инструментов
+search-field =
+    .placeholder = Поиск...

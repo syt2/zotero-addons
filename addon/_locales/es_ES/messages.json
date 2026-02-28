@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "Mercado de complementos para Zotero"
+  },
+  "description": {
+    "description": "description",
+    "message": "Explorar, instalar y revisar complementos dentro de Zotero"
+  }
+}

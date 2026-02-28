@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "سوق الإضافات لـ Zotero"
+  },
+  "description": {
+    "description": "description",
+    "message": "تصفح وتثبيت ومراجعة الإضافات داخل Zotero"
+  }
+}

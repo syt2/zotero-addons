@@ -1,0 +1,11 @@
+title = Add-on-Markt
+refresh =
+    .label = Neu laden
+selectSource = Quelle auswählen:
+customSource = Benutzerdefinierte Quelle:
+autoUpdate =
+    .label = Add-ons automatisch aktualisieren
+hideToolbarEntrance =
+    .label = Symbolleisten-Eintrag ausblenden
+search-field =
+    .placeholder = Suchen...

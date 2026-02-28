@@ -1,0 +1,11 @@
+title = Sklep z dodatkami
+refresh =
+    .label = Odśwież
+selectSource = Wybierz źródło:
+customSource = Niestandardowe źródło:
+autoUpdate =
+    .label = Automatycznie aktualizuj dodatki
+hideToolbarEntrance =
+    .label = Ukryj wejście paska narzędzi
+search-field =
+    .placeholder = Szukaj...

@@ -1,0 +1,11 @@
+title = Mercado de complementos
+refresh =
+    .label = Actualizar
+selectSource = Seleccionar fuente:
+customSource = Fuente personalizada:
+autoUpdate =
+    .label = Actualizar complementos automáticamente
+hideToolbarEntrance =
+    .label = Ocultar entrada de la barra de herramientas
+search-field =
+    .placeholder = Buscar...

@@ -1,0 +1,11 @@
+title = Eklenti Marketi
+refresh =
+    .label = Yenile
+selectSource = Kaynak Seç:
+customSource = Özel Kaynak:
+autoUpdate =
+    .label = Eklentileri otomatik güncelle
+hideToolbarEntrance =
+    .label = Araç çubuğu girişini gizle
+search-field =
+    .placeholder = Ara...

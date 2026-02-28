@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "Zotero アドオンマーケット"
+  },
+  "description": {
+    "description": "description",
+    "message": "Zotero内でプラグインの閲覧、インストール、レビューが可能"
+  }
+}

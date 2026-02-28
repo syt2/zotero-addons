@@ -1,0 +1,11 @@
+title = سوق الإضافات
+refresh =
+    .label = تحديث
+selectSource = اختر المصدر:
+customSource = مصدر مخصص:
+autoUpdate =
+    .label = تحديث الإضافات تلقائياً
+hideToolbarEntrance =
+    .label = إخفاء مدخل شريط الأدوات
+search-field =
+    .placeholder = بحث...

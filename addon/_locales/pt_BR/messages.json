@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "Mercado de extensões para Zotero"
+  },
+  "description": {
+    "description": "description",
+    "message": "Navegar, instalar e avaliar plugins dentro do Zotero"
+  }
+}

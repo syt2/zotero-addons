@@ -1,0 +1,11 @@
+title = 부가기능 마켓
+refresh =
+    .label = 새로고침
+selectSource = 소스 선택:
+customSource = 사용자 정의 소스:
+autoUpdate =
+    .label = 부가기능 자동 업데이트
+hideToolbarEntrance =
+    .label = 도구 모음 입구 숨기기
+search-field =
+    .placeholder = 검색...

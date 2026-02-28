@@ -1,0 +1,11 @@
+title = Mercato dei componenti aggiuntivi
+refresh =
+    .label = Aggiorna
+selectSource = Seleziona fonte:
+customSource = Fonte personalizzata:
+autoUpdate =
+    .label = Aggiorna automaticamente i componenti aggiuntivi
+hideToolbarEntrance =
+    .label = Nascondi ingresso barra degli strumenti
+search-field =
+    .placeholder = Cerca...

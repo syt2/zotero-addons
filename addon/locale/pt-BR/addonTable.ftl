@@ -1,0 +1,11 @@
+title = Mercado de extensões
+refresh =
+    .label = Atualizar
+selectSource = Selecionar fonte:
+customSource = Fonte personalizada:
+autoUpdate =
+    .label = Atualizar extensões automaticamente
+hideToolbarEntrance =
+    .label = Ocultar entrada da barra de ferramentas
+search-field =
+    .placeholder = Pesquisar...

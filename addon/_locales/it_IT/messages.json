@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "Mercato dei componenti aggiuntivi per Zotero"
+  },
+  "description": {
+    "description": "description",
+    "message": "Sfoglia, installa e recensisci i plugin all'interno di Zotero"
+  }
+}

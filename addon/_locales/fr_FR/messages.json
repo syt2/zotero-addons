@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "Marché d'extensions pour Zotero"
+  },
+  "description": {
+    "description": "description",
+    "message": "Parcourir, installer et examiner des extensions dans Zotero"
+  }
+}

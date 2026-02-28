@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "Zotero Eklenti Marketi"
+  },
+  "description": {
+    "description": "description",
+    "message": "Zotero içinde eklentileri keşfedin, kurun ve inceleyin"
+  }
+}

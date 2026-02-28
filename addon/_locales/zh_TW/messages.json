@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "Zotero 外掛市場"
+  },
+  "description": {
+    "description": "description",
+    "message": "在Zotero內瀏覽、安裝和檢視外掛"
+  }
+}

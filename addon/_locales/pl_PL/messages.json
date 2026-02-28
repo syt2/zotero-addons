@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "Sklep z dodatkami dla Zotero"
+  },
+  "description": {
+    "description": "description",
+    "message": "Przeglądaj, instaluj i recenzuj wtyczki w Zotero"
+  }
+}

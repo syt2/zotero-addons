@@ -1,0 +1,10 @@
+{
+  "name": {
+    "description": "name",
+    "message": "Add-on-Markt für Zotero"
+  },
+  "description": {
+    "description": "description",
+    "message": "Plugins in Zotero durchsuchen, installieren und bewerten"
+  }
+}
