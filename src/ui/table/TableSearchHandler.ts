@@ -8,6 +8,7 @@ import type { AssociatedAddonInfo } from "../../types";
 
 export class TableSearchHandler {
   private window: Window;
+  private debounceTimer?: number;
 
   constructor(window: Window) {
     this.window = window;
@@ -16,7 +17,7 @@ export class TableSearchHandler {
   /**
    * Initialize search input
    */
-  initSearch(onSearch: () => void): void {
+  initSearch(onSearch: () => void | Promise<void>): void {
     const searchButton = this.window.document.querySelector(
       "#search-button",
     ) as HTMLElement;
@@ -44,7 +45,20 @@ export class TableSearchHandler {
       }
       searchField.focus();
     });
-    searchField.addEventListener("command", onSearch);
+
+    const triggerSearchDebounced = (delayMs = 120) => {
+      if (this.debounceTimer) {
+        this.window.clearTimeout(this.debounceTimer);
+      }
+      this.debounceTimer = this.window.setTimeout(() => {
+        void onSearch();
+      }, delayMs);
+    };
+
+    // "command" usually fires on Enter/confirm in XUL inputs
+    searchField.addEventListener("command", () => void onSearch());
+    // Real-time search while typing
+    searchField.addEventListener("input", () => triggerSearchDebounced());
   }
 
   /**
@@ -63,6 +77,10 @@ export class TableSearchHandler {
     ) {
       searchField.classList.remove("visible");
       searchField.setAttribute("disabled", "true");
+      if (this.debounceTimer) {
+        this.window.clearTimeout(this.debounceTimer);
+        this.debounceTimer = undefined;
+      }
       setTimeout(() => {
         searchButton.style.display = "";
         searchField.style.visibility = "hidden";

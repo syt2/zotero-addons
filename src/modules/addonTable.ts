@@ -90,6 +90,7 @@ export class AddonTable {
   }
 
   private static addonInfos: AssociatedAddonInfo[] = [];
+  private static baseAddonInfos: AssociatedAddonInfo[] = [];
   private static window: Window | null;
   private static tableHelper?: VirtualizedTableHelper;
   private static columnManager = new TableColumnManager();
@@ -495,8 +496,14 @@ export class AddonTable {
 
   private static async initFooterContainer(win: Window) {
     this.searchHandler?.initSearch(async () => {
-      await this.updateAddonInfos();
-      this.updateTable();
+      // Real-time filtering should be local and fast.
+      // Only re-fetch addon list on explicit refresh / source change.
+      if (this.baseAddonInfos.length === 0) {
+        await this.updateAddonInfos(false);
+      } else {
+        this.applySearchAndSort();
+      }
+      await this.updateTable();
     });
     this.initRefreshButton(win);
     this.initAutoUpdate(win);
@@ -648,10 +655,17 @@ export class AddonTable {
     this.refreshTag += 1;
     const curRefreshTag = this.refreshTag;
 
-    let addonInfos = await TableDataTransformer.transformAddonInfos(force);
+    const addonInfos = await TableDataTransformer.transformAddonInfos(force);
     if (curRefreshTag !== this.refreshTag) {
       return;
     }
+
+    this.baseAddonInfos = addonInfos;
+    this.applySearchAndSort();
+  }
+
+  private static applySearchAndSort() {
+    let addonInfos = this.baseAddonInfos;
 
     // Filter by search
     if (this.searchHandler) {
