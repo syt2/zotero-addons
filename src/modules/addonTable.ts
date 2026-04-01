@@ -18,6 +18,7 @@ import {
 } from "../utils/configuration";
 import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
+import { HistoricalVersions } from "./historicalVersions";
 import { Guide } from "./guide";
 import { getXPIDatabase, getAddonManager } from "../utils/compat";
 import type { TableMenuItemID, AssociatedAddonInfo } from "../types";
@@ -619,6 +620,25 @@ export class AddonTable {
           }
           Zotero.launchURL(`https://github.com/${addon[0].repo}`);
         });
+        break;
+      case "menu-history-versions":
+        if (selectAddons.length !== 1) {
+          break;
+        }
+        {
+          const addonInfo = selectAddons[0][0];
+          const name =
+            addonReleaseInfo(addonInfo)?.name ?? addonInfo.name ?? "";
+          if (addonInfo.repo) {
+            HistoricalVersions.showWindow(name, addonInfo.repo);
+          }
+        }
+        break;
+      case "menu-rollback-previous":
+        if (selectAddons.length !== 1) {
+          break;
+        }
+        await AddonInfoDetail.rollbackToPrevious(selectAddons[0][0]);
         break;
       case "menu-open-xpi-location":
         selectAddons.forEach(async (selectedAddon) => {

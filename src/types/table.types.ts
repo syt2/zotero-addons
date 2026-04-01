@@ -19,6 +19,8 @@ export type TableMenuItemID =
   | "menu-remove"
   | "menu-uninstall-undo"
   | "menu-homepage"
+  | "menu-history-versions"
+  | "menu-rollback-previous"
   | "menu-refresh"
   | "menu-systemAddon"
   | "menu-updateAllIfNeed"
