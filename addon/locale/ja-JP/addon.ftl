@@ -69,6 +69,8 @@ menu-enable = 有効化
 menu-disable = 無効化
 menu-items-count = 件
 menu-open-xpi-location = ファイルマネージャーで表示
+menu-history-versions = 過去のバージョン…
+menu-rollback-previous = 1つ前のバージョンに戻す
 
 source-github = GitHub
 source-gitee = Gitee
@@ -96,3 +98,11 @@ compatibility-compatible = ✅ ({ $minVersion } - { $maxVersion })
 compatibility-incompatible = ⚠️ ({ $minVersion } - { $maxVersion })
 menu-install-version = このバージョンをインストール
 menu-goto-release = リリースページへ
+
+# ロールバック / 履歴
+rollback-previous-button = 1つ前のバージョンに戻す
+rollback-previous-confirm-title = アドオンを戻しますか？
+rollback-previous-confirm-message = { $name } を { $currentVersion } から { $targetVersion } に戻しますか？
+rollback-previous-confirm-confirm = 戻す
+rollback-previous-not-found = 現在のバージョン（{ $currentVersion }）より前のバージョンが見つかりません。
+rollback-previous-no-download = { $targetVersion } のダウンロード可能な XPI が見つかりません。

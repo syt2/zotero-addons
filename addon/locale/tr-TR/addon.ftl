@@ -69,6 +69,8 @@ menu-enable = Etkinleştir
 menu-disable = Devre dışı bırak
 menu-items-count = öğe
 menu-open-xpi-location = Dosya yöneticisinde göster
+menu-history-versions = Önceki sürümler…
+menu-rollback-previous = Önceki sürüme dön
 
 source-github = GitHub
 source-gitee = Gitee
@@ -96,3 +98,11 @@ compatibility-compatible = ✅ ({ $minVersion } - { $maxVersion })
 compatibility-incompatible = ⚠️ ({ $minVersion } - { $maxVersion })
 menu-install-version = Bu Sürümü Kur
 menu-goto-release = Yayın Sayfasına Git
+
+# Geri alma / geçmiş
+rollback-previous-button = Önceki sürüme dön
+rollback-previous-confirm-title = Eklenti geri alınsın mı?
+rollback-previous-confirm-message = { $name }, { $currentVersion } sürümünden { $targetVersion } sürümüne geri alınsın mı?
+rollback-previous-confirm-confirm = Geri al
+rollback-previous-not-found = Geçerli sürüm ({ $currentVersion }) için önceki bir sürüm bulunamadı.
+rollback-previous-no-download = { $targetVersion } için indirilebilir bir XPI bulunamadı.
