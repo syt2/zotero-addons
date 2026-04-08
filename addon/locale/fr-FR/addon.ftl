@@ -69,6 +69,8 @@ menu-enable = Activer
 menu-disable = Désactiver
 menu-items-count = éléments
 menu-open-xpi-location = Afficher dans le gestionnaire de fichiers
+menu-history-versions = Versions antérieures…
+menu-rollback-previous = Revenir à la version précédente
 
 source-github = GitHub
 source-gitee = Gitee
@@ -96,3 +98,11 @@ compatibility-compatible = ✅ ({ $minVersion } - { $maxVersion })
 compatibility-incompatible = ⚠️ ({ $minVersion } - { $maxVersion })
 menu-install-version = Installer cette version
 menu-goto-release = Aller à la page de publication
+
+# Retour / versions
+rollback-previous-button = Revenir à la version précédente
+rollback-previous-confirm-title = Revenir en arrière ?
+rollback-previous-confirm-message = Revenir { $name } de { $currentVersion } à { $targetVersion } ?
+rollback-previous-confirm-confirm = Revenir en arrière
+rollback-previous-not-found = Aucune version précédente trouvée pour la version actuelle ({ $currentVersion }).
+rollback-previous-no-download = Aucun XPI téléchargeable trouvé pour { $targetVersion }.

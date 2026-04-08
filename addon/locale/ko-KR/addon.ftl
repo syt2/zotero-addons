@@ -69,6 +69,8 @@ menu-enable = 활성화
 menu-disable = 비활성화
 menu-items-count = 개
 menu-open-xpi-location = 파일 관리자에서 열기
+menu-history-versions = 이전 버전…
+menu-rollback-previous = 이전 버전으로 되돌리기
 
 source-github = GitHub
 source-gitee = Gitee
@@ -96,3 +98,11 @@ compatibility-compatible = ✅ ({ $minVersion } - { $maxVersion })
 compatibility-incompatible = ⚠️ ({ $minVersion } - { $maxVersion })
 menu-install-version = 이 버전 설치
 menu-goto-release = 릴리스 페이지로 이동
+
+# 롤백 / 기록
+rollback-previous-button = 이전 버전으로 되돌리기
+rollback-previous-confirm-title = 부가 기능을 되돌릴까요?
+rollback-previous-confirm-message = { $name }을(를) { $currentVersion }에서 { $targetVersion }(으)로 되돌릴까요?
+rollback-previous-confirm-confirm = 되돌리기
+rollback-previous-not-found = 현재 버전({ $currentVersion })에 대한 이전 버전을 찾을 수 없습니다.
+rollback-previous-no-download = { $targetVersion }에 대해 다운로드 가능한 XPI를 찾을 수 없습니다.

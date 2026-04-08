@@ -8,6 +8,7 @@ import {
   AddonInfo,
   addonCanUpdate,
   addonReleaseInfo,
+  isScraperSource,
   relatedAddons,
 } from "../../modules/addonInfo";
 import { getXPIDatabase } from "../../utils/compat";
@@ -64,6 +65,20 @@ export class TableMenuHandler {
       );
       if (selects.size === 1) {
         append("menu-homepage");
+
+        // Historical versions / rollback (only for scraper source)
+        if (isScraperSource()) {
+          append("menu-history-versions");
+          const addonInfos = this.deps.getAddonInfos();
+          const idx = Array.from(selects)[0];
+          const addonInfo = addonInfos[idx]?.[0];
+          if (addonInfo?.repo) {
+            const relatedAddon = await relatedAddons([addonInfo]);
+            if (relatedAddon.length > 0 && relatedAddon[0][1]?.version) {
+              append("menu-rollback-previous");
+            }
+          }
+        }
       }
       append("menu-sep");
     }

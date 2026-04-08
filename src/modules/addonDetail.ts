@@ -2,6 +2,9 @@ import {
   AddonInfo,
   addonReleaseInfo,
   addonReleaseTime,
+  fetchHistoricalReleases,
+  historicalReleaseDownloadUrls,
+  HistoricalRelease,
   relatedAddons,
   xpiDownloadUrls,
   isScraperSource,
@@ -17,6 +20,7 @@ import { DetailButtonHandler } from "../ui/detail";
 export class AddonInfoDetail {
   private static window: Window | null;
   private static addonInfo?: AddonInfo;
+  private static historicalReleasesCache = new Map<string, HistoricalRelease[]>();
 
   /**
    * Close detail window
@@ -143,6 +147,23 @@ export class AddonInfoDetail {
     });
   }
 
+  /**
+   * Roll back the specified add-on to its previous version (if available).
+   * This does not require the detail window to be open.
+   */
+  static async rollbackToPrevious(addonInfo: AddonInfo) {
+    if (!isScraperSource() || !addonInfo.repo) {
+      return;
+    }
+    const relatedAddonList = await relatedAddons([addonInfo]);
+    const localAddon = relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;
+    const currentLocalVersion = localAddon?.version;
+    if (!currentLocalVersion) {
+      return;
+    }
+    await this.rollbackToPreviousVersion(addonInfo, currentLocalVersion);
+  }
+
 
   private static get installButton() {
     return this.window?.document.querySelector("#install") as HTMLButtonElement;
@@ -202,6 +223,11 @@ export class AddonInfoDetail {
   private static get historyVersionsButton() {
     return this.window?.document.querySelector(
       "#history-versions",
+    ) as HTMLButtonElement;
+  }
+  private static get rollbackPreviousButton() {
+    return this.window?.document.querySelector(
+      "#rollback-previous",
     ) as HTMLButtonElement;
   }
   private static async localAddon(): Promise<any | undefined> {
@@ -361,6 +387,7 @@ export class AddonInfoDetail {
 
     // Historical versions button (only for scraper sources)
     this.setupHistoryVersionsButton(addonInfo);
+    await this.setupRollbackPreviousButton(addonInfo, localAddon);
   }
 
   /**
@@ -388,6 +415,171 @@ export class AddonInfoDetail {
     newButton.addEventListener("click", () => {
       const name = addonReleaseInfo(addonInfo)?.name ?? addonInfo.name ?? "";
       HistoricalVersions.showWindow(name, addonInfo.repo);
+    });
+  }
+
+  /**
+   * Set up "rollback to previous version" button
+   */
+  private static async setupRollbackPreviousButton(
+    addonInfo: AddonInfo,
+    localAddon: any | undefined,
+  ) {
+    const button = this.rollbackPreviousButton;
+    if (!button) {
+      return;
+    }
+
+    // Only available for installed add-ons from scraper sources (historical releases are guaranteed)
+    if (!isScraperSource() || !localAddon?.version || !addonInfo.repo) {
+      button.hidden = true;
+      return;
+    }
+
+    button.hidden = false;
+    button.textContent = getString("rollback-previous-button");
+
+    // Remove existing event listener by cloning
+    const newButton = button.cloneNode(true) as HTMLButtonElement;
+    button.parentNode?.replaceChild(newButton, button);
+
+    newButton.addEventListener("click", async () => {
+      await this.rollbackToPreviousVersion(addonInfo, localAddon?.version);
+    });
+  }
+
+  private static normalizeVersion(v: string) {
+    return (v ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/^v/, "")
+      .replace(/\s+/g, "");
+  }
+
+  private static compareVersions(a: string, b: string) {
+    try {
+      return Services.vc.compare(
+        this.normalizeVersion(a) || "0",
+        this.normalizeVersion(b) || "0",
+      );
+    } catch {
+      return this.normalizeVersion(a).localeCompare(this.normalizeVersion(b));
+    }
+  }
+
+  private static releaseVersionString(release: HistoricalRelease) {
+    return release.addon_version || release.tag || "";
+  }
+
+  private static async getHistoricalReleases(repo: string) {
+    const cached = this.historicalReleasesCache.get(repo);
+    if (cached) {
+      return cached;
+    }
+    const releases = await fetchHistoricalReleases(repo);
+    this.historicalReleasesCache.set(repo, releases);
+    return releases;
+  }
+
+  private static findPreviousRelease(
+    releases: HistoricalRelease[],
+    currentVersion: string,
+  ): HistoricalRelease | undefined {
+    const cur = this.normalizeVersion(currentVersion);
+    if (!cur) {
+      return undefined;
+    }
+
+    // Prefer "previous in list" if we can find an exact match (most intuitive)
+    const exactIdx = releases.findIndex((r) => {
+      const v = this.normalizeVersion(this.releaseVersionString(r));
+      return v === cur;
+    });
+    if (exactIdx >= 0 && exactIdx + 1 < releases.length) {
+      return releases[exactIdx + 1];
+    }
+
+    // Fallback: pick the greatest version < currentVersion
+    const candidates = releases.filter((r) => {
+      const v = this.releaseVersionString(r);
+      if (!v) return false;
+      return this.compareVersions(v, currentVersion) < 0;
+    });
+    if (candidates.length === 0) {
+      return undefined;
+    }
+    candidates.sort((a, b) =>
+      this.compareVersions(this.releaseVersionString(b), this.releaseVersionString(a)),
+    );
+    return candidates[0];
+  }
+
+  private static async rollbackToPreviousVersion(
+    addonInfo: AddonInfo,
+    currentLocalVersion: string,
+  ) {
+    if (!addonInfo.repo) return;
+
+    const releases = await this.getHistoricalReleases(addonInfo.repo);
+    const prev = this.findPreviousRelease(releases, currentLocalVersion);
+
+    if (!prev) {
+      new ztoolkit.ProgressWindow(getString("addon-name"), {
+        closeOnClick: true,
+        closeTime: 3000,
+      })
+        .createLine({
+          text: getString("rollback-previous-not-found", {
+            args: { currentVersion: currentLocalVersion },
+          }),
+          type: "fail",
+        })
+        .show(3000);
+      return;
+    }
+
+    const targetVersion = this.releaseVersionString(prev) || prev.tag;
+    const urls = historicalReleaseDownloadUrls(prev);
+    if (!urls || urls.length === 0) {
+      new ztoolkit.ProgressWindow(getString("addon-name"), {
+        closeOnClick: true,
+        closeTime: 3000,
+      })
+        .createLine({
+          text: getString("rollback-previous-no-download", {
+            args: { targetVersion },
+          }),
+          type: "fail",
+        })
+        .show(3000);
+      return;
+    }
+
+    const confirm = await (Services as any).prompt.confirmEx(
+      null as any,
+      getString("rollback-previous-confirm-title"),
+      getString("rollback-previous-confirm-message", {
+        args: {
+          name: addonReleaseInfo(addonInfo)?.name ?? addonInfo.name ?? "Unknown",
+          currentVersion: currentLocalVersion,
+          targetVersion,
+        },
+      }),
+      Services.prompt.BUTTON_POS_0! * Services.prompt.BUTTON_TITLE_IS_STRING! +
+        Services.prompt.BUTTON_POS_1! * Services.prompt.BUTTON_TITLE_CANCEL!,
+      getString("rollback-previous-confirm-confirm"),
+      "",
+      "",
+      "",
+      { value: false },
+    );
+    if (confirm !== 0) {
+      return;
+    }
+
+    await installAddonFrom(urls, {
+      name: addonReleaseInfo(addonInfo)?.name ?? addonInfo.name,
+      popWin: true,
     });
   }
 }

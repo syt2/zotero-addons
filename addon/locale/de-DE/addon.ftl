@@ -69,6 +69,8 @@ menu-enable = Aktivieren
 menu-disable = Deaktivieren
 menu-items-count = Einträge
 menu-open-xpi-location = Im Dateimanager anzeigen
+menu-history-versions = Versionshistorie…
+menu-rollback-previous = Zur vorherigen Version zurücksetzen
 
 source-github = GitHub
 source-gitee = Gitee
@@ -96,3 +98,11 @@ compatibility-compatible = ✅ ({ $minVersion } - { $maxVersion })
 compatibility-incompatible = ⚠️ ({ $minVersion } - { $maxVersion })
 menu-install-version = Diese Version installieren
 menu-goto-release = Zur Veröffentlichungsseite
+
+# Rollback / frühere Versionen
+rollback-previous-button = Zur vorherigen Version zurücksetzen
+rollback-previous-confirm-title = Add-on zurücksetzen?
+rollback-previous-confirm-message = { $name } von { $currentVersion } auf { $targetVersion } zurücksetzen?
+rollback-previous-confirm-confirm = Zurücksetzen
+rollback-previous-not-found = Keine frühere Version für die aktuelle Version ({ $currentVersion }) gefunden.
+rollback-previous-no-download = Keine herunterladbare XPI für { $targetVersion } gefunden.

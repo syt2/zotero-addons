@@ -6,8 +6,42 @@
 import Fuse from "fuse.js";
 import type { AssociatedAddonInfo } from "../../types";
 
+const fuseOptions: ConstructorParameters<typeof Fuse<AssociatedAddonInfo>>[1] =
+  {
+    keys: [
+      {
+        name: "addonInfoName",
+        weight: 0.3,
+        getFn: (e) => e[0].name || "",
+      },
+      {
+        name: "addonName",
+        weight: 0.3,
+        getFn: (e) => e[1]["menu-name"] || "",
+      },
+      {
+        name: "addonInfoDescription",
+        weight: 0.2,
+        getFn: (e) => e[0].description || "",
+      },
+      {
+        name: "addonDescription",
+        weight: 0.2,
+        getFn: (e) => e[1]["menu-desc"] || "",
+      },
+    ],
+    includeScore: true,
+    threshold: 0.3,
+    ignoreLocation: true,
+    shouldSort: true,
+    isCaseSensitive: false,
+  };
+
 export class TableSearchHandler {
   private window: Window;
+  private debounceTimer?: number;
+  private fuse?: Fuse<AssociatedAddonInfo>;
+  private fuseSource?: AssociatedAddonInfo[];
 
   constructor(window: Window) {
     this.window = window;
@@ -16,7 +50,7 @@ export class TableSearchHandler {
   /**
    * Initialize search input
    */
-  initSearch(onSearch: () => void): void {
+  initSearch(onSearch: () => void | Promise<void>): void {
     const searchButton = this.window.document.querySelector(
       "#search-button",
     ) as HTMLElement;
@@ -44,7 +78,20 @@ export class TableSearchHandler {
       }
       searchField.focus();
     });
-    searchField.addEventListener("command", onSearch);
+
+    const triggerSearchDebounced = (delayMs = 120) => {
+      if (this.debounceTimer) {
+        this.window.clearTimeout(this.debounceTimer);
+      }
+      this.debounceTimer = this.window.setTimeout(() => {
+        void onSearch();
+      }, delayMs);
+    };
+
+    // "command" usually fires on Enter/confirm in XUL inputs
+    searchField.addEventListener("command", () => void onSearch());
+    // Real-time search while typing
+    searchField.addEventListener("input", () => triggerSearchDebounced());
   }
 
   /**
@@ -63,6 +110,10 @@ export class TableSearchHandler {
     ) {
       searchField.classList.remove("visible");
       searchField.setAttribute("disabled", "true");
+      if (this.debounceTimer) {
+        this.window.clearTimeout(this.debounceTimer);
+        this.debounceTimer = undefined;
+      }
       setTimeout(() => {
         searchButton.style.display = "";
         searchField.style.visibility = "hidden";
@@ -90,36 +141,13 @@ export class TableSearchHandler {
       return addonInfos;
     }
 
-    const fuse = new Fuse(addonInfos, {
-      keys: [
-        {
-          name: "addonInfoName",
-          weight: 0.3,
-          getFn: (e) => e[0].name || "",
-        },
-        {
-          name: "addonName",
-          weight: 0.3,
-          getFn: (e) => e[1]["menu-name"] || "",
-        },
-        {
-          name: "addonInfoDescription",
-          weight: 0.2,
-          getFn: (e) => e[0].description || "",
-        },
-        {
-          name: "addonDescription",
-          weight: 0.2,
-          getFn: (e) => e[1]["menu-desc"] || "",
-        },
-      ],
-      includeScore: true,
-      threshold: 0.3,
-      ignoreLocation: true,
-      shouldSort: true,
-      isCaseSensitive: false,
-    });
-    const result = fuse.search(searchText);
+    // Rebuild index only when the backing list reference changes (e.g. refresh),
+    // not on every keystroke — same pattern as `fuse.search(query)` on one index.
+    if (!this.fuse || this.fuseSource !== addonInfos) {
+      this.fuse = new Fuse(addonInfos, fuseOptions);
+      this.fuseSource = addonInfos;
+    }
+    const result = this.fuse.search(searchText);
     return result.map((e) => e.item);
   }
 }
