@@ -114,7 +114,7 @@ export class TableSearchHandler {
         this.window.clearTimeout(this.debounceTimer);
         this.debounceTimer = undefined;
       }
-      setTimeout(() => {
+      this.window.setTimeout(() => {
         searchButton.style.display = "";
         searchField.style.visibility = "hidden";
         searchField.style.removeProperty("max-width");

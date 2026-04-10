@@ -33,8 +33,12 @@ export class HistoricalVersions {
    */
   static async showWindow(addonName: string, repo: string) {
     if (this.window && isWindowAlive(this.window)) {
-      this.window.focus();
-      return;
+      if (this.repo === repo) {
+        this.window.focus();
+        return;
+      }
+      // Different addon requested — close existing window and reopen with new data
+      this.close();
     }
 
     this.addonName = addonName;

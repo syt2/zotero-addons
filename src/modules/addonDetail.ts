@@ -20,7 +20,11 @@ import { DetailButtonHandler } from "../ui/detail";
 export class AddonInfoDetail {
   private static window: Window | null;
   private static addonInfo?: AddonInfo;
-  private static historicalReleasesCache = new Map<string, HistoricalRelease[]>();
+  private static readonly CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+  private static historicalReleasesCache = new Map<
+    string,
+    { releases: HistoricalRelease[]; timestamp: number }
+  >();
 
   /**
    * Close detail window
@@ -473,12 +477,21 @@ export class AddonInfoDetail {
 
   private static async getHistoricalReleases(repo: string) {
     const cached = this.historicalReleasesCache.get(repo);
-    if (cached) {
-      return cached;
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS) {
+      return cached.releases;
     }
     const releases = await fetchHistoricalReleases(repo);
-    this.historicalReleasesCache.set(repo, releases);
+    this.historicalReleasesCache.set(repo, { releases, timestamp: Date.now() });
     return releases;
+  }
+
+  private static showRollbackError(text: string) {
+    new ztoolkit.ProgressWindow(getString("addon-name"), {
+      closeOnClick: true,
+      closeTime: 3000,
+    })
+      .createLine({ text, type: "fail" })
+      .show(3000);
   }
 
   private static findPreviousRelease(
@@ -524,34 +537,20 @@ export class AddonInfoDetail {
     const prev = this.findPreviousRelease(releases, currentLocalVersion);
 
     if (!prev) {
-      new ztoolkit.ProgressWindow(getString("addon-name"), {
-        closeOnClick: true,
-        closeTime: 3000,
-      })
-        .createLine({
-          text: getString("rollback-previous-not-found", {
-            args: { currentVersion: currentLocalVersion },
-          }),
-          type: "fail",
-        })
-        .show(3000);
+      this.showRollbackError(
+        getString("rollback-previous-not-found", {
+          args: { currentVersion: currentLocalVersion },
+        }),
+      );
       return;
     }
 
     const targetVersion = this.releaseVersionString(prev) || prev.tag;
     const urls = historicalReleaseDownloadUrls(prev);
     if (!urls || urls.length === 0) {
-      new ztoolkit.ProgressWindow(getString("addon-name"), {
-        closeOnClick: true,
-        closeTime: 3000,
-      })
-        .createLine({
-          text: getString("rollback-previous-no-download", {
-            args: { targetVersion },
-          }),
-          type: "fail",
-        })
-        .show(3000);
+      this.showRollbackError(
+        getString("rollback-previous-no-download", { args: { targetVersion } }),
+      );
       return;
     }
 

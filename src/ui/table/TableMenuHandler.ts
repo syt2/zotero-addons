@@ -56,7 +56,6 @@ export class TableMenuHandler {
         "menu-uninstall",
         "menu-enable",
         "menu-disable",
-        "menu-open-xpi-location",
       ];
       possibleTabID.forEach(
         (e) =>
@@ -67,16 +66,11 @@ export class TableMenuHandler {
         append("menu-homepage");
 
         // Historical versions / rollback (only for scraper source)
+        // relatedAddons was already fetched in getSelectedAddonSupportOperations
         if (isScraperSource()) {
           append("menu-history-versions");
-          const addonInfos = this.deps.getAddonInfos();
-          const idx = Array.from(selects)[0];
-          const addonInfo = addonInfos[idx]?.[0];
-          if (addonInfo?.repo) {
-            const relatedAddon = await relatedAddons([addonInfo]);
-            if (relatedAddon.length > 0 && relatedAddon[0][1]?.version) {
-              append("menu-rollback-previous");
-            }
+          if (selectedAddonSupportOps.has("menu-rollback-previous")) {
+            append("menu-rollback-previous");
           }
         }
       }
@@ -159,6 +153,11 @@ export class TableMenuHandler {
           } else {
             append("menu-disable", addonInfo[0]);
           }
+        }
+
+        // Rollback eligibility — reuse the relatedAddon already fetched above
+        if (isScraperSource() && addonInfo[0].repo && relatedAddon[0][1]?.version) {
+          append("menu-rollback-previous", addonInfo[0]);
         }
       } else {
         append("menu-install", addonInfo[0]);
