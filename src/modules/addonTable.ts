@@ -35,20 +35,22 @@ export class AddonTable {
    * Register entrance in menu tools
    */
   static registerInMenuTool() {
-    ztoolkit.Menu.register("menuTools", {
-      tag: "menuseparator",
-      id: "addon-table-menuseparator",
-    });
-    ztoolkit.Menu.register("menuTools", {
-      tag: "menuitem",
-      id: "addon-table-entrance",
-      label: getString("menuitem-addons"),
-      icon: `chrome://${config.addonRef}/content/icons/favicon.svg`,
-      commandListener: () => {
-        (async () => {
-          await this.showAddonsWindow({ from: "menu" });
-        })();
-      },
+    Zotero.MenuManager.registerMenu({
+      menuID: "addon-table-entrance",
+      pluginID: config.addonID,
+      target: "main/menubar/tools",
+      menus: [
+        {
+          menuType: "menuitem",
+          icon: `chrome://${config.addonRef}/content/icons/favicon.svg`,
+          onShowing: (_ev, context) => {
+            context.menuElem.setAttribute("label", getString("menuitem-addons"));
+          },
+          onCommand: () => {
+            void this.showAddonsWindow({ from: "menu" });
+          },
+        },
+      ],
     });
   }
 
@@ -86,8 +88,7 @@ export class AddonTable {
     Zotero.getMainWindow()
       .document.querySelector("#zotero-toolbaritem-addons")
       ?.remove();
-    ztoolkit.Menu.unregister("addon-table-menuseparator");
-    ztoolkit.Menu.unregister("addon-table-entrance");
+    Zotero.MenuManager.unregisterMenu("addon-table-entrance");
   }
 
   private static addonInfos: AssociatedAddonInfo[] = [];

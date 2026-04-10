@@ -33,7 +33,6 @@ function initZToolkit(_ztoolkit: ReturnType<typeof createZToolkit>) {
 import {
   VirtualizedTableHelper,
   ProgressWindowHelper,
-  MenuManager,
   GuideHelper,
   UITool,
   BasicTool,
@@ -44,7 +43,6 @@ class MyToolkit extends BasicTool {
   UI: UITool;
   VirtualizedTable: typeof VirtualizedTableHelper;
   ProgressWindow: typeof ProgressWindowHelper;
-  Menu: MenuManager;
   Guide: typeof GuideHelper;
 
   constructor() {
@@ -52,7 +50,6 @@ class MyToolkit extends BasicTool {
     this.UI = new UITool(this);
     this.VirtualizedTable = VirtualizedTableHelper;
     this.ProgressWindow = ProgressWindowHelper;
-    this.Menu = new MenuManager(this);
     this.Guide = GuideHelper;
   }
 
