@@ -3,6 +3,7 @@ refresh =
     .label = Verversen
 selectSource = Selecteer Bron:
 customSource = Aangepaste Bron:
+filterByTag = Tags:
 autoUpdate =
     .label = Automatische add-ons bijwerken
 hideToolbarEntrance =

@@ -3,6 +3,7 @@ refresh =
     .label = Odśwież
 selectSource = Wybierz źródło:
 customSource = Niestandardowe źródło:
+filterByTag = Tagi:
 autoUpdate =
     .label = Automatycznie aktualizuj dodatki
 hideToolbarEntrance =

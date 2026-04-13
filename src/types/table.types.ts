@@ -37,7 +37,8 @@ export type TableColumnID =
   | "menu-remote-update-time"
   | "menu-remote-version"
   | "menu-local-version"
-  | "menu-install-state";
+  | "menu-install-state"
+  | "menu-tags";
 
 /**
  * Table row data

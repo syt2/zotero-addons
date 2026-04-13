@@ -1,5 +1,7 @@
 addon-name = سوق الإضافات لـ Zotero
 menuitem-addons = سوق الإضافات
+filter-all-tags = جميع الوسوم
+menu-tags = الوسوم
 name = الاسم
 description = الوصف
 stars = ⭐️

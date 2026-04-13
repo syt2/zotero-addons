@@ -1,6 +1,7 @@
 import { VirtualizedTableHelper } from "zotero-plugin-toolkit";
 import { config } from "../../package.json";
 import { getString } from "../utils/locale";
+import { tagColor } from "../utils/tagColor";
 import {
   AddonInfo,
   AddonInfoManager,
@@ -44,7 +45,10 @@ export class AddonTable {
           menuType: "menuitem",
           icon: `chrome://${config.addonRef}/content/icons/favicon.svg`,
           onShowing: (_ev, context) => {
-            context.menuElem.setAttribute("label", getString("menuitem-addons"));
+            context.menuElem.setAttribute(
+              "label",
+              getString("menuitem-addons"),
+            );
           },
           onCommand: () => {
             void this.showAddonsWindow({ from: "menu" });
@@ -93,11 +97,14 @@ export class AddonTable {
 
   private static addonInfos: AssociatedAddonInfo[] = [];
   private static baseAddonInfos: AssociatedAddonInfo[] = [];
+  private static currentTag: string | null = null;
   private static window: Window | null;
   private static tableHelper?: VirtualizedTableHelper;
   private static columnManager = new TableColumnManager();
   private static searchHandler?: TableSearchHandler;
   private static menuHandler?: TableMenuHandler;
+  private static tagCellObserver?: MutationObserver;
+  private static applyTagCellChips?: () => void;
 
   /**
    * Display addon table window
@@ -111,6 +118,7 @@ export class AddonTable {
       this.refresh();
       return;
     }
+    this.resetWindowTransientState();
     let resolveInit: () => void;
     const _initPromise = new Promise<void>((resolve) => {
       resolveInit = resolve;
@@ -130,6 +138,14 @@ export class AddonTable {
     if (!win) {
       return;
     }
+    win.addEventListener(
+      "unload",
+      () => {
+        AddonInfoDetail.close();
+        this.resetWindowTransientState();
+      },
+      { once: true },
+    );
     win.addEventListener("keypress", (e: KeyboardEvent) => {
       if (
         ((Zotero.isMac && e.metaKey && !e.ctrlKey) ||
@@ -143,6 +159,7 @@ export class AddonTable {
     });
     win.onclose = () => {
       AddonInfoDetail.close();
+      this.currentTag = null;
     };
     await windowArgs._initPromise.promise;
     this.window = win;
@@ -278,19 +295,24 @@ export class AddonTable {
   }
 
   // MARK: private
+  private static resetWindowTransientState() {
+    this.tagCellObserver?.disconnect();
+    this.tagCellObserver = undefined;
+    this.applyTagCellChips = undefined;
+    this.currentTag = null;
+    this.addonInfos = [];
+    this.baseAddonInfos = [];
+    this.window = null;
+    this.tableHelper = undefined;
+    this.searchHandler = undefined;
+    this.menuHandler = undefined;
+  }
+
   private static updateHideToolbarEntranceInWindow(hide: boolean) {
     const hideToolbarCheckbox = this.window?.document.querySelector(
       "#hide-toolbar-entrance",
     ) as HTMLElement;
-    const autoUpdateCheckbox = this.window?.document.querySelector(
-      "#auto-update",
-    ) as HTMLElement;
     hideToolbarCheckbox.hidden = hide;
-    if (hide) {
-      autoUpdateCheckbox.style.marginLeft = "auto";
-    } else {
-      autoUpdateCheckbox.style.removeProperty("margin-left");
-    }
   }
 
   private static async createTable() {
@@ -402,6 +424,7 @@ export class AddonTable {
       .render(undefined, () => {
         this.refresh(AddonInfoManager.shared.addonInfos.length <= 0);
         this.setupCellTooltips();
+        this.setupTagCellChips();
       });
   }
 
@@ -434,6 +457,8 @@ export class AddonTable {
         },
         styles: {
           cursor: "pointer",
+          height: "28px",
+          minHeight: "28px",
         },
         listeners: [
           {
@@ -510,6 +535,228 @@ export class AddonTable {
     this.initRefreshButton(win);
     this.initAutoUpdate(win);
     this.initHideEntrance(win);
+    this.initTagFilter(win);
+  }
+
+  private static initTagFilter(win: Window) {
+    const placeholder = win.document.getElementById("tagFilterPlaceholder");
+    if (!placeholder) return;
+    this.replaceTagFilterList(placeholder);
+  }
+
+  private static replaceTagFilterList(node: Element) {
+    ztoolkit.UI.replaceElement(
+      {
+        tag: "menulist",
+        id: "tag-filter",
+        attributes: {
+          value: this.currentTag ?? "all",
+          native: "true",
+          sizetopopup: "none",
+        },
+        styles: {
+          cursor: "pointer",
+          width: "120px",
+          minWidth: "120px",
+          maxWidth: "120px",
+          height: "28px",
+          minHeight: "28px",
+        },
+        listeners: [
+          {
+            type: "command",
+            listener: () => {
+              const value = (
+                this.window?.document.getElementById(
+                  "tag-filter",
+                ) as XULMenuListElement
+              )?.getAttribute("value");
+              this.currentTag = value === "all" ? null : (value ?? null);
+              this.syncTagFilterControl();
+              this.applySearchAndSort();
+              void this.updateTable();
+            },
+          },
+        ],
+        children: [
+          {
+            tag: "menupopup",
+            id: "tag-filter-popup",
+            children: this.buildTagMenuItems(),
+          },
+        ],
+      },
+      node,
+    );
+    this.syncTagFilterControl();
+  }
+
+  private static buildTagMenuItems() {
+    const counts = this.getTagCounts();
+    return [
+      {
+        tag: "menuitem" as const,
+        attributes: {
+          label: `${getString("filter-all-tags")} (${this.baseAddonInfos.length})`,
+          value: "all",
+          crop: "end",
+        },
+      },
+      ...this.getAllTags().map((tag) => ({
+        tag: "menuitem" as const,
+        attributes: {
+          label: `${tag} (${counts.get(tag) ?? 0})`,
+          value: tag,
+          crop: "end",
+          style: `color: ${tagColor(tag)}; font-weight: 500`,
+        },
+      })),
+    ];
+  }
+
+  private static refreshTagFilter() {
+    const popup = this.window?.document.getElementById("tag-filter-popup");
+    if (!popup) return;
+
+    const allTags = this.getAllTags();
+    // Reset currentTag if it no longer exists in the data
+    if (this.currentTag && !allTags.includes(this.currentTag)) {
+      this.currentTag = null;
+      (
+        this.window?.document.getElementById("tag-filter") as XULMenuListElement
+      )?.setAttribute("value", "all");
+    }
+
+    while (popup.firstChild) popup.removeChild(popup.firstChild);
+    for (const item of this.buildTagMenuItems()) {
+      ztoolkit.UI.appendElement(item, popup);
+    }
+    this.syncTagFilterControl();
+  }
+
+  private static syncTagFilterControl() {
+    const control = this.window?.document.getElementById(
+      "tag-filter",
+    ) as XULMenuListElement | null;
+    if (!control) return;
+    const label =
+      this.currentTag === null ? getString("filter-all-tags") : this.currentTag;
+    control.setAttribute("label", label);
+    control.setAttribute("tooltiptext", label);
+  }
+
+  private static getTagCounts() {
+    const counts = new Map<string, number>();
+    for (const [addonInfo] of this.baseAddonInfos) {
+      addonInfo.tags?.forEach((tag) => {
+        counts.set(tag, (counts.get(tag) ?? 0) + 1);
+      });
+    }
+    return counts;
+  }
+
+  private static setupTagCellChips() {
+    const container = this.window?.document.querySelector("#table-container");
+    if (!container) return;
+
+    this.tagCellObserver?.disconnect();
+
+    const renderTagCell = (cell: HTMLElement) => {
+      const inHeader =
+        !!cell.closest(".virtualized-table-header") || !cell.closest(".row");
+      if (inHeader) {
+        cell.removeAttribute("data-tag-chip-rendered");
+        cell.removeAttribute("data-tag-filter");
+        return;
+      }
+
+      const hasChipWrapper = !!cell.querySelector(":scope > .tag-chip-list");
+      const rawText = (
+        hasChipWrapper ? cell.dataset.tagRaw : cell.textContent
+      )?.trim();
+      const currentFilter = this.currentTag ?? "";
+      if (!rawText) {
+        cell.removeAttribute("data-tag-chip-rendered");
+        cell.removeAttribute("data-tag-raw");
+        cell.removeAttribute("data-tag-filter");
+        cell.replaceChildren();
+        return;
+      }
+
+      if (
+        cell.dataset.tagChipRendered === "true" &&
+        cell.dataset.tagRaw === rawText &&
+        cell.dataset.tagFilter === currentFilter
+      ) {
+        return;
+      }
+
+      const doc = cell.ownerDocument;
+      if (!doc) return;
+      const wrapper = doc.createElement("div");
+      wrapper.className = "tag-chip-list";
+      const tags = rawText
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+
+      for (const tag of tags) {
+        const chip = doc.createElement("span");
+        const color = tagColor(tag);
+        const stopRowSelection = (event: MouseEvent) => {
+          event.preventDefault();
+          event.stopPropagation();
+        };
+        chip.className = "tag-chip";
+        if (tag === this.currentTag) {
+          chip.classList.add("is-active");
+        }
+        chip.dataset.tagValue = tag;
+        chip.textContent = tag;
+        chip.style.setProperty("--tag-chip-color", color);
+        chip.addEventListener("mousedown", stopRowSelection);
+        chip.addEventListener("mouseup", stopRowSelection);
+        chip.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          this.currentTag = this.currentTag === tag ? null : tag;
+          this.syncTagFilterControl();
+          this.applySearchAndSort();
+          void this.updateTable();
+        });
+        wrapper.append(chip);
+      }
+
+      cell.dataset.tagRaw = rawText;
+      cell.dataset.tagChipRendered = "true";
+      cell.dataset.tagFilter = currentFilter;
+      cell.setAttribute("title", rawText);
+      cell.replaceChildren(wrapper);
+    };
+
+    const applyChips = () => {
+      container
+        .querySelectorAll<HTMLElement>(".cell.menu-tags")
+        .forEach((cell: HTMLElement) => {
+          if (!cell.querySelector(":scope > .tag-chip-list")) {
+            cell.dataset.tagRaw = cell.textContent?.trim() ?? "";
+          }
+          renderTagCell(cell);
+        });
+    };
+
+    this.applyTagCellChips = applyChips;
+    applyChips();
+    const win = container.ownerDocument?.defaultView;
+    if (!win) return;
+    const observer = new win.MutationObserver(applyChips);
+    this.tagCellObserver = observer;
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
   }
 
   private static initRefreshButton(win: Window) {
@@ -682,13 +929,22 @@ export class AddonTable {
     }
 
     this.baseAddonInfos = addonInfos;
+    this.refreshTagFilter();
     this.applySearchAndSort();
   }
 
   private static applySearchAndSort() {
     let addonInfos = this.baseAddonInfos;
 
-    // Filter by search
+    // Filter by tag (AND with search — tag narrows the pool first)
+    if (this.currentTag) {
+      const tag = this.currentTag;
+      addonInfos = addonInfos.filter(
+        ([addonInfo]) => addonInfo.tags?.includes(tag) ?? false,
+      );
+    }
+
+    // Filter by search text within the tag-narrowed pool
     if (this.searchHandler) {
       addonInfos = this.searchHandler.filterAddons(addonInfos);
     }
@@ -700,9 +956,18 @@ export class AddonTable {
     this.addonInfos = addonInfos;
   }
 
+  private static getAllTags(): string[] {
+    const tagSet = new Set<string>();
+    for (const [addonInfo] of this.baseAddonInfos) {
+      addonInfo.tags?.forEach((t) => tagSet.add(t));
+    }
+    return [...tagSet].sort();
+  }
+
   private static async updateTable() {
     return new Promise<void>((resolve) => {
       this.tableHelper?.render(undefined, () => {
+        this.applyTagCellChips?.();
         resolve();
       });
     });

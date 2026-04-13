@@ -3,6 +3,7 @@ refresh =
     .label = Actualizar
 selectSource = Seleccionar fuente:
 customSource = Fuente personalizada:
+filterByTag = Etiquetas:
 autoUpdate =
     .label = Actualizar complementos automáticamente
 hideToolbarEntrance =

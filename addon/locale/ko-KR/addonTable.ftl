@@ -3,6 +3,7 @@ refresh =
     .label = 새로고침
 selectSource = 소스 선택:
 customSource = 사용자 정의 소스:
+filterByTag = 태그:
 autoUpdate =
     .label = 부가기능 자동 업데이트
 hideToolbarEntrance =

@@ -1,5 +1,7 @@
 addon-name = Zotero Eklenti Marketi
 menuitem-addons = Eklenti Marketi
+filter-all-tags = Tüm etiketler
+menu-tags = Etiketler
 name = Ad
 description = Açıklama
 stars = ⭐️

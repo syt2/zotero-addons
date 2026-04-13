@@ -1,5 +1,7 @@
 addon-name = Zotero アドオンマーケット
 menuitem-addons = アドオンマーケット
+filter-all-tags = すべてのタグ
+menu-tags = タグ
 name = 名前
 description = 説明
 stars = ⭐️

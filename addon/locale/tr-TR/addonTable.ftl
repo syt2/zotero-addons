@@ -3,6 +3,7 @@ refresh =
     .label = Yenile
 selectSource = Kaynak Seç:
 customSource = Özel Kaynak:
+filterByTag = Etiketler:
 autoUpdate =
     .label = Eklentileri otomatik güncelle
 hideToolbarEntrance =

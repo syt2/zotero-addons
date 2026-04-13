@@ -1,5 +1,7 @@
 addon-name = Mercato dei componenti aggiuntivi per Zotero
 menuitem-addons = Mercato dei componenti aggiuntivi
+filter-all-tags = Tutti i tag
+menu-tags = Tag
 name = Nome
 description = Descrizione
 stars = ⭐️

@@ -1,5 +1,7 @@
 addon-name = Zotero插件市场
 menuitem-addons = 插件市场
+filter-all-tags = 全部标签
+menu-tags = 标签
 name = 名称
 description = 简介
 stars = ⭐️

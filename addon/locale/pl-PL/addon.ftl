@@ -1,5 +1,7 @@
 addon-name = Sklep z dodatkami dla Zotero
 menuitem-addons = Sklep z dodatkami
+filter-all-tags = Wszystkie tagi
+menu-tags = Tagi
 name = Nazwa
 description = Opis
 stars = ⭐️

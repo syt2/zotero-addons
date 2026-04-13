@@ -3,6 +3,7 @@ refresh =
     .label = تحديث
 selectSource = اختر المصدر:
 customSource = مصدر مخصص:
+filterByTag = الوسوم:
 autoUpdate =
     .label = تحديث الإضافات تلقائياً
 hideToolbarEntrance =

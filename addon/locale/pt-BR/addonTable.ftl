@@ -3,6 +3,7 @@ refresh =
     .label = Atualizar
 selectSource = Selecionar fonte:
 customSource = Fonte personalizada:
+filterByTag = Tags:
 autoUpdate =
     .label = Atualizar extensões automaticamente
 hideToolbarEntrance =

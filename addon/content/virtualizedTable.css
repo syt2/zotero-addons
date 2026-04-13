@@ -31,3 +31,63 @@
 .virtualized-table .cell[title] {
   cursor: default;
 }
+
+.virtualized-table .cell.menu-tags {
+  overflow: hidden;
+}
+
+.virtualized-table .cell.menu-tags .tag-chip-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.virtualized-table .cell.menu-tags .tag-chip {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-width: max-content;
+  max-width: none;
+  padding: 1px 8px;
+  border: 1px solid color-mix(in srgb, var(--tag-chip-color) 20%, transparent);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  color: var(--tag-chip-color);
+  background-color: color-mix(
+    in srgb,
+    var(--tag-chip-color) 12%,
+    transparent
+  );
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
+}
+
+.virtualized-table .cell.menu-tags .tag-chip:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--tag-chip-color) 18%,
+    transparent
+  );
+}
+
+.virtualized-table .cell.menu-tags .tag-chip:active {
+  transform: translateY(1px);
+}
+
+.virtualized-table .cell.menu-tags .tag-chip.is-active {
+  color: #fff;
+  border-color: var(--tag-chip-color);
+  background-color: var(--tag-chip-color);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tag-chip-color) 28%, #fff);
+}

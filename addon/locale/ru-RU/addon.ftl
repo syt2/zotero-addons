@@ -1,5 +1,7 @@
 addon-name = Магазин дополнений для Zotero
 menuitem-addons = Магазин дополнений
+filter-all-tags = Все теги
+menu-tags = Теги
 name = Название
 description = Описание
 stars = ⭐️

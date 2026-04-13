@@ -100,6 +100,10 @@ export interface AddonInfo {
    * Addon author
    */
   author?: AddonAuthor;
+  /**
+   * Addon tags for categorization (e.g. ["integration", "productivity"])
+   */
+  tags?: string[];
 }
 
 /**

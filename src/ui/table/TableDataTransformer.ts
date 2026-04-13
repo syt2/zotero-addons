@@ -62,6 +62,7 @@ export class TableDataTransformer {
         const installState = await addonInstallStatus(addonInfo, relateAddon);
         result["menu-install-state"] =
           TableDataTransformer.installStatusDescription(installState);
+        result["menu-tags"] = addonInfo.tags?.join(", ") ?? "";
         return [addonInfo, result] as AssociatedAddonInfo;
       }),
     );

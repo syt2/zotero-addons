@@ -1,5 +1,7 @@
 addon-name = Zotero 부가기능 마켓
 menuitem-addons = 부가기능 마켓
+filter-all-tags = 모든 태그
+menu-tags = 태그
 name = 이름
 description = 설명
 stars = ⭐️

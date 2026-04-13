@@ -1,5 +1,7 @@
 addon-name = Add-on Markt voor Zotero
 menuitem-addons = Add-on Markt
+filter-all-tags = Alle tags
+menu-tags = Tags
 name = Naam
 description = Beschrijving
 stars = ⭐️

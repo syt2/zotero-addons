@@ -3,6 +3,7 @@ refresh =
     .label = Neu laden
 selectSource = Quelle auswählen:
 customSource = Benutzerdefinierte Quelle:
+filterByTag = Tags:
 autoUpdate =
     .label = Add-ons automatisch aktualisieren
 hideToolbarEntrance =

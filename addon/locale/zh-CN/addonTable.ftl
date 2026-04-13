@@ -3,6 +3,7 @@ refresh =
     .label = 刷新
 selectSource = 选择源：
 customSource = 自定义源：
+filterByTag = 标签：
 autoUpdate =
     .label = 自动更新插件
 hideToolbarEntrance =

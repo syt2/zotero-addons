@@ -1,5 +1,7 @@
 addon-name = Zotero 外掛市場
 menuitem-addons = 外掛市場
+filter-all-tags = 全部標籤
+menu-tags = 標籤
 name = 名稱
 description = 簡介
 stars = ⭐️

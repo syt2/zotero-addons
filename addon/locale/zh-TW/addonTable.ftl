@@ -3,6 +3,7 @@ refresh =
     .label = 重新整理
 selectSource = 選擇來源：
 customSource = 自訂來源：
+filterByTag = 標籤：
 autoUpdate =
     .label = 自動更新外掛
 hideToolbarEntrance =

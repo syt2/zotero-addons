@@ -3,6 +3,7 @@ refresh =
     .label = Refresh
 selectSource = Select Source:
 customSource = Custom Source:
+filterByTag = Tags:
 autoUpdate =
     .label = Automatic update add-ons
 hideToolbarEntrance =

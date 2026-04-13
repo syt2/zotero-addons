@@ -3,6 +3,7 @@ refresh =
     .label = Обновить
 selectSource = Выбрать источник:
 customSource = Пользовательский источник:
+filterByTag = Теги:
 autoUpdate =
     .label = Автоматически обновлять дополнения
 hideToolbarEntrance =

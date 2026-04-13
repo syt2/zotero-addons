@@ -13,6 +13,7 @@ declare namespace _ZoteroTypes {
       'hideToolbarEntrance': boolean;
       'guideStatus': number;
       'firstInstalledVersion': string;
+      'tagColumnLayoutMigrated': boolean;
     };
   }
 }

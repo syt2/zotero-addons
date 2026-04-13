@@ -1,5 +1,7 @@
 addon-name = Mercado de extensões para Zotero
 menuitem-addons = Mercado de extensões
+filter-all-tags = Todas as tags
+menu-tags = Tags
 name = Nome
 description = Descrição
 stars = ⭐️

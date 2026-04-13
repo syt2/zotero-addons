@@ -3,6 +3,7 @@ refresh =
     .label = 再読み込み
 selectSource = ソースを選択：
 customSource = カスタムソース：
+filterByTag = タグ：
 autoUpdate =
     .label = アドオンを自動更新
 hideToolbarEntrance =

@@ -6,7 +6,18 @@
 import { LargePrefHelper } from "zotero-plugin-toolkit";
 import { config } from "../../../package.json";
 import { getString } from "../../utils/locale";
+import { getPref, setPref } from "../../utils/prefs";
 import type { ExtendedColumnOptions } from "../../types";
+
+type PersistedColumnState = Pick<
+  ExtendedColumnOptions,
+  "dataKey" | "hidden" | "ordinal" | "sortDirection" | "width"
+>;
+
+const TAG_COLUMN_MIGRATION_PREF = "tagColumnLayoutMigrated";
+const TAG_COLUMN_KEY = "menu-tags";
+const STAR_COLUMN_KEY = "menu-star";
+const TAG_COLUMN_WIDTH = 96;
 
 export class TableColumnManager {
   private largePrefHelper = new LargePrefHelper(
@@ -28,13 +39,20 @@ export class TableColumnManager {
     try {
       const result = this.largePrefHelper.getValue(
         "columns",
-      ) as ExtendedColumnOptions[];
+      ) as PersistedColumnState[];
       if (result.length === this._columns.length) {
-        this._columns = result;
+        const persistedByKey = new Map(
+          result.map((column) => [column.dataKey, column]),
+        );
+        this._columns = defaultColumns.map((column) => ({
+          ...column,
+          ...persistedByKey.get(column.dataKey),
+        }));
       }
     } catch {
       // Use default columns
     }
+    this.migrateTagColumnLayoutIfNeeded();
     this._columns.map((column) =>
       // @ts-expect-error ignore getString type check
       Object.assign(column, { label: getString(column.dataKey) }),
@@ -58,14 +76,10 @@ export class TableColumnManager {
     try {
       this._columns = treeInstance?._getColumns() as ExtendedColumnOptions[];
       if (this._columns.length > 0) {
-        this._columns = this._columns.map((column: any) => {
-          const {
-            ["className"]: _removedClassNameAttr,
-            ...newObjWithoutClassName
-          } = column;
-          return newObjWithoutClassName;
-        });
-        this.largePrefHelper.setValue("columns", this._columns);
+        const persistedColumns = this._columns.map((column) =>
+          this.toPersistedColumnState(column),
+        );
+        this.largePrefHelper.setValue("columns", persistedColumns);
       }
     } catch (error) {
       ztoolkit.log(`updateColumns failed: ${error}`);
@@ -107,12 +121,14 @@ export class TableColumnManager {
         label: "menu-name",
         staticWidth: true,
         hidden: false,
+        ordinal: 0,
       },
       {
         dataKey: "menu-desc",
         label: "menu-desc",
         fixedWidth: false,
         hidden: false,
+        ordinal: 1,
       },
       {
         dataKey: "menu-star",
@@ -120,6 +136,15 @@ export class TableColumnManager {
         staticWidth: true,
         width: 50,
         hidden: false,
+        ordinal: 2,
+      },
+      {
+        dataKey: "menu-tags",
+        label: "menu-tags",
+        staticWidth: true,
+        width: 96,
+        hidden: true,
+        ordinal: 3,
       },
       {
         dataKey: "menu-remote-update-time",
@@ -127,6 +152,7 @@ export class TableColumnManager {
         staticWidth: true,
         width: 150,
         hidden: false,
+        ordinal: 4,
       },
       {
         dataKey: "menu-remote-version",
@@ -134,6 +160,7 @@ export class TableColumnManager {
         staticWidth: true,
         width: 100,
         hidden: false,
+        ordinal: 5,
       },
       {
         dataKey: "menu-local-version",
@@ -141,6 +168,7 @@ export class TableColumnManager {
         staticWidth: true,
         width: 85,
         hidden: false,
+        ordinal: 6,
       },
       {
         dataKey: "menu-install-state",
@@ -148,8 +176,60 @@ export class TableColumnManager {
         staticWidth: true,
         width: 95,
         hidden: false,
+        ordinal: 7,
       },
     ];
+  }
+
+  private toPersistedColumnState(
+    column: ExtendedColumnOptions,
+  ): PersistedColumnState {
+    return {
+      dataKey: column.dataKey,
+      hidden: column.hidden,
+      ordinal: column.ordinal,
+      sortDirection: column.sortDirection,
+      width: column.width,
+    };
+  }
+
+  private migrateTagColumnLayoutIfNeeded(): void {
+    if (getPref(TAG_COLUMN_MIGRATION_PREF)) {
+      return;
+    }
+
+    const orderedColumns = this._columns
+      .slice()
+      .sort((a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0));
+    const starIndex = orderedColumns.findIndex(
+      (column) => column.dataKey === STAR_COLUMN_KEY,
+    );
+    const starColumn = starIndex >= 0 ? orderedColumns[starIndex] : undefined;
+    const tagIndex = orderedColumns.findIndex(
+      (column) => column.dataKey === TAG_COLUMN_KEY,
+    );
+    if (tagIndex < 0) {
+      return;
+    }
+
+    const [tagColumn] = orderedColumns.splice(tagIndex, 1);
+    const insertIndex =
+      starColumn && !starColumn.hidden
+        ? Math.min(starIndex + 1, orderedColumns.length)
+        : orderedColumns.length;
+    tagColumn.hidden = false;
+    tagColumn.width = TAG_COLUMN_WIDTH;
+    orderedColumns.splice(insertIndex, 0, tagColumn);
+    orderedColumns.forEach((column, index) => {
+      column.ordinal = index;
+    });
+
+    this._columns = orderedColumns;
+    this.largePrefHelper.setValue(
+      "columns",
+      this._columns.map((column) => this.toPersistedColumnState(column)),
+    );
+    setPref(TAG_COLUMN_MIGRATION_PREF, true);
   }
 
   /**

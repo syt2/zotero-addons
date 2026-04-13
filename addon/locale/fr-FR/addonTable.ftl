@@ -3,6 +3,7 @@ refresh =
     .label = Actualiser
 selectSource = Sélectionner la source :
 customSource = Source personnalisée :
+filterByTag = Étiquettes :
 autoUpdate =
     .label = Mettre à jour automatiquement les extensions
 hideToolbarEntrance =
