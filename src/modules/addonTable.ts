@@ -32,29 +32,56 @@ import {
 } from "../ui/table";
 
 export class AddonTable {
+  private static getNativeMenuManager() {
+    return (Zotero as typeof Zotero & {
+      MenuManager?: {
+        registerMenu?: (options: unknown) => void;
+        unregisterMenu?: (menuID: string) => void;
+      };
+    }).MenuManager;
+  }
+
   /**
    * Register entrance in menu tools
    */
   static registerInMenuTool() {
-    Zotero.MenuManager.registerMenu({
-      menuID: "addon-table-entrance",
-      pluginID: config.addonID,
-      target: "main/menubar/tools",
-      menus: [
-        {
-          menuType: "menuitem",
-          icon: `chrome://${config.addonRef}/content/icons/favicon.svg`,
-          onShowing: (_ev, context) => {
-            context.menuElem.setAttribute(
-              "label",
-              getString("menuitem-addons"),
-            );
+    const nativeMenuManager = this.getNativeMenuManager();
+    if (nativeMenuManager?.registerMenu) {
+      nativeMenuManager.registerMenu({
+        menuID: "addon-table-entrance",
+        pluginID: config.addonID,
+        target: "main/menubar/tools",
+        menus: [
+          {
+            menuType: "menuitem",
+            icon: `chrome://${config.addonRef}/content/icons/favicon.svg`,
+            onShowing: (_ev: Event, context: { menuElem: XULElement }) => {
+              context.menuElem.setAttribute(
+                "label",
+                getString("menuitem-addons"),
+              );
+            },
+            onCommand: () => {
+              void this.showAddonsWindow({ from: "menu" });
+            },
           },
-          onCommand: () => {
-            void this.showAddonsWindow({ from: "menu" });
-          },
-        },
-      ],
+        ],
+      });
+      return;
+    }
+
+    ztoolkit.Menu.register("menuTools", {
+      tag: "menuseparator",
+      id: "addon-table-menuseparator",
+    });
+    ztoolkit.Menu.register("menuTools", {
+      tag: "menuitem",
+      id: "addon-table-entrance",
+      label: getString("menuitem-addons"),
+      icon: `chrome://${config.addonRef}/content/icons/favicon.svg`,
+      commandListener: () => {
+        void this.showAddonsWindow({ from: "menu" });
+      },
     });
   }
 
@@ -92,7 +119,13 @@ export class AddonTable {
     Zotero.getMainWindow()
       .document.querySelector("#zotero-toolbaritem-addons")
       ?.remove();
-    Zotero.MenuManager.unregisterMenu("addon-table-entrance");
+    const nativeMenuManager = this.getNativeMenuManager();
+    if (nativeMenuManager?.unregisterMenu) {
+      nativeMenuManager.unregisterMenu("addon-table-entrance");
+      return;
+    }
+    ztoolkit.Menu.unregister("addon-table-menuseparator");
+    ztoolkit.Menu.unregister("addon-table-entrance");
   }
 
   private static addonInfos: AssociatedAddonInfo[] = [];
