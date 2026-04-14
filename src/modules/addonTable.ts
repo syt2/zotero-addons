@@ -21,7 +21,7 @@ import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
 import { HistoricalVersions } from "./historicalVersions";
 import { Guide } from "./guide";
-import { getXPIDatabase, getAddonManager } from "../utils/compat";
+import { getXPIDatabase, getAddonManager, isZoteroVersionAtLeast } from "../utils/compat";
 import type { TableMenuItemID, AssociatedAddonInfo } from "../types";
 import {
   TableSearchHandler,
@@ -693,6 +693,7 @@ export class AddonTable {
     if (!container) return;
 
     this.tagCellObserver?.disconnect();
+    const canInteractWithTagChips = isZoteroVersionAtLeast("8")
 
     const renderTagCell = (cell: HTMLElement) => {
       const inHeader =
@@ -736,10 +737,6 @@ export class AddonTable {
       for (const tag of tags) {
         const chip = doc.createElement("span");
         const color = tagColor(tag);
-        const stopRowSelection = (event: MouseEvent) => {
-          event.preventDefault();
-          event.stopPropagation();
-        };
         chip.className = "tag-chip";
         if (tag === this.currentTag) {
           chip.classList.add("is-active");
@@ -747,17 +744,27 @@ export class AddonTable {
         chip.dataset.tagValue = tag;
         chip.textContent = tag;
         chip.style.setProperty("--tag-chip-color", color);
-        chip.addEventListener("mousedown", stopRowSelection);
-        chip.addEventListener("mouseup", stopRowSelection);
-        chip.addEventListener("click", (event) => {
-          event.preventDefault();
-          event.stopPropagation();
+        if (canInteractWithTagChips) {
+          const stopRowSelection = (event: MouseEvent) => {
+            event.preventDefault();
+            event.stopPropagation();
+          };
+          chip.addEventListener("mousedown", stopRowSelection);
+          chip.addEventListener("mouseup", stopRowSelection);
+          chip.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
 
-          this.currentTag = this.currentTag === tag ? null : tag;
-          this.syncTagFilterControl();
-          this.applySearchAndSort();
-          void this.updateTable();
-        });
+            this.currentTag = this.currentTag === tag ? null : tag;
+            this.syncTagFilterControl();
+            this.applySearchAndSort();
+            void this.updateTable();
+          });
+        } else {
+          // Zotero 7's virtualized table swallows chip click events unreliably.
+          // Keep the chip styling for readability, but treat tags as display-only.
+          chip.classList.add("is-static");
+        }
         wrapper.append(chip);
       }
 

@@ -91,3 +91,7 @@
   background-color: var(--tag-chip-color);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--tag-chip-color) 28%, #fff);
 }
+
+.virtualized-table .cell.menu-tags .tag-chip.is-static {
+  cursor: default;
+}
