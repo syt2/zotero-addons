@@ -11,7 +11,7 @@ import type { ExtendedColumnOptions } from "../../types";
 
 type PersistedColumnState = Pick<
   ExtendedColumnOptions,
-  "dataKey" | "hidden" | "ordinal" | "sortDirection" | "width"
+  "dataKey" | "hidden" | "ordinal" | "width"
 >;
 
 const TAG_COLUMN_MIGRATION_PREF = "tagColumnLayoutMigrated";
@@ -42,7 +42,10 @@ export class TableColumnManager {
       ) as PersistedColumnState[];
       if (result.length === this._columns.length) {
         const persistedByKey = new Map(
-          result.map((column) => [column.dataKey, column]),
+          result.map((column) => [
+            column.dataKey,
+            this.toPersistedColumnState(column),
+          ]),
         );
         this._columns = defaultColumns.map((column) => ({
           ...column,
@@ -90,7 +93,7 @@ export class TableColumnManager {
    * Get column with sort direction if any
    */
   getSortColumn(): ExtendedColumnOptions | undefined {
-    return this.columns.find((column) => "sortDirection" in column);
+    return this.columns.find((column) => typeof column.sortDirection === "number");
   }
 
   /**
@@ -182,13 +185,12 @@ export class TableColumnManager {
   }
 
   private toPersistedColumnState(
-    column: ExtendedColumnOptions,
+    column: Pick<ExtendedColumnOptions, "dataKey" | "hidden" | "ordinal" | "width">,
   ): PersistedColumnState {
     return {
       dataKey: column.dataKey,
       hidden: column.hidden,
       ordinal: column.ordinal,
-      sortDirection: column.sortDirection,
       width: column.width,
     };
   }
