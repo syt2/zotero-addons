@@ -72,7 +72,7 @@ menu-disable = Отключить
 menu-items-count = элементов
 menu-open-xpi-location = Показать в файловом менеджере
 menu-history-versions = История версий…
-menu-rollback-previous = Откатить на предыдущую версию
+menu-rollback-previous = Откатить на предыдущую доступную версию
 
 source-github = GitHub
 source-gitee = Gitee
@@ -102,9 +102,9 @@ menu-install-version = Установить эту версию
 menu-goto-release = Перейти на страницу релиза
 
 # Откат / история
-rollback-previous-button = Откатить на предыдущую версию
+rollback-previous-button = Откатить на предыдущую доступную версию
 rollback-previous-confirm-title = Откатить дополнение?
-rollback-previous-confirm-message = Откатить { $name } с { $currentVersion } на { $targetVersion }?
+rollback-previous-confirm-message = Откатить { $name } с { $currentVersion } на предыдущую доступную версию { $targetVersion }?
 rollback-previous-confirm-confirm = Откатить
-rollback-previous-not-found = Предыдущая версия для текущей ({ $currentVersion }) не найдена.
-rollback-previous-no-download = Не удалось найти скачиваемый XPI для { $targetVersion }.
+rollback-previous-not-found = Предыдущая доступная версия для текущей ({ $currentVersion }) не найдена.
+rollback-previous-no-download = Не удалось найти скачиваемый XPI для предыдущей доступной версии { $targetVersion }.

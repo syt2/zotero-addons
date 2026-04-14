@@ -8,6 +8,7 @@ import {
   relatedAddons,
   xpiDownloadUrls,
   isScraperSource,
+  isVersionCompatible,
 } from "./addonInfo";
 import { HistoricalVersions } from "./historicalVersions";
 import { getString } from "../utils/locale";
@@ -152,7 +153,7 @@ export class AddonInfoDetail {
   }
 
   /**
-   * Roll back the specified add-on to its previous version (if available).
+   * Roll back the specified add-on to its previous available version.
    * This does not require the detail window to be open.
    */
   static async rollbackToPrevious(addonInfo: AddonInfo) {
@@ -165,7 +166,14 @@ export class AddonInfoDetail {
     if (!currentLocalVersion) {
       return;
     }
-    await this.rollbackToPreviousVersion(addonInfo, currentLocalVersion);
+    await this.rollbackToPreviousAvailableVersion(addonInfo, currentLocalVersion);
+  }
+
+  static async canRollbackToPreviousAvailable(
+    addonInfo: AddonInfo,
+    currentLocalVersion: string,
+  ) {
+    return !!(await this.getPreviousAvailableRelease(addonInfo, currentLocalVersion));
   }
 
 
@@ -423,7 +431,7 @@ export class AddonInfoDetail {
   }
 
   /**
-   * Set up "rollback to previous version" button
+   * Set up "rollback to previous available version" button
    */
   private static async setupRollbackPreviousButton(
     addonInfo: AddonInfo,
@@ -440,6 +448,15 @@ export class AddonInfoDetail {
       return;
     }
 
+    const targetRelease = await this.getPreviousAvailableRelease(
+      addonInfo,
+      localAddon.version,
+    );
+    if (!targetRelease) {
+      button.hidden = true;
+      return;
+    }
+
     button.hidden = false;
     button.textContent = getString("rollback-previous-button");
 
@@ -448,7 +465,7 @@ export class AddonInfoDetail {
     button.parentNode?.replaceChild(newButton, button);
 
     newButton.addEventListener("click", async () => {
-      await this.rollbackToPreviousVersion(addonInfo, localAddon?.version);
+      await this.rollbackToPreviousAvailableVersion(addonInfo, localAddon.version);
     });
   }
 
@@ -494,47 +511,74 @@ export class AddonInfoDetail {
       .show(3000);
   }
 
-  private static findPreviousRelease(
+  private static isRollbackCandidate(
+    release: HistoricalRelease,
+    currentVersion: string,
+  ) {
+    const version = this.releaseVersionString(release);
+    if (!version) {
+      return false;
+    }
+    if (this.compareVersions(version, currentVersion) >= 0) {
+      return false;
+    }
+    if (
+      !isVersionCompatible(
+        release.min_zotero_version,
+        release.max_zotero_version,
+      )
+    ) {
+      return false;
+    }
+    return historicalReleaseDownloadUrls(release).length > 0;
+  }
+
+  private static findPreviousAvailableRelease(
     releases: HistoricalRelease[],
     currentVersion: string,
   ): HistoricalRelease | undefined {
-    const cur = this.normalizeVersion(currentVersion);
-    if (!cur) {
-      return undefined;
-    }
-
-    // Prefer "previous in list" if we can find an exact match (most intuitive)
-    const exactIdx = releases.findIndex((r) => {
-      const v = this.normalizeVersion(this.releaseVersionString(r));
-      return v === cur;
-    });
-    if (exactIdx >= 0 && exactIdx + 1 < releases.length) {
-      return releases[exactIdx + 1];
-    }
-
-    // Fallback: pick the greatest version < currentVersion
     const candidates = releases.filter((r) => {
-      const v = this.releaseVersionString(r);
-      if (!v) return false;
-      return this.compareVersions(v, currentVersion) < 0;
+      return this.isRollbackCandidate(r, currentVersion);
     });
     if (candidates.length === 0) {
       return undefined;
     }
-    candidates.sort((a, b) =>
-      this.compareVersions(this.releaseVersionString(b), this.releaseVersionString(a)),
-    );
+    candidates.sort((a, b) => {
+      const versionCompare = this.compareVersions(
+        this.releaseVersionString(b),
+        this.releaseVersionString(a),
+      );
+      if (versionCompare !== 0) {
+        return versionCompare;
+      }
+      return (
+        new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+      );
+    });
     return candidates[0];
   }
 
-  private static async rollbackToPreviousVersion(
+  private static async getPreviousAvailableRelease(
+    addonInfo: AddonInfo,
+    currentLocalVersion: string,
+  ) {
+    if (!addonInfo.repo) {
+      return undefined;
+    }
+    const releases = await this.getHistoricalReleases(addonInfo.repo);
+    return this.findPreviousAvailableRelease(releases, currentLocalVersion);
+  }
+
+  private static async rollbackToPreviousAvailableVersion(
     addonInfo: AddonInfo,
     currentLocalVersion: string,
   ) {
     if (!addonInfo.repo) return;
 
-    const releases = await this.getHistoricalReleases(addonInfo.repo);
-    const prev = this.findPreviousRelease(releases, currentLocalVersion);
+    const prev = await this.getPreviousAvailableRelease(
+      addonInfo,
+      currentLocalVersion,
+    );
 
     if (!prev) {
       this.showRollbackError(

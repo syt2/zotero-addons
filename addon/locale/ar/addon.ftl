@@ -72,7 +72,7 @@ menu-disable = تعطيل
 menu-items-count = عناصر
 menu-open-xpi-location = عرض في مدير الملفات
 menu-history-versions = الإصدارات السابقة…
-menu-rollback-previous = العودة إلى الإصدار السابق
+menu-rollback-previous = العودة إلى الإصدار السابق المتاح
 
 source-github = GitHub
 source-gitee = Gitee
@@ -102,9 +102,9 @@ menu-install-version = تثبيت هذا الإصدار
 menu-goto-release = الذهاب إلى صفحة الإصدار
 
 # التراجع / السجل
-rollback-previous-button = العودة إلى الإصدار السابق
+rollback-previous-button = العودة إلى الإصدار السابق المتاح
 rollback-previous-confirm-title = التراجع عن الإضافة؟
-rollback-previous-confirm-message = التراجع عن { $name } من { $currentVersion } إلى { $targetVersion }؟
+rollback-previous-confirm-message = التراجع عن { $name } من { $currentVersion } إلى الإصدار السابق المتاح { $targetVersion }؟
 rollback-previous-confirm-confirm = تراجع
-rollback-previous-not-found = لم يُعثر على إصدار سابق للإصدار الحالي ({ $currentVersion }).
-rollback-previous-no-download = لم يُعثر على ملف XPI قابل للتنزيل لـ { $targetVersion }.
+rollback-previous-not-found = لم يُعثر على إصدار سابق متاح للإصدار الحالي ({ $currentVersion }).
+rollback-previous-no-download = لم يُعثر على ملف XPI قابل للتنزيل للإصدار السابق المتاح { $targetVersion }.

@@ -155,7 +155,6 @@ export class TableMenuHandler {
           }
         }
 
-        // Rollback eligibility — reuse the relatedAddon already fetched above
         if (isScraperSource() && addonInfo[0].repo && relatedAddon[0][1]?.version) {
           append("menu-rollback-previous", addonInfo[0]);
         }

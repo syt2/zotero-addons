@@ -72,7 +72,7 @@ menu-disable = Uitschakelen
 menu-items-count = items
 menu-open-xpi-location = Weergeven in Bestandsbeheer
 menu-history-versions = Eerdere versies…
-menu-rollback-previous = Terug naar vorige versie
+menu-rollback-previous = Terug naar vorige beschikbare versie
 
 source-github = GitHub
 source-gitee = Gitee
@@ -102,9 +102,9 @@ menu-install-version = Installeer Deze Versie
 menu-goto-release = Ga naar Releasepagina
 
 # Terugdraaien / geschiedenis
-rollback-previous-button = Terug naar vorige versie
+rollback-previous-button = Terug naar vorige beschikbare versie
 rollback-previous-confirm-title = Add-on terugdraaien?
-rollback-previous-confirm-message = { $name } terugdraaien van { $currentVersion } naar { $targetVersion }?
+rollback-previous-confirm-message = { $name } terugdraaien van { $currentVersion } naar vorige beschikbare versie { $targetVersion }?
 rollback-previous-confirm-confirm = Terugdraaien
-rollback-previous-not-found = Geen eerdere versie gevonden voor huidige versie ({ $currentVersion }).
-rollback-previous-no-download = Geen downloadbare XPI gevonden voor { $targetVersion }.
+rollback-previous-not-found = Geen vorige beschikbare versie gevonden voor huidige versie ({ $currentVersion }).
+rollback-previous-no-download = Geen downloadbare XPI gevonden voor vorige beschikbare versie { $targetVersion }.

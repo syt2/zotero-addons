@@ -418,11 +418,34 @@ export async function fetchHistoricalReleases(repo: string): Promise<HistoricalR
  * @param githubUrl The original GitHub download URL
  * @returns XpiDownloadUrls object with various mirror URLs
  */
+function isUsableHistoricalDownloadUrl(url?: string): boolean {
+  if (!url?.trim()) {
+    return false;
+  }
+  try {
+    const parsed = new URL(url.trim());
+    return (
+      (parsed.protocol === "https:" || parsed.protocol === "http:") &&
+      (parsed.pathname !== "/" || !!parsed.search)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function buildHistoricalDownloadUrls(githubUrl: string): XpiDownloadUrls {
+  const normalizedUrl = githubUrl.trim();
+  if (!isUsableHistoricalDownloadUrl(normalizedUrl)) {
+    return {
+      github: "",
+      ghProxy: "",
+      kgithub: "",
+    };
+  }
   return {
-    github: githubUrl,
-    ghProxy: `https://gh-proxy.org/${githubUrl}`,
-    kgithub: githubUrl.replace("github.com", "kkgithub.com"),
+    github: normalizedUrl,
+    ghProxy: `https://gh-proxy.org/${normalizedUrl}`,
+    kgithub: normalizedUrl.replace("github.com", "kkgithub.com"),
   };
 }
 
@@ -438,7 +461,9 @@ export function historicalReleaseDownloadUrls(historicalRelease: HistoricalRelea
       ? autoSource()?.id
       : currentSource().id;
 
-  const result = Object.values(urls).filter((e) => !!e) as string[];
+  const result = Object.values(urls).filter((e) =>
+    isUsableHistoricalDownloadUrl(e),
+  ) as string[];
   let firstElement: string | undefined = undefined;
 
   switch (sourceID) {

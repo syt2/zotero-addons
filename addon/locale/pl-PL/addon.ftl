@@ -72,7 +72,7 @@ menu-disable = Wyłącz
 menu-items-count = elementów
 menu-open-xpi-location = Pokaż w menedżerze plików
 menu-history-versions = Poprzednie wersje…
-menu-rollback-previous = Cofnij do poprzedniej wersji
+menu-rollback-previous = Cofnij do poprzedniej dostępnej wersji
 
 source-github = GitHub
 source-gitee = Gitee
@@ -102,9 +102,9 @@ menu-install-version = Zainstaluj tę wersję
 menu-goto-release = Przejdź do strony wydania
 
 # Cofnięcie / historia
-rollback-previous-button = Cofnij do poprzedniej wersji
+rollback-previous-button = Cofnij do poprzedniej dostępnej wersji
 rollback-previous-confirm-title = Cofnąć dodatek?
-rollback-previous-confirm-message = Cofnąć { $name } z { $currentVersion } do { $targetVersion }?
+rollback-previous-confirm-message = Cofnąć { $name } z { $currentVersion } do poprzedniej dostępnej wersji { $targetVersion }?
 rollback-previous-confirm-confirm = Cofnij
-rollback-previous-not-found = Nie znaleziono wcześniejszej wersji dla bieżącej ({ $currentVersion }).
-rollback-previous-no-download = Brak pliku XPI do pobrania dla { $targetVersion }.
+rollback-previous-not-found = Nie znaleziono poprzedniej dostępnej wersji dla bieżącej ({ $currentVersion }).
+rollback-previous-no-download = Brak pliku XPI do pobrania dla poprzedniej dostępnej wersji { $targetVersion }.

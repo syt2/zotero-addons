@@ -72,7 +72,7 @@ menu-disable = 停用
 menu-items-count = 項
 menu-open-xpi-location = 在檔案管理員中開啟
 menu-history-versions = 歷史版本…
-menu-rollback-previous = 回滾到上一版
+menu-rollback-previous = 回滾到上一個可用版本
 
 source-github = GitHub
 source-gitee = Gitee
@@ -102,9 +102,9 @@ menu-install-version = 安裝此版本
 menu-goto-release = 前往發佈頁面
 
 # 回滾 / 歷史版本
-rollback-previous-button = 回滾到上一版
+rollback-previous-button = 回滾到上一個可用版本
 rollback-previous-confirm-title = 回滾附加元件？
-rollback-previous-confirm-message = 確認將 { $name } 從 { $currentVersion } 回滾到 { $targetVersion }？
+rollback-previous-confirm-message = 確認將 { $name } 從 { $currentVersion } 回滾到上一個可用版本 { $targetVersion }？
 rollback-previous-confirm-confirm = 回滾
-rollback-previous-not-found = 找不到可回滾的上一版本（目前版本：{ $currentVersion }）。
-rollback-previous-no-download = 找不到 { $targetVersion } 的可下載 XPI。
+rollback-previous-not-found = 找不到可回滾的上一個可用版本（目前版本：{ $currentVersion }）。
+rollback-previous-no-download = 找不到上一個可用版本 { $targetVersion } 的可下載 XPI。
