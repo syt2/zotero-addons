@@ -36,13 +36,11 @@ import {
   GuideHelper,
   UITool,
   BasicTool,
-  MenuManager,
   unregister,
 } from "zotero-plugin-toolkit";
 
 class MyToolkit extends BasicTool {
   UI: UITool;
-  Menu: MenuManager;
   VirtualizedTable: typeof VirtualizedTableHelper;
   ProgressWindow: typeof ProgressWindowHelper;
   Guide: typeof GuideHelper;
@@ -50,7 +48,6 @@ class MyToolkit extends BasicTool {
   constructor() {
     super();
     this.UI = new UITool(this);
-    this.Menu = new MenuManager(this);
     this.VirtualizedTable = VirtualizedTableHelper;
     this.ProgressWindow = ProgressWindowHelper;
     this.Guide = GuideHelper;

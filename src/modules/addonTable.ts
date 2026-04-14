@@ -32,6 +32,42 @@ import {
 } from "../ui/table";
 
 export class AddonTable {
+  private static registerLegacyToolsMenu() {
+    const doc = Zotero.getMainWindow().document;
+    const toolsPopup = doc.querySelector("#menu_ToolsPopup");
+    if (!toolsPopup) {
+      return;
+    }
+
+    this.unregisterLegacyToolsMenu();
+
+    const separator = ztoolkit.createXULElement(
+      doc,
+      "menuseparator",
+    ) as XULElement;
+    separator.id = "addon-table-menuseparator";
+
+    const menuitem = ztoolkit.createXULElement(doc, "menuitem") as XULElement;
+    menuitem.id = "addon-table-entrance";
+    menuitem.setAttribute("label", getString("menuitem-addons"));
+    menuitem.setAttribute(
+      "image",
+      `chrome://${config.addonRef}/content/icons/favicon.svg`,
+    );
+    menuitem.setAttribute("class", "menuitem-iconic");
+    menuitem.addEventListener("command", () => {
+      void this.showAddonsWindow({ from: "menu" });
+    });
+
+    toolsPopup.append(separator, menuitem);
+  }
+
+  private static unregisterLegacyToolsMenu() {
+    const doc = Zotero.getMainWindow().document;
+    doc.querySelector("#addon-table-menuseparator")?.remove();
+    doc.querySelector("#addon-table-entrance")?.remove();
+  }
+
   private static getNativeMenuManager() {
     return (Zotero as typeof Zotero & {
       MenuManager?: {
@@ -70,19 +106,7 @@ export class AddonTable {
       return;
     }
 
-    ztoolkit.Menu.register("menuTools", {
-      tag: "menuseparator",
-      id: "addon-table-menuseparator",
-    });
-    ztoolkit.Menu.register("menuTools", {
-      tag: "menuitem",
-      id: "addon-table-entrance",
-      label: getString("menuitem-addons"),
-      icon: `chrome://${config.addonRef}/content/icons/favicon.svg`,
-      commandListener: () => {
-        void this.showAddonsWindow({ from: "menu" });
-      },
-    });
+    this.registerLegacyToolsMenu();
   }
 
   /**
@@ -124,8 +148,7 @@ export class AddonTable {
       nativeMenuManager.unregisterMenu("addon-table-entrance");
       return;
     }
-    ztoolkit.Menu.unregister("addon-table-menuseparator");
-    ztoolkit.Menu.unregister("addon-table-entrance");
+    this.unregisterLegacyToolsMenu();
   }
 
   private static addonInfos: AssociatedAddonInfo[] = [];
