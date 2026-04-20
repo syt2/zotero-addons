@@ -32,6 +32,8 @@ import {
 } from "../ui/table";
 
 export class AddonTable {
+  private static readonly recommendedRowClass = "is-recommended";
+
   private static registerLegacyToolsMenu() {
     const doc = Zotero.getMainWindow().document;
     const toolsPopup = doc.querySelector("#menu_ToolsPopup");
@@ -661,7 +663,7 @@ export class AddonTable {
       ...this.getAllTags().map((tag) => ({
         tag: "menuitem" as const,
         attributes: {
-          label: `${tag} (${counts.get(tag) ?? 0})`,
+          label: `${TableDataTransformer.displayTagLabel(tag)} (${counts.get(tag) ?? 0})`,
           value: tag,
           crop: "end",
           style: `color: ${tagColor(tag)}; font-weight: 500`,
@@ -696,7 +698,9 @@ export class AddonTable {
     ) as XULMenuListElement | null;
     if (!control) return;
     const label =
-      this.currentTag === null ? getString("filter-all-tags") : this.currentTag;
+      this.currentTag === null
+        ? getString("filter-all-tags")
+        : TableDataTransformer.displayTagLabel(this.currentTag);
     control.setAttribute("label", label);
     control.setAttribute("tooltiptext", label);
   }
@@ -704,7 +708,7 @@ export class AddonTable {
   private static getTagCounts() {
     const counts = new Map<string, number>();
     for (const [addonInfo] of this.baseAddonInfos) {
-      addonInfo.tags?.forEach((tag) => {
+      TableDataTransformer.displayTags(addonInfo).forEach((tag) => {
         counts.set(tag, (counts.get(tag) ?? 0) + 1);
       });
     }
@@ -716,7 +720,7 @@ export class AddonTable {
     if (!container) return;
 
     this.tagCellObserver?.disconnect();
-    const canInteractWithTagChips = isZoteroVersionAtLeast("8")
+    const canInteractWithTagChips = isZoteroVersionAtLeast("8");
 
     const renderTagCell = (cell: HTMLElement) => {
       const inHeader =
@@ -732,7 +736,9 @@ export class AddonTable {
         hasChipWrapper ? cell.dataset.tagRaw : cell.textContent
       )?.trim();
       const currentFilter = this.currentTag ?? "";
+      const row = cell.closest(".row");
       if (!rawText) {
+        row?.classList.remove(this.recommendedRowClass);
         cell.removeAttribute("data-tag-chip-rendered");
         cell.removeAttribute("data-tag-raw");
         cell.removeAttribute("data-tag-filter");
@@ -756,6 +762,10 @@ export class AddonTable {
         .split(",")
         .map((item) => item.trim())
         .filter(Boolean);
+      row?.classList.toggle(
+        this.recommendedRowClass,
+        tags.includes(TableDataTransformer.recommendedTag),
+      );
 
       for (const tag of tags) {
         const chip = doc.createElement("span");
@@ -765,7 +775,7 @@ export class AddonTable {
           chip.classList.add("is-active");
         }
         chip.dataset.tagValue = tag;
-        chip.textContent = tag;
+        chip.textContent = TableDataTransformer.displayTagLabel(tag);
         chip.style.setProperty("--tag-chip-color", color);
         if (canInteractWithTagChips) {
           const stopRowSelection = (event: MouseEvent) => {
@@ -794,7 +804,10 @@ export class AddonTable {
       cell.dataset.tagRaw = rawText;
       cell.dataset.tagChipRendered = "true";
       cell.dataset.tagFilter = currentFilter;
-      cell.setAttribute("title", rawText);
+      cell.setAttribute(
+        "title",
+        tags.map((tag) => TableDataTransformer.displayTagLabel(tag)).join(", "),
+      );
       cell.replaceChildren(wrapper);
     };
 
@@ -1003,7 +1016,8 @@ export class AddonTable {
     if (this.currentTag) {
       const tag = this.currentTag;
       addonInfos = addonInfos.filter(
-        ([addonInfo]) => addonInfo.tags?.includes(tag) ?? false,
+        ([addonInfo]) =>
+          TableDataTransformer.displayTags(addonInfo).includes(tag),
       );
     }
 
@@ -1022,9 +1036,19 @@ export class AddonTable {
   private static getAllTags(): string[] {
     const tagSet = new Set<string>();
     for (const [addonInfo] of this.baseAddonInfos) {
-      addonInfo.tags?.forEach((t) => tagSet.add(t));
+      TableDataTransformer.displayTags(addonInfo).forEach((tag) =>
+        tagSet.add(tag),
+      );
     }
-    return [...tagSet].sort();
+    return [...tagSet].sort((left, right) => {
+      if (left === TableDataTransformer.recommendedTag) {
+        return -1;
+      }
+      if (right === TableDataTransformer.recommendedTag) {
+        return 1;
+      }
+      return left.localeCompare(right);
+    });
   }
 
   private static async updateTable() {

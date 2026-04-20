@@ -101,6 +101,10 @@ export interface AddonInfo {
    */
   author?: AddonAuthor;
   /**
+   * Whether the addon is recommended
+   */
+  recommended?: boolean;
+  /**
    * Addon tags for categorization (e.g. ["integration", "productivity"])
    */
   tags?: string[];
@@ -180,4 +184,3 @@ export interface ReleaseCacheData {
   last_checked: string;
   checked_releases: HistoricalRelease[];
 }
-

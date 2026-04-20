@@ -20,6 +20,30 @@ import type {
 } from "../../types";
 
 export class TableDataTransformer {
+  static readonly recommendedTag = "__recommended__";
+  static readonly recommendedTagLabel = "❤️";
+
+  static displayTagLabel(tag: string): string {
+    return tag === TableDataTransformer.recommendedTag
+      ? TableDataTransformer.recommendedTagLabel
+      : tag;
+  }
+
+  /**
+   * Get tags displayed in the table UI.
+   * Recommended addons receive an extra star tag.
+   */
+  static displayTags(addonInfo: AddonInfo): string[] {
+    const tags = addonInfo.tags ? [...addonInfo.tags] : [];
+    if (
+      addonInfo.recommended &&
+      !tags.includes(TableDataTransformer.recommendedTag)
+    ) {
+      tags.unshift(TableDataTransformer.recommendedTag);
+    }
+    return tags;
+  }
+
   /**
    * Transform addon infos to table row data
    */
@@ -62,7 +86,9 @@ export class TableDataTransformer {
         const installState = await addonInstallStatus(addonInfo, relateAddon);
         result["menu-install-state"] =
           TableDataTransformer.installStatusDescription(installState);
-        result["menu-tags"] = addonInfo.tags?.join(", ") ?? "";
+        result["menu-tags"] = TableDataTransformer.displayTags(addonInfo).join(
+          ", ",
+        );
         return [addonInfo, result] as AssociatedAddonInfo;
       }),
     );
