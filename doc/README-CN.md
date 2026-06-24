@@ -18,7 +18,7 @@
 
 1. 下载[最新版xpi安装包](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi)
 
-2. 在 Zotero 内安装 `(工具) -> (附加组件)`
+2. 在 Zotero 内安装 `(工具) -> (附加组件 / 插件)`
 
 ## 使用方法
 
