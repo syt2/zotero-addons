@@ -20,7 +20,7 @@ This is a Zotero plugin designed for browsing, installing, and reviewing plugins
 
 1. Download the [latest release xpi file](https://github.com/syt2/zotero-addons/releases/latest/download/zotero-addons.xpi)
 
-2. Install in Zotero `(Tools) -> (Add-ons)`
+2. Install in Zotero `(Tools) -> (Add-ons / Plugins)`
 
 ## Usage
 
