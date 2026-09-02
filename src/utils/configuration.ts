@@ -115,9 +115,9 @@ export function autoSource(): Readonly<Source> | undefined {
 
 /**
  * Set current auto source
- * @param source A Source
+ * @param source A source, or undefined to clear the automatic selection
  */
-export function setAutoSource(source: Readonly<Source>) {
+export function setAutoSource(source?: Readonly<Source>) {
   _autoSource = source;
 }
 

@@ -22,8 +22,58 @@ export interface InstallOptions {
   name?: string;
   popWin?: boolean;
   startIndex?: number;
+  /** Time without download progress before trying the next source. */
+  stallTimeoutMs?: number;
+  /** Sampling window used to detect a persistently slow source. */
+  slowSpeedWindowMs?: number;
+  /** Minimum average speed before trying the next source. */
+  minimumBytesPerSecond?: number;
   /** Owner for dependent progress windows. */
   window?: Window;
+}
+
+const DEFAULT_STALL_TIMEOUT_MS = 8000;
+const DEFAULT_SLOW_SPEED_WINDOW_MS = 12000;
+const DEFAULT_MINIMUM_BYTES_PER_SECOND = 16 * 1024;
+const DOWNLOAD_PROGRESS_POLL_INTERVAL_MS = 500;
+
+export type DownloadFailoverReason = "stalled" | "too-slow" | undefined;
+
+/**
+ * Decide whether a download should move to the next mirror.
+ *
+ * The final source is never cancelled for being slow: keeping a slow last
+ * resort is better than turning a usable download into a hard failure.
+ */
+export function downloadFailoverReason(options: {
+  hasFallback: boolean;
+  idleForMs: number;
+  sampleDurationMs: number;
+  sampleBytes: number;
+  stallTimeoutMs?: number;
+  slowSpeedWindowMs?: number;
+  minimumBytesPerSecond?: number;
+}): DownloadFailoverReason {
+  if (!options.hasFallback) {
+    return undefined;
+  }
+
+  const stallTimeoutMs = options.stallTimeoutMs ?? DEFAULT_STALL_TIMEOUT_MS;
+  if (options.idleForMs >= stallTimeoutMs) {
+    return "stalled";
+  }
+
+  const slowSpeedWindowMs =
+    options.slowSpeedWindowMs ?? DEFAULT_SLOW_SPEED_WINDOW_MS;
+  if (options.sampleDurationMs < slowSpeedWindowMs) {
+    return undefined;
+  }
+
+  const minimumBytesPerSecond =
+    options.minimumBytesPerSecond ?? DEFAULT_MINIMUM_BYTES_PER_SECOND;
+  const bytesPerSecond =
+    (Math.max(0, options.sampleBytes) * 1000) / options.sampleDurationMs;
+  return bytesPerSecond < minimumBytesPerSecond ? "too-slow" : undefined;
 }
 
 /**
@@ -162,15 +212,14 @@ export async function installAddonFrom(
   url: string | string[],
   options?: InstallOptions,
 ): Promise<void> {
+  const urls = Array.isArray(url) ? url : [url];
   const progressWindowOwner = resolveProgressWindowOwner(options?.window);
-  if (!Array.isArray(url)) {
-    url = [url];
-  }
   const startIndex = options?.startIndex ?? 0;
-  if (startIndex >= url.length || startIndex < 0) {
+  if (startIndex >= urls.length || startIndex < 0) {
     return;
   }
-  const xpiUrl = url[startIndex];
+  const xpiUrl = urls[startIndex];
+  const hasFallback = startIndex + 1 < urls.length;
   const xpiName = options?.name ?? extractFileNameFromUrl(xpiUrl) ?? "Unknown";
   let sourceName = xpiURLSourceName(xpiUrl);
   if (sourceName === "source-others") {
@@ -206,19 +255,107 @@ export async function installAddonFrom(
         telemetryInfo: { source: config.addonID },
       });
       return await new Promise<boolean>((resolve) => {
+        let settled = false;
+        const finish = (tryNextSource: boolean) => {
+          if (settled) {
+            return false;
+          }
+          settled = true;
+          install.removeListener(listener);
+          resolve(tryNextSource);
+          return true;
+        };
+        const cancelForFailover = (
+          reason: Exclude<DownloadFailoverReason, undefined>,
+        ) => {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          install.removeListener(listener);
+          ztoolkit.log(
+            `download from ${xpiUrl} ${reason}; trying the next source`,
+          );
+          popWin
+            ?.changeLine({
+              text: getString("download-failed", {
+                args: { name: xpiName + ` (${source})` },
+              }),
+              type: "fail",
+              progress: 0,
+            })
+            .addDescription(reason);
+          try {
+            install.cancel();
+          } catch (error) {
+            ztoolkit.log(`cancel download from ${xpiUrl} failed: ${error}`);
+          }
+          resolve(true);
+        };
         const listener: IInstallListener = {
           onDownloadStarted: (install: IAddonInstall) => {
-            if (!popWin) {
-              return;
-            }
-            // Download progress
+            // Track progress independently of the progress window so a stalled
+            // background install can also fail over.
             (async () => {
-              while (install.state === getAddonManager().STATE_DOWNLOADING) {
-                await new Promise((resolve) => setTimeout(resolve, 200));
+              let lastProgress = Math.max(0, install.progress);
+              let lastProgressAt = Date.now();
+              let sampleStartedAt = lastProgressAt;
+              let sampleStartProgress = lastProgress;
+
+              while (
+                !settled &&
+                install.state === getAddonManager().STATE_DOWNLOADING
+              ) {
+                await new Promise((resolve) =>
+                  setTimeout(resolve, DOWNLOAD_PROGRESS_POLL_INTERVAL_MS),
+                );
+                if (
+                  settled ||
+                  install.state !== getAddonManager().STATE_DOWNLOADING
+                ) {
+                  break;
+                }
+
+                const now = Date.now();
+                const progress = Math.max(0, install.progress);
+                if (progress > lastProgress) {
+                  lastProgress = progress;
+                  lastProgressAt = now;
+                }
                 if (install.maxProgress > 0 && install.progress > 0) {
-                  popWin.changeLine({
+                  popWin?.changeLine({
                     progress: (100 * install.progress) / install.maxProgress,
                   });
+                }
+
+                // Do not cancel between the final byte and Zotero's
+                // onDownloadEnded notification.
+                if (
+                  install.maxProgress > 0 &&
+                  progress >= install.maxProgress
+                ) {
+                  continue;
+                }
+
+                const reason = downloadFailoverReason({
+                  hasFallback,
+                  idleForMs: now - lastProgressAt,
+                  sampleDurationMs: now - sampleStartedAt,
+                  sampleBytes: progress - sampleStartProgress,
+                  stallTimeoutMs: options?.stallTimeoutMs,
+                  slowSpeedWindowMs: options?.slowSpeedWindowMs,
+                  minimumBytesPerSecond: options?.minimumBytesPerSecond,
+                });
+                if (reason) {
+                  cancelForFailover(reason);
+                  break;
+                }
+
+                const slowSpeedWindowMs =
+                  options?.slowSpeedWindowMs ?? DEFAULT_SLOW_SPEED_WINDOW_MS;
+                if (now - sampleStartedAt >= slowSpeedWindowMs) {
+                  sampleStartedAt = now;
+                  sampleStartProgress = progress;
                 }
               }
             })();
@@ -231,14 +368,13 @@ export async function installAddonFrom(
 
             if ((install.addon as any).appDisabled) {
               ztoolkit.log(`Incompatible add-on from ${xpiUrl}`);
-              install.removeListener(listener);
+              finish(false);
               install.cancel();
               popWin?.changeLine({
                 text: `${getString("install-failed", { args: { name: xpiName } })} [${getString("install-failed-uncompatible")}]`,
                 type: "fail",
                 progress: 0,
               });
-              resolve(false);
               return;
             }
             popWin?.changeLine({
@@ -251,7 +387,7 @@ export async function installAddonFrom(
             ztoolkit.log(
               `download from ${xpiUrl} failed ${getAddonManager().errorToString(install.error)}`,
             );
-            install.removeListener(listener);
+            finish(true);
             popWin
               ?.changeLine({
                 text: getString("download-failed", {
@@ -263,13 +399,12 @@ export async function installAddonFrom(
               .addDescription(
                 getAddonManager().errorToString(install.error).slice(0, 45),
               );
-            resolve(true);
           },
           onInstallFailed: () => {
             ztoolkit.log(
               `install failed ${getAddonManager().errorToString(install.error)} from ${xpiUrl}`,
             );
-            install.removeListener(listener);
+            finish(true);
             popWin
               ?.changeLine({
                 text: `${getString("install-failed", { args: { name: xpiName } })} [${getAddonManager().errorToString(install.error)}]`,
@@ -279,17 +414,15 @@ export async function installAddonFrom(
               .addDescription(
                 getAddonManager().errorToString(install.error).slice(0, 45),
               );
-            resolve(true);
           },
           onInstallEnded: (install: IAddonInstall, addon: LocalAddon) => {
-            install.removeListener(listener);
+            finish(false);
             ztoolkit.log(`install success`);
             popWin?.changeLine({
               text: getString("install-succeed", { args: { name: xpiName } }),
               type: "success",
               progress: 0,
             });
-            resolve(false);
           },
         };
         install.addListener(listener as any);
@@ -310,12 +443,12 @@ export async function installAddonFrom(
 
   const doNextUrlInstall = await actualInstall();
   popWin?.startCloseTimer(2000);
-  if (doNextUrlInstall && Array.isArray(url) && url.length > 1) {
-    options = {
+  if (doNextUrlInstall && urls.length > 1) {
+    const nextOptions = {
       ...options,
       startIndex: startIndex + 1,
       window: progressWindowOwner,
     };
-    return await installAddonFrom(url, options);
+    return await installAddonFrom(urls, nextOptions);
   }
 }

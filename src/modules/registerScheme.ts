@@ -4,7 +4,6 @@ import { AddonTable } from "../modules/addonTable";
 import { AddonInfoManager } from "../modules/addonInfo";
 import {
   Sources,
-  currentSource,
   setCurrentSource,
   setCustomSourceApi,
 } from "../utils/configuration";
@@ -100,10 +99,7 @@ async function handleConfigSource(params: any): Promise<void> {
       }
     } else {
       setCurrentSource(params.source);
-      if (
-        params.source === "source-auto" &&
-        currentSource().id !== "source-auto"
-      ) {
+      if (params.source === "source-auto") {
         await AddonInfoManager.autoSwitchAvaliableApi();
         AddonTable.refresh(false);
       }
