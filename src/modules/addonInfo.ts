@@ -11,11 +11,37 @@ import {
   completeXpiDownloadUrls,
   xpiDownloadUrlList,
 } from "../utils/xpiDownloadUrls";
+import {
+  firstSuccessfulStaggered,
+  type StaggerScheduler,
+} from "../utils/staggeredRequests";
 // Re-export types from types module
 export { InstallStatus } from "../types";
 export type { AddonInfo, HistoricalRelease, ReleaseCacheData } from "../types";
 import { InstallStatus } from "../types";
 import type { AddonInfo, LocalAddon, HistoricalRelease, ReleaseCacheData, XpiDownloadUrls } from "../types";
+
+const CURRENT_SOURCE_FETCH_TIMEOUT_MS = 5000;
+const AUTO_SOURCE_FETCH_TIMEOUT_MS = 10000;
+const AUTO_SOURCE_STAGGER_DELAY_MS = 3000;
+
+export interface AddonInfoFetchOptions {
+  timeout?: number;
+  cancellerReceiver?: (canceller: VoidFunction) => void;
+}
+
+export interface AddonInfoManagerDependencies {
+  currentSource: () => Readonly<Source>;
+  sources: readonly Readonly<Source>[];
+  setAutoSource: (source: Readonly<Source>) => void;
+  fetchAddonInfos: (
+    url: string,
+    options?: AddonInfoFetchOptions,
+  ) => Promise<AddonInfo[]>;
+  now: () => Date;
+  staggerScheduler?: StaggerScheduler;
+  log: (message: string) => void;
+}
 
 /**
  * Extract download urls of xpi file from AddonInfo
@@ -219,22 +245,28 @@ class AddonInfoAPI {
   /**
    * Fetch AddonInfo from url
    * @param url url to fetch AddonInfo JSON
-   * @param timeout set timeout if specified
-   * @param onTimeoutCallback timeout callback if specified timeout
+   * @param options request options
    * @returns AddonInfo[]
    */
   static async fetchAddonInfos(
     url: string,
-    timeout?: number,
-    onTimeoutCallback?: VoidFunction,
+    options?: AddonInfoFetchOptions,
   ): Promise<AddonInfo[]> {
     ztoolkit.log(`fetch addon infos from ${url}`);
     try {
-      const options: { timeout?: number } = {};
-      if (timeout) {
-        options.timeout = timeout;
+      const response = await Zotero.HTTP.request("GET", url, {
+        ...options,
+        // Zotero handles Retry-After before errorDelayMax in both 7 and 10,
+        // so accepting the response here is the only cross-version way to
+        // keep this to one cancellable request. We validate the status below.
+        successCodes: false,
+      });
+      if (
+        response.status !== 0 &&
+        (response.status < 200 || response.status >= 300)
+      ) {
+        throw new Error(`HTTP ${response.status}`);
       }
-      const response = await Zotero.HTTP.request("GET", url, options);
       const addons = JSON.parse(response.response) as AddonInfo[];
       const validAddons = addons.filter((addon) => addonReleaseInfo(addon));
       // return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
@@ -243,32 +275,39 @@ class AddonInfoAPI {
       return validAddons;
     } catch (error) {
       ztoolkit.log(`fetch fetchAddonInfos from ${url} failed: ${error}`);
-      if (error instanceof (Zotero.HTTP as any).TimeoutException) {
-        onTimeoutCallback?.();
-      }
     }
     return [];
   }
 }
 
+const defaultAddonInfoManagerDependencies: AddonInfoManagerDependencies = {
+  currentSource,
+  sources: Sources,
+  setAutoSource,
+  fetchAddonInfos: AddonInfoAPI.fetchAddonInfos,
+  now: () => new Date(),
+  log: (message) => ztoolkit.log(message),
+};
+
 export class AddonInfoManager {
   static shared = new AddonInfoManager();
 
-  private constructor() {
-    //
-  }
+  constructor(
+    private readonly dependencies: AddonInfoManagerDependencies = defaultAddonInfoManagerDependencies,
+  ) {}
 
   /**
    * Get AddonInfos from memory
    */
   get addonInfos() {
-    const url = currentSource().api;
+    const url = this.dependencies.currentSource().api;
     if (!url) {
       return [];
     }
     if (url in this.sourceInfos) {
       if (
-        new Date().getTime() - this.sourceInfos[url][0].getTime() >=
+        this.dependencies.now().getTime() -
+          this.sourceInfos[url][0].getTime() >=
         12 * 60 * 60 * 1000
       ) {
         this.fetchAddonInfos(true);
@@ -279,64 +318,109 @@ export class AddonInfoManager {
   }
 
   private sourceInfos: { [key: string]: [Date, AddonInfo[]] } = {};
+
+  private autoSourceOperationPromise: Promise<AddonInfo[]> | undefined;
   /**
    * Fetch AddonInfos from current selected source
    * @param forceRefresh force fetch
    * @returns AddonInfo[]
    */
   async fetchAddonInfos(forceRefresh = false) {
-    const source = currentSource();
+    const source = this.dependencies.currentSource();
     if (source.id === "source-auto" && !source.api) {
-      return await AddonInfoManager.autoSwitchAvaliableApi();
+      return await this.runAutoSourceOperation(() => this.findAvailableApi());
     }
     const url = source.api;
     if (!url) {
       return [];
     }
     // 不在刷新，且不需要强制刷新
-    if (!forceRefresh && this.addonInfos) {
-      return this.addonInfos;
+    if (!forceRefresh) {
+      const cachedInfos = this.addonInfos;
+      if (cachedInfos.length > 0) {
+        return cachedInfos;
+      }
     }
-    const infos = await AddonInfoAPI.fetchAddonInfos(url, 5000);
+    const cachedInfos = this.sourceInfos[url]?.[1] ?? [];
+    if (forceRefresh && source.id === "source-auto") {
+      return await this.runAutoSourceOperation(async () => {
+        const infos = await this.dependencies.fetchAddonInfos(url, {
+          timeout: CURRENT_SOURCE_FETCH_TIMEOUT_MS,
+        });
+        if (infos.length > 0) {
+          this.sourceInfos[url] = [this.dependencies.now(), infos];
+          return infos;
+        }
+
+        const switchedInfos = await this.findAvailableApi();
+        return switchedInfos.length > 0 ? switchedInfos : cachedInfos;
+      });
+    }
+
+    const infos = await this.dependencies.fetchAddonInfos(url, {
+      timeout: CURRENT_SOURCE_FETCH_TIMEOUT_MS,
+    });
     if (infos.length > 0) {
-      this.sourceInfos[url] = [new Date(), infos];
+      this.sourceInfos[url] = [this.dependencies.now(), infos];
+      return infos;
     }
-    return this.addonInfos;
+    return cachedInfos;
   }
 
   /**
-   * Switch to a connectable source (sequential)
-   * @param timeout Timeout for each source request in ms
-   * @returns AddonInfos from first available source
+   * Start source requests in order, adding the next source every three seconds.
+   * Earlier requests remain active until one returns a valid add-on index.
    */
-  static async autoSwitchAvaliableApi(timeout = 3000) {
-    const sourcesWithApi = Sources.filter(
+  static async autoSwitchAvaliableApi() {
+    return await this.shared.runAutoSourceOperation(() =>
+      this.shared.findAvailableApi(),
+    );
+  }
+
+  private async runAutoSourceOperation(
+    operation: () => Promise<AddonInfo[]>,
+  ): Promise<AddonInfo[]> {
+    if (this.autoSourceOperationPromise) {
+      return await this.autoSourceOperationPromise;
+    }
+
+    this.autoSourceOperationPromise = operation();
+    try {
+      return await this.autoSourceOperationPromise;
+    } finally {
+      this.autoSourceOperationPromise = undefined;
+    }
+  }
+
+  private async findAvailableApi(): Promise<AddonInfo[]> {
+    const sourcesWithApi = this.dependencies.sources.filter(
       (source): source is Source & { api: string } => !!source.api,
     );
 
-    for (const source of sourcesWithApi) {
-      try {
-        ztoolkit.log(`trying source: ${source.id}`);
-        const infos = await AddonInfoAPI.fetchAddonInfos(
-          source.api,
-          timeout,
-          () => {
-            ztoolkit.log(`source ${source.id} timeout after ${timeout}ms`);
-          },
-        );
+    const result = await firstSuccessfulStaggered(
+      sourcesWithApi.map((source) => async (registerCanceller) => {
+        this.dependencies.log(`trying source: ${source.id}`);
+        const infos = await this.dependencies.fetchAddonInfos(source.api, {
+          timeout: AUTO_SOURCE_FETCH_TIMEOUT_MS,
+          cancellerReceiver: registerCanceller,
+        });
+        return infos.length > 0 ? { source, infos } : undefined;
+      }),
+      AUTO_SOURCE_STAGGER_DELAY_MS,
+      this.dependencies.staggerScheduler,
+    );
 
-        if (infos.length > 0) {
-          this.shared.sourceInfos[source.api] = [new Date(), infos];
-          setAutoSource(source);
-          ztoolkit.log(`switched to ${source.id} automatically`);
-          return infos;
-        }
-      } catch (error) {
-        ztoolkit.log(`source ${source.id} failed: ${error}`);
-      }
+    if (result) {
+      this.sourceInfos[result.source.api] = [
+        this.dependencies.now(),
+        result.infos,
+      ];
+      this.dependencies.setAutoSource(result.source);
+      this.dependencies.log(`switched to ${result.source.id} automatically`);
+      return result.infos;
     }
 
-    ztoolkit.log("all sources failed");
+    this.dependencies.log("all sources failed");
     return [];
   }
 }
