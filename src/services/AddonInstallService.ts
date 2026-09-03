@@ -26,6 +26,16 @@ export interface InstallOptions {
   window?: Window;
 }
 
+const DOWNLOAD_STALL_TIMEOUT_MS = 10000;
+const DOWNLOAD_PROGRESS_POLL_INTERVAL_MS = 500;
+
+export function shouldFailOverStalledDownload(options: {
+  hasFallback: boolean;
+  idleForMs: number;
+}): boolean {
+  return options.hasFallback && options.idleForMs >= DOWNLOAD_STALL_TIMEOUT_MS;
+}
+
 /**
  * Uninstall options
  */
@@ -162,15 +172,14 @@ export async function installAddonFrom(
   url: string | string[],
   options?: InstallOptions,
 ): Promise<void> {
+  const urls = Array.isArray(url) ? url : [url];
   const progressWindowOwner = resolveProgressWindowOwner(options?.window);
-  if (!Array.isArray(url)) {
-    url = [url];
-  }
   const startIndex = options?.startIndex ?? 0;
-  if (startIndex >= url.length || startIndex < 0) {
+  if (startIndex >= urls.length || startIndex < 0) {
     return;
   }
-  const xpiUrl = url[startIndex];
+  const xpiUrl = urls[startIndex];
+  const hasFallback = startIndex + 1 < urls.length;
   const xpiName = options?.name ?? extractFileNameFromUrl(xpiUrl) ?? "Unknown";
   let sourceName = xpiURLSourceName(xpiUrl);
   if (sourceName === "source-others") {
@@ -206,19 +215,97 @@ export async function installAddonFrom(
         telemetryInfo: { source: config.addonID },
       });
       return await new Promise<boolean>((resolve) => {
+        let settled = false;
+        const finish = (tryNextSource: boolean) => {
+          if (settled) {
+            return false;
+          }
+          settled = true;
+          install.removeListener(listener);
+          resolve(tryNextSource);
+          return true;
+        };
+        const cancelForFailover = () => {
+          if (settled) {
+            return;
+          }
+          // Zotero can stay in STATE_DOWNLOADING after its network channel has
+          // closed. Only switch sources when cancellation actually succeeds.
+          try {
+            install.cancel();
+          } catch (error) {
+            ztoolkit.log(
+              `download from ${xpiUrl} appeared stalled but could not be cancelled; keeping the current source: ${error}`,
+            );
+            return;
+          }
+          if (!finish(true)) {
+            return;
+          }
+          ztoolkit.log(
+            `download from ${xpiUrl} stalled; trying the next source`,
+          );
+          popWin?.changeLine({
+            text: getString("download-failed", {
+              args: { name: xpiName + ` (${source})` },
+            }),
+            type: "fail",
+            progress: 0,
+          });
+        };
         const listener: IInstallListener = {
           onDownloadStarted: (install: IAddonInstall) => {
-            if (!popWin) {
+            if (!popWin && !hasFallback) {
               return;
             }
-            // Download progress
+            // Track progress independently of the progress window so a stalled
+            // background install can also fail over.
             (async () => {
-              while (install.state === getAddonManager().STATE_DOWNLOADING) {
-                await new Promise((resolve) => setTimeout(resolve, 200));
+              let lastProgress = Math.max(0, install.progress);
+              let lastProgressAt = Date.now();
+
+              while (
+                !settled &&
+                install.state === getAddonManager().STATE_DOWNLOADING
+              ) {
+                await new Promise((resolve) =>
+                  setTimeout(resolve, DOWNLOAD_PROGRESS_POLL_INTERVAL_MS),
+                );
+                if (
+                  settled ||
+                  install.state !== getAddonManager().STATE_DOWNLOADING
+                ) {
+                  break;
+                }
+
+                const now = Date.now();
+                const progress = Math.max(0, install.progress);
+                if (progress > lastProgress) {
+                  lastProgress = progress;
+                  lastProgressAt = now;
+                }
                 if (install.maxProgress > 0 && install.progress > 0) {
-                  popWin.changeLine({
+                  popWin?.changeLine({
                     progress: (100 * install.progress) / install.maxProgress,
                   });
+                }
+
+                // Give Zotero time to emit onDownloadEnded after the final byte.
+                if (
+                  install.maxProgress > 0 &&
+                  progress >= install.maxProgress
+                ) {
+                  continue;
+                }
+
+                if (
+                  shouldFailOverStalledDownload({
+                    hasFallback,
+                    idleForMs: now - lastProgressAt,
+                  })
+                ) {
+                  cancelForFailover();
+                  break;
                 }
               }
             })();
@@ -230,15 +317,16 @@ export async function installAddonFrom(
             }
 
             if ((install.addon as any).appDisabled) {
+              if (!finish(false)) {
+                return;
+              }
               ztoolkit.log(`Incompatible add-on from ${xpiUrl}`);
-              install.removeListener(listener);
               install.cancel();
               popWin?.changeLine({
                 text: `${getString("install-failed", { args: { name: xpiName } })} [${getString("install-failed-uncompatible")}]`,
                 type: "fail",
                 progress: 0,
               });
-              resolve(false);
               return;
             }
             popWin?.changeLine({
@@ -248,10 +336,12 @@ export async function installAddonFrom(
             });
           },
           onDownloadFailed: () => {
+            if (!finish(true)) {
+              return;
+            }
             ztoolkit.log(
               `download from ${xpiUrl} failed ${getAddonManager().errorToString(install.error)}`,
             );
-            install.removeListener(listener);
             popWin
               ?.changeLine({
                 text: getString("download-failed", {
@@ -263,13 +353,14 @@ export async function installAddonFrom(
               .addDescription(
                 getAddonManager().errorToString(install.error).slice(0, 45),
               );
-            resolve(true);
           },
           onInstallFailed: () => {
+            if (!finish(true)) {
+              return;
+            }
             ztoolkit.log(
               `install failed ${getAddonManager().errorToString(install.error)} from ${xpiUrl}`,
             );
-            install.removeListener(listener);
             popWin
               ?.changeLine({
                 text: `${getString("install-failed", { args: { name: xpiName } })} [${getAddonManager().errorToString(install.error)}]`,
@@ -279,17 +370,17 @@ export async function installAddonFrom(
               .addDescription(
                 getAddonManager().errorToString(install.error).slice(0, 45),
               );
-            resolve(true);
           },
           onInstallEnded: (install: IAddonInstall, addon: LocalAddon) => {
-            install.removeListener(listener);
+            if (!finish(false)) {
+              return;
+            }
             ztoolkit.log(`install success`);
             popWin?.changeLine({
               text: getString("install-succeed", { args: { name: xpiName } }),
               type: "success",
               progress: 0,
             });
-            resolve(false);
           },
         };
         install.addListener(listener as any);
@@ -310,12 +401,12 @@ export async function installAddonFrom(
 
   const doNextUrlInstall = await actualInstall();
   popWin?.startCloseTimer(2000);
-  if (doNextUrlInstall && Array.isArray(url) && url.length > 1) {
-    options = {
+  if (doNextUrlInstall && hasFallback) {
+    const nextOptions = {
       ...options,
       startIndex: startIndex + 1,
       window: progressWindowOwner,
     };
-    return await installAddonFrom(url, options);
+    return await installAddonFrom(urls, nextOptions);
   }
 }
