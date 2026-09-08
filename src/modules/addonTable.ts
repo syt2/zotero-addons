@@ -21,6 +21,10 @@ import { getPref, setPref } from "../utils/prefs";
 import { AddonInfoDetail } from "./addonDetail";
 import { HistoricalVersions } from "./historicalVersions";
 import { Guide } from "./guide";
+import {
+  registerXPIDropInstaller,
+  unregisterXPIDropInstaller,
+} from "./xpiDropInstaller";
 import { getXPIDatabase, getAddonManager, isZoteroVersionAtLeast } from "../utils/compat";
 import type { TableMenuItemID, AssociatedAddonInfo } from "../types";
 import {
@@ -201,6 +205,7 @@ export class AddonTable {
     win.addEventListener(
       "unload",
       () => {
+        unregisterXPIDropInstaller(win);
         AddonInfoDetail.close();
         this.resetWindowTransientState();
       },
@@ -222,6 +227,8 @@ export class AddonTable {
       this.currentTag = null;
     };
     await windowArgs._initPromise.promise;
+    if (!isWindowAlive(win)) return;
+    registerXPIDropInstaller(win);
     this.window = win;
     if (options?.from) {
       this.updateHideToolbarEntranceInWindow(options.from === "toolbar");

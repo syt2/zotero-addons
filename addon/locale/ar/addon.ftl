@@ -108,3 +108,11 @@ rollback-previous-confirm-message = التراجع عن { $name } من { $curren
 rollback-previous-confirm-confirm = تراجع
 rollback-previous-not-found = لم يُعثر على إصدار سابق متاح للإصدار الحالي ({ $currentVersion }).
 rollback-previous-no-download = لم يُعثر على ملف XPI قابل للتنزيل للإصدار السابق المتاح { $targetVersion }.
+
+xpi-drop-title = تثبيت إضافة من ملف
+xpi-drop-message = هل تريد تثبيت ملفات XPI التالية؟
+    { $files }
+xpi-drop-invalid = هذا الملف ليس حزمة إضافة صالحة.
+
+xpi-drop-install = تثبيت
+xpi-drop-cancel = إلغاء

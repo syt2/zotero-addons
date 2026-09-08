@@ -108,3 +108,11 @@ rollback-previous-confirm-message = Reverter { $name } de { $currentVersion } pa
 rollback-previous-confirm-confirm = Reverter
 rollback-previous-not-found = Nenhuma versão anterior disponível encontrada para a versão atual ({ $currentVersion }).
 rollback-previous-no-download = Não foi encontrado um XPI para download da versão anterior disponível { $targetVersion }.
+
+xpi-drop-title = Instalar extensão a partir de um arquivo
+xpi-drop-message = Instalar os seguintes arquivos XPI?
+    { $files }
+xpi-drop-invalid = Este arquivo não é um pacote de extensão válido.
+
+xpi-drop-install = Instalar
+xpi-drop-cancel = Cancelar

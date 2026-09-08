@@ -121,4 +121,9 @@ export type FluentMessageId =
   | 'update-all-uncompatible-confirm'
   | 'update-all-uncompatible-message'
   | 'update-all-uncompatible-title'
-  | 'update-succeed';
+  | 'update-succeed'
+  | 'xpi-drop-cancel'
+  | 'xpi-drop-install'
+  | 'xpi-drop-invalid'
+  | 'xpi-drop-message'
+  | 'xpi-drop-title';

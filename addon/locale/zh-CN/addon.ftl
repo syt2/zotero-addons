@@ -108,3 +108,11 @@ rollback-previous-confirm-message = 确认将 { $name } 从 { $currentVersion } 
 rollback-previous-confirm-confirm = 回滚
 rollback-previous-not-found = 未找到可回滚的上一可用版本（当前版本：{ $currentVersion }）。
 rollback-previous-no-download = 未找到上一可用版本 { $targetVersion } 的可下载 XPI。
+
+xpi-drop-title = 从文件安装插件
+xpi-drop-message = 是否安装以下 XPI 文件？
+    { $files }
+xpi-drop-invalid = 此文件不是有效的插件安装包。
+
+xpi-drop-install = 安装
+xpi-drop-cancel = 取消

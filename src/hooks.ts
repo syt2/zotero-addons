@@ -9,6 +9,11 @@ import { getPref } from "./utils/prefs";
 import { registerConfigScheme } from "./modules/registerScheme";
 import { Guide } from "./modules/guide";
 import { getEventBus, AddonEvents, clearEventBus } from "./core";
+import {
+  registerXPIDropInstaller,
+  unregisterXPIDropInstaller,
+  unregisterAllXPIDropInstallers,
+} from "./modules/xpiDropInstaller";
 
 async function onStartup() {
   await Promise.all([
@@ -62,6 +67,7 @@ async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {
   addon.data.ztoolkit = createZToolkit();
   AddonTable.registerInToolbar();
   AddonTable.registerInMenuTool();
+  registerXPIDropInstaller(win);
 
   Guide.showGuideInMainWindowIfNeed(win);
   // win.MozXULElement.insertFTLIfNeeded(
@@ -70,10 +76,12 @@ async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {
 }
 
 async function onMainWindowUnload(_win: Window): Promise<void> {
+  unregisterXPIDropInstaller(_win);
   ztoolkit.unregisterAll();
 }
 
 function onShutdown(): void {
+  unregisterAllXPIDropInstallers();
   ztoolkit.unregisterAll();
   AddonTable.close();
   AddonInfoDetail.close();

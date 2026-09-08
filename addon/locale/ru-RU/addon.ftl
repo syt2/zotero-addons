@@ -108,3 +108,11 @@ rollback-previous-confirm-message = Откатить { $name } с { $currentVers
 rollback-previous-confirm-confirm = Откатить
 rollback-previous-not-found = Предыдущая доступная версия для текущей ({ $currentVersion }) не найдена.
 rollback-previous-no-download = Не удалось найти скачиваемый XPI для предыдущей доступной версии { $targetVersion }.
+
+xpi-drop-title = Установка дополнения из файла
+xpi-drop-message = Установить следующие файлы XPI?
+    { $files }
+xpi-drop-invalid = Этот файл не является допустимым пакетом дополнения.
+
+xpi-drop-install = Установить
+xpi-drop-cancel = Отмена

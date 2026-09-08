@@ -108,3 +108,11 @@ rollback-previous-confirm-message = { $name } を { $currentVersion } から利�
 rollback-previous-confirm-confirm = 戻す
 rollback-previous-not-found = 現在のバージョン（{ $currentVersion }）より前の利用可能なバージョンが見つかりません。
 rollback-previous-no-download = 利用可能な1つ前のバージョン { $targetVersion } のダウンロード可能な XPI が見つかりません。
+
+xpi-drop-title = ファイルからアドオンをインストール
+xpi-drop-message = 以下の XPI ファイルをインストールしますか？
+    { $files }
+xpi-drop-invalid = このファイルは有効なアドオンパッケージではありません。
+
+xpi-drop-install = インストール
+xpi-drop-cancel = キャンセル

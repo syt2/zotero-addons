@@ -108,3 +108,11 @@ rollback-previous-confirm-message = { $name }을(를) { $currentVersion }에서 
 rollback-previous-confirm-confirm = 되돌리기
 rollback-previous-not-found = 현재 버전({ $currentVersion })에 대한 이전 사용 가능한 버전을 찾을 수 없습니다.
 rollback-previous-no-download = 이전 사용 가능한 버전 { $targetVersion }에 대해 다운로드 가능한 XPI를 찾을 수 없습니다.
+
+xpi-drop-title = 파일에서 부가기능 설치
+xpi-drop-message = 다음 XPI 파일을 설치하시겠습니까?
+    { $files }
+xpi-drop-invalid = 이 파일은 유효한 부가기능 패키지가 아닙니다.
+
+xpi-drop-install = 설치
+xpi-drop-cancel = 취소

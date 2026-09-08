@@ -108,3 +108,11 @@ rollback-previous-confirm-message = { $name }, { $currentVersion } sürümünden
 rollback-previous-confirm-confirm = Geri al
 rollback-previous-not-found = Geçerli sürüm ({ $currentVersion }) için önceki kullanılabilir bir sürüm bulunamadı.
 rollback-previous-no-download = Önceki kullanılabilir sürüm { $targetVersion } için indirilebilir bir XPI bulunamadı.
+
+xpi-drop-title = Dosyadan eklenti kur
+xpi-drop-message = Aşağıdaki XPI dosyaları kurulsun mu?
+    { $files }
+xpi-drop-invalid = Bu dosya geçerli bir eklenti paketi değil.
+
+xpi-drop-install = Kur
+xpi-drop-cancel = İptal

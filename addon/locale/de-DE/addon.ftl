@@ -108,3 +108,11 @@ rollback-previous-confirm-message = { $name } von { $currentVersion } auf die vo
 rollback-previous-confirm-confirm = Zurücksetzen
 rollback-previous-not-found = Keine vorherige verfügbare Version für die aktuelle Version ({ $currentVersion }) gefunden.
 rollback-previous-no-download = Keine herunterladbare XPI für die vorherige verfügbare Version { $targetVersion } gefunden.
+
+xpi-drop-title = Add-on aus Datei installieren
+xpi-drop-message = Die folgenden XPI-Dateien installieren?
+    { $files }
+xpi-drop-invalid = Diese Datei ist kein gültiges Add-on-Paket.
+
+xpi-drop-install = Installieren
+xpi-drop-cancel = Abbrechen

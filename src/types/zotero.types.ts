@@ -51,6 +51,7 @@ export interface IAddonEventListener {
  * AddonManager interface
  */
 export interface IAddonManager {
+  getInstallForFile(file: nsIFile): Promise<IAddonInstall | null>;
   getAllAddons(): Promise<LocalAddon[]>;
   getInstallForURL(
     url: string,
