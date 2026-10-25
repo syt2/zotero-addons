@@ -65,6 +65,30 @@ type="text/css"?>
       margin: 16px;
     }
 
+    .detail-actions {
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 10px 16px 16px;
+    }
+
+    .detail-actions > button {
+      flex: 0 0 auto;
+      margin: 0 !important;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .detail-actions > button:disabled {
+      cursor: default;
+    }
+
+    #rollback-previous {
+      margin-inline-start: auto !important;
+    }
+
     .atk-link {
       display: none;
     }
@@ -175,18 +199,19 @@ type="text/css"?>
         "></label>
   </div>
 
-  <div class="footer-container" style="padding: 10px; display: flex; flex-wrap: wrap"
+  <div class="detail-actions"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-    <button id="install" data-l10n-id="install" style="cursor: pointer"></button>
-    <button id="update" data-l10n-id="update" style="cursor: pointer"></button>
-    <button id="reinstall" data-l10n-id="reinstall" style="cursor: pointer"></button>
-    <button id="uninstall" data-l10n-id="uninstall" style="cursor: pointer"></button>
-    <button id="remove" data-l10n-id="remove" style="cursor: pointer"></button>
-    <button id="uninstallUndo" data-l10n-id="uninstallUndo" style="cursor: pointer"></button>
-    <button id="enable" data-l10n-id="enable" style="cursor: pointer"></button>
-    <button id="disable" data-l10n-id="disable" style="cursor: pointer"></button>
-    <button id="rollback-previous" style="cursor: pointer; margin-left: auto;" hidden="true"></button>
-    <button id="history-versions" data-l10n-id="history-versions-button" style="cursor: pointer;" hidden="true"></button>
+    <xul:button id="install" data-l10n-id="install"></xul:button>
+    <xul:button id="update" data-l10n-id="update"></xul:button>
+    <xul:button id="reinstall" data-l10n-id="reinstall"></xul:button>
+    <xul:button id="uninstall" data-l10n-id="uninstall"></xul:button>
+    <xul:button id="remove" data-l10n-id="remove"></xul:button>
+    <xul:button id="uninstallUndo" data-l10n-id="uninstallUndo"></xul:button>
+    <xul:button id="enable" data-l10n-id="enable"></xul:button>
+    <xul:button id="disable" data-l10n-id="disable"></xul:button>
+    <xul:button id="rollback-previous" hidden="true"></xul:button>
+    <xul:button id="history-versions" data-l10n-id="history-versions-button"
+      hidden="true"></xul:button>
   </div>
 
   <div class="artalk-container">
