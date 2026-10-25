@@ -18,6 +18,9 @@ import type {
   TableColumnID,
   ExtendedColumnOptions,
 } from "../../types";
+import { withTimeout } from "../../utils/async";
+
+const RELATED_ADDONS_TIMEOUT_MS = 3000;
 
 export class TableDataTransformer {
   static readonly recommendedTag = "__recommended__";
@@ -51,7 +54,25 @@ export class TableDataTransformer {
     force = false,
   ): Promise<AssociatedAddonInfo[]> {
     const addonInfos = await AddonInfoManager.shared.fetchAddonInfos(force);
-    const relateAddons = await relatedAddons(addonInfos);
+    // Local add-on metadata is supplementary. Zotero 11 can delay the
+    // AddonManager while it is refreshing the extension database; do not let
+    // that block the remote list from rendering.
+    let relateAddons: Awaited<ReturnType<typeof relatedAddons>>;
+    let localMetadataAvailable = true;
+    try {
+      relateAddons = await withTimeout(
+        relatedAddons(addonInfos).catch((error: unknown) => {
+          ztoolkit.log(`failed to query local add-ons: ${error}`);
+          localMetadataAvailable = false;
+          return [];
+        }),
+        RELATED_ADDONS_TIMEOUT_MS,
+      );
+    } catch (error) {
+      ztoolkit.log(`timed out querying local add-ons: ${error}`);
+      relateAddons = [];
+      localMetadataAvailable = false;
+    }
 
     return Promise.all(
       addonInfos.map(async (addonInfo) => {
@@ -74,21 +95,26 @@ export class TableDataTransformer {
         if (releaseTime) {
           result["menu-remote-update-time"] = releaseTime;
         }
-        const relateAddon = relateAddons.find((addonPair) => {
-          const addonID = addonReleaseInfo(addonInfo)?.id;
-          if (addonID) {
-            return addonID == addonPair[1].id;
-          } else {
-            return addonInfo.repo === addonPair[0].repo;
-          }
-        });
-        result["menu-local-version"] = relateAddon?.[1].version ?? "-";
-        const installState = await addonInstallStatus(addonInfo, relateAddon);
+        const relateAddon = localMetadataAvailable
+          ? relateAddons.find((addonPair) => {
+              const addonID = addonReleaseInfo(addonInfo)?.id;
+              if (addonID) {
+                return addonID == addonPair[1].id;
+              } else {
+                return addonInfo.repo === addonPair[0].repo;
+              }
+            })
+          : undefined;
+        result["menu-local-version"] = localMetadataAvailable
+          ? (relateAddon?.[1].version ?? "-")
+          : "?";
+        const installState = localMetadataAvailable
+          ? await addonInstallStatus(addonInfo, relateAddon)
+          : InstallStatus.unknown;
         result["menu-install-state"] =
           TableDataTransformer.installStatusDescription(installState);
-        result["menu-tags"] = TableDataTransformer.displayTags(addonInfo).join(
-          ", ",
-        );
+        result["menu-tags"] =
+          TableDataTransformer.displayTags(addonInfo).join(", ");
         return [addonInfo, result] as AssociatedAddonInfo;
       }),
     );

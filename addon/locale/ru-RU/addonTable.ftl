@@ -1,6 +1,7 @@
 title = Магазин дополнений
 refresh =
     .label = Обновить
+    .aria-label = Обновить
 selectSource = Выбрать источник:
 customSource = Пользовательский источник:
 filterByTag = Теги:
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = Скрыть вход на панели инструментов
 search-field =
     .placeholder = Поиск...
+    .aria-label = Поиск...

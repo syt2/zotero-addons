@@ -1,6 +1,7 @@
 title = Sklep z dodatkami
 refresh =
     .label = Odśwież
+    .aria-label = Odśwież
 selectSource = Wybierz źródło:
 customSource = Niestandardowe źródło:
 filterByTag = Tagi:
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = Ukryj wejście paska narzędzi
 search-field =
     .placeholder = Szukaj...
+    .aria-label = Szukaj...

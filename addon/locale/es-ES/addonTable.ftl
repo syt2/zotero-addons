@@ -1,6 +1,7 @@
 title = Mercado de complementos
 refresh =
     .label = Actualizar
+    .aria-label = Actualizar
 selectSource = Seleccionar fuente:
 customSource = Fuente personalizada:
 filterByTag = Etiquetas:
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = Ocultar entrada de la barra de herramientas
 search-field =
     .placeholder = Buscar...
+    .aria-label = Buscar...

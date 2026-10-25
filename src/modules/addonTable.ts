@@ -25,7 +25,11 @@ import {
   registerXPIDropInstaller,
   unregisterXPIDropInstaller,
 } from "./xpiDropInstaller";
-import { getXPIDatabase, getAddonManager, isZoteroVersionAtLeast } from "../utils/compat";
+import {
+  getXPIDatabase,
+  getAddonManager,
+  isZoteroVersionAtLeast,
+} from "../utils/compat";
 import type { TableMenuItemID, AssociatedAddonInfo } from "../types";
 import {
   TableSearchHandler,
@@ -75,12 +79,14 @@ export class AddonTable {
   }
 
   private static getNativeMenuManager() {
-    return (Zotero as typeof Zotero & {
-      MenuManager?: {
-        registerMenu?: (options: unknown) => void;
-        unregisterMenu?: (menuID: string) => void;
-      };
-    }).MenuManager;
+    return (
+      Zotero as typeof Zotero & {
+        MenuManager?: {
+          registerMenu?: (options: unknown) => void;
+          unregisterMenu?: (menuID: string) => void;
+        };
+      }
+    ).MenuManager;
   }
 
   /**
@@ -167,6 +173,7 @@ export class AddonTable {
   private static menuHandler?: TableMenuHandler;
   private static tagCellObserver?: MutationObserver;
   private static applyTagCellChips?: () => void;
+  private static refreshAnimationId = 0;
 
   /**
    * Display addon table window
@@ -276,7 +283,7 @@ export class AddonTable {
    * Refresh this window
    */
   static async refresh(force = false) {
-    if (!this.isShown) {
+    if (!this.isShown()) {
       return;
     }
     const selectIndices = this.tableHelper?.treeInstance.selection.selected;
@@ -287,25 +294,32 @@ export class AddonTable {
     if (force) {
       actions.push(new Promise((resolve) => setTimeout(resolve, 1000)));
     }
-    await this.actionWithRefreshAnimate(actions);
-    this.updateTable();
-    selectAddons.forEach((oldAddon) => {
-      const newIdx = this.addonInfos.findIndex(
-        (newAddon) =>
-          oldAddon[0].repo === newAddon[0].repo ||
-          (addonReleaseInfo(newAddon[0])?.id &&
-            addonReleaseInfo(newAddon[0])?.id ===
-              addonReleaseInfo(oldAddon[0])?.id),
-      );
-      if (newIdx >= 0) {
-        this.tableHelper?.treeInstance.selection.rangedSelect(
-          newIdx,
-          newIdx,
-          true,
-          false,
+    const isLatestRefresh = await this.actionWithRefreshAnimate(actions);
+    if (!isLatestRefresh || !this.isShown()) {
+      return;
+    }
+    await this.updateTable();
+    try {
+      selectAddons.forEach((oldAddon) => {
+        const newIdx = this.addonInfos.findIndex(
+          (newAddon) =>
+            oldAddon[0].repo === newAddon[0].repo ||
+            (addonReleaseInfo(newAddon[0])?.id &&
+              addonReleaseInfo(newAddon[0])?.id ===
+                addonReleaseInfo(oldAddon[0])?.id),
         );
-      }
-    });
+        if (newIdx >= 0) {
+          this.tableHelper?.treeInstance.selection.rangedSelect(
+            newIdx,
+            newIdx,
+            true,
+            false,
+          );
+        }
+      });
+    } catch (error) {
+      ztoolkit.log(`failed to restore add-on selection: ${error}`);
+    }
   }
 
   /**
@@ -368,6 +382,8 @@ export class AddonTable {
     this.tagCellObserver?.disconnect();
     this.tagCellObserver = undefined;
     this.applyTagCellChips = undefined;
+    this.refreshAnimationId += 1;
+    this.refreshTag += 1;
     this.currentTag = null;
     this.addonInfos = [];
     this.baseAddonInfos = [];
@@ -849,7 +865,7 @@ export class AddonTable {
   private static initRefreshButton(win: Window) {
     const refreshButton = win.document.querySelector(
       "#refresh",
-    ) as XULToolBarButtonElement;
+    ) as HTMLButtonElement;
     refreshButton.addEventListener("click", async () => {
       if (refreshButton.disabled) {
         return;
@@ -858,17 +874,26 @@ export class AddonTable {
     });
   }
 
-  private static async actionWithRefreshAnimate(actions: Promise<void>[]) {
+  private static async actionWithRefreshAnimate(
+    actions: Promise<void>[],
+  ): Promise<boolean> {
     const refreshButton =
-      this.window?.document.querySelector<XULToolBarButtonElement>("#refresh");
+      this.window?.document.querySelector<HTMLButtonElement>("#refresh");
+    const animationId = ++this.refreshAnimationId;
     if (refreshButton) {
       refreshButton.disabled = true;
       refreshButton.setAttribute("status", "animate");
+      refreshButton.setAttribute("aria-busy", "true");
     }
-    await Promise.all(actions);
-    if (refreshButton) {
-      refreshButton.removeAttribute("status");
-      refreshButton.disabled = false;
+    try {
+      await Promise.all(actions);
+      return animationId === this.refreshAnimationId;
+    } finally {
+      if (animationId === this.refreshAnimationId && refreshButton) {
+        refreshButton.removeAttribute("status");
+        refreshButton.removeAttribute("aria-busy");
+        refreshButton.disabled = false;
+      }
     }
   }
 
@@ -1010,14 +1035,18 @@ export class AddonTable {
     this.refreshTag += 1;
     const curRefreshTag = this.refreshTag;
 
-    const addonInfos = await TableDataTransformer.transformAddonInfos(force);
-    if (curRefreshTag !== this.refreshTag) {
-      return;
-    }
+    try {
+      const addonInfos = await TableDataTransformer.transformAddonInfos(force);
+      if (curRefreshTag !== this.refreshTag) {
+        return;
+      }
 
-    this.baseAddonInfos = addonInfos;
-    this.refreshTagFilter();
-    this.applySearchAndSort();
+      this.baseAddonInfos = addonInfos;
+      this.refreshTagFilter();
+      this.applySearchAndSort();
+    } catch (error) {
+      ztoolkit.log(`failed to update addon table: ${error}`);
+    }
   }
 
   private static applySearchAndSort() {
@@ -1026,9 +1055,8 @@ export class AddonTable {
     // Filter by tag (AND with search — tag narrows the pool first)
     if (this.currentTag) {
       const tag = this.currentTag;
-      addonInfos = addonInfos.filter(
-        ([addonInfo]) =>
-          TableDataTransformer.displayTags(addonInfo).includes(tag),
+      addonInfos = addonInfos.filter(([addonInfo]) =>
+        TableDataTransformer.displayTags(addonInfo).includes(tag),
       );
     }
 
@@ -1063,11 +1091,30 @@ export class AddonTable {
   }
 
   private static async updateTable() {
-    return new Promise<void>((resolve) => {
-      this.tableHelper?.render(undefined, () => {
-        this.applyTagCellChips?.();
-        resolve();
-      });
+    const tableHelper = this.tableHelper;
+    const win = this.window;
+    if (!tableHelper || !win) {
+      return;
+    }
+
+    try {
+      tableHelper.render();
+    } catch (error) {
+      ztoolkit.log(`failed to render add-on table: ${error}`);
+      return;
+    }
+
+    const applyChips = this.applyTagCellChips;
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        try {
+          applyChips?.();
+        } catch (error) {
+          ztoolkit.log(`failed to render add-on tags: ${error}`);
+        } finally {
+          resolve();
+        }
+      }, 0);
     });
   }
 

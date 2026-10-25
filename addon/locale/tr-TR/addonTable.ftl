@@ -1,6 +1,7 @@
 title = Eklenti Marketi
 refresh =
     .label = Yenile
+    .aria-label = Yenile
 selectSource = Kaynak Seç:
 customSource = Özel Kaynak:
 filterByTag = Etiketler:
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = Araç çubuğu girişini gizle
 search-field =
     .placeholder = Ara...
+    .aria-label = Ara...

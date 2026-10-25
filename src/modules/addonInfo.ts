@@ -15,15 +15,23 @@ import {
   firstSuccessfulStaggered,
   type StaggerScheduler,
 } from "../utils/staggeredRequests";
+import { withTimeout } from "../utils/async";
 // Re-export types from types module
 export { InstallStatus } from "../types";
 export type { AddonInfo, HistoricalRelease, ReleaseCacheData } from "../types";
 import { InstallStatus } from "../types";
-import type { AddonInfo, LocalAddon, HistoricalRelease, ReleaseCacheData, XpiDownloadUrls } from "../types";
+import type {
+  AddonInfo,
+  LocalAddon,
+  HistoricalRelease,
+  ReleaseCacheData,
+  XpiDownloadUrls,
+} from "../types";
 
 const CURRENT_SOURCE_FETCH_TIMEOUT_MS = 5000;
 const AUTO_SOURCE_FETCH_TIMEOUT_MS = 10000;
 const AUTO_SOURCE_STAGGER_DELAY_MS = 3000;
+const REQUEST_FALLBACK_TIMEOUT_MS = 8000;
 
 export interface AddonInfoFetchOptions {
   timeout?: number;
@@ -95,11 +103,20 @@ export function xpiDownloadUrls(addonInfo: AddonInfo) {
  * @returns AddonInfo.releases (Adapted to current Zotero version)
  */
 export function addonReleaseInfo(addonInfo: AddonInfo) {
-  const release = addonInfo.releases?.find(
-    (release) => Services.vc.compare(release.targetZoteroVersion, Zotero.version.split(".")[0]) == 0 
-  ) ?? addonInfo.releases?.find(
-    (release) => Services.vc.compare(release.targetZoteroVersion, Zotero.version) >= 0,
-  )
+  const currentMajor = Zotero.version.split(".")[0];
+  const release =
+    addonInfo.releases?.find(
+      (release) => release.targetZoteroVersion === currentMajor,
+    ) ??
+    addonInfo.releases?.find((release) => {
+      const minVersion = release.minZoteroVersion?.replace(/\*/g, "999");
+      const maxVersion = release.maxZoteroVersion?.replace(/\*/g, "999");
+      const meetsMinimum =
+        !minVersion || Services.vc.compare(Zotero.version, minVersion) >= 0;
+      const meetsMaximum =
+        !maxVersion || Services.vc.compare(Zotero.version, maxVersion) <= 0;
+      return meetsMinimum && meetsMaximum;
+    });
   if ((release?.xpiDownloadUrl?.github?.length ?? 0) === 0) {
     return;
   }
@@ -231,13 +248,22 @@ export function addonCanUpdate(addonInfo: AddonInfo, addon: LocalAddon) {
  * @param maxVersion Maximum Zotero version (e.g., "8.*")
  * @returns true if compatible, false otherwise
  */
-export function isVersionCompatible(minVersion?: string, maxVersion?: string): boolean {
+export function isVersionCompatible(
+  minVersion?: string,
+  maxVersion?: string,
+): boolean {
   if (!minVersion || !maxVersion) {
     return true; // If no version info, assume compatible
   }
   const currentVersion = Zotero.version;
-  const minCompare = Services.vc.compare(currentVersion, minVersion.replace("*", "0"));
-  const maxCompare = Services.vc.compare(currentVersion, maxVersion.replace("*", "999"));
+  const minCompare = Services.vc.compare(
+    currentVersion,
+    minVersion.replace("*", "0"),
+  );
+  const maxCompare = Services.vc.compare(
+    currentVersion,
+    maxVersion.replace("*", "999"),
+  );
   return minCompare >= 0 && maxCompare <= 0;
 }
 
@@ -254,13 +280,21 @@ class AddonInfoAPI {
   ): Promise<AddonInfo[]> {
     ztoolkit.log(`fetch addon infos from ${url}`);
     try {
-      const response = await Zotero.HTTP.request("GET", url, {
+      let cancelRequest: VoidFunction | undefined;
+      const requestTimeout = options?.timeout ?? REQUEST_FALLBACK_TIMEOUT_MS;
+      const request = Zotero.HTTP.request("GET", url, {
         ...options,
-        // Zotero handles Retry-After before errorDelayMax in both 7 and 10,
-        // so accepting the response here is the only cross-version way to
-        // keep this to one cancellable request. We validate the status below.
+        timeout: requestTimeout,
+        errorDelayMax: 0,
         successCodes: false,
+        cancellerReceiver: (cancel: VoidFunction) => {
+          cancelRequest = cancel;
+          options?.cancellerReceiver?.(cancel);
+        },
       });
+      const response = await withTimeout(request, requestTimeout, () =>
+        cancelRequest?.(),
+      );
       if (
         response.status !== 0 &&
         (response.status < 200 || response.status >= 300)
@@ -482,7 +516,9 @@ function buildReleaseCacheUrl(repo: string): string | undefined {
  * @param repo Repository name (e.g., "syt2/zotero-addons")
  * @returns Array of historical releases, sorted by published_at descending
  */
-export async function fetchHistoricalReleases(repo: string): Promise<HistoricalRelease[]> {
+export async function fetchHistoricalReleases(
+  repo: string,
+): Promise<HistoricalRelease[]> {
   if (!isScraperSource()) {
     return [];
   }
@@ -501,7 +537,9 @@ export async function fetchHistoricalReleases(repo: string): Promise<HistoricalR
     // Sort by published_at descending (newest first)
     const releases = data.checked_releases || [];
     releases.sort((a, b) => {
-      return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+      return (
+        new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+      );
     });
 
     return releases;
@@ -516,7 +554,9 @@ export async function fetchHistoricalReleases(repo: string): Promise<HistoricalR
  * @param githubUrl The original GitHub download URL
  * @returns XpiDownloadUrls object with various mirror URLs
  */
-export function buildHistoricalDownloadUrls(githubUrl: string): XpiDownloadUrls {
+export function buildHistoricalDownloadUrls(
+  githubUrl: string,
+): XpiDownloadUrls {
   return buildXpiDownloadUrlsFromGitHub(githubUrl);
 }
 
@@ -525,7 +565,9 @@ export function buildHistoricalDownloadUrls(githubUrl: string): XpiDownloadUrls 
  * @param historicalRelease The historical release
  * @returns Array of download URLs, ordered by preference based on current source
  */
-export function historicalReleaseDownloadUrls(historicalRelease: HistoricalRelease): string[] {
+export function historicalReleaseDownloadUrls(
+  historicalRelease: HistoricalRelease,
+): string[] {
   const urls = buildHistoricalDownloadUrls(historicalRelease.xpi_download_url);
   const sourceID =
     currentSource().id === "source-auto"

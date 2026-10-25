@@ -1,6 +1,7 @@
 title = アドオンマーケット
 refresh =
     .label = 再読み込み
+    .aria-label = 再読み込み
 selectSource = ソースを選択：
 customSource = カスタムソース：
 filterByTag = タグ：
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = ツールバーの入口を非表示
 search-field =
     .placeholder = 検索...
+    .aria-label = 検索...

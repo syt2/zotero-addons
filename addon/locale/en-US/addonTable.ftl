@@ -1,6 +1,7 @@
 title = Add-on Market
 refresh = 
     .label = Refresh
+    .aria-label = Refresh
 selectSource = Select Source:
 customSource = Custom Source:
 filterByTag = Tags:
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = Hide toolbar entrance
 search-field =
     .placeholder = Search...
+    .aria-label = Search...

@@ -75,36 +75,172 @@ type="text/css"?>
         overflow-y: scroll;
       }
 
-      #search-container {
-        border-bottom: 1px solid transparent;
+      #footer-search-group {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-inline-start: 2px;
+        min-width: 0;
+      }
+
+      #search-shell {
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        overflow: hidden;
+        border-radius: 7px;
+        background-color: transparent;
+        transition:
+          width 180ms ease,
+          background-color 120ms ease,
+          box-shadow 120ms ease;
+      }
+
+      #search-shell:not(.expanded):hover {
+        background-color: color-mix(in srgb, currentColor 8%, transparent);
+      }
+
+      #search-shell.expanded {
+        width: 180px;
+        background-color: Field;
+        box-shadow: inset 0 0 0 1px
+          color-mix(in srgb, currentColor 22%, transparent);
+      }
+
+      #search-shell.expanded:focus-within {
+        box-shadow:
+          inset 0 0 0 1px AccentColor,
+          0 0 0 2px color-mix(in srgb, AccentColor 16%, transparent);
+      }
+
+      #search-button,
+      #refresh {
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        min-width: 28px;
+        max-width: 28px;
+        height: 28px;
+        min-height: 28px;
+        margin: 0;
+        padding: 0;
+        border: 0 !important;
+        border-radius: 7px;
+        background-color: transparent;
+        box-shadow: none !important;
+        color: ButtonText;
+        appearance: none !important;
+        -moz-context-properties: fill, fill-opacity;
+        fill: currentColor;
+        cursor: pointer;
+        transition:
+          background-color 120ms ease,
+          transform 80ms ease;
       }
 
       #search-button {
-        list-style-image: url("chrome://zotero/skin/20/universal/magnifier.svg");
-        fill: currentColor;
+        flex: 0 0 28px;
+        background-image: none;
+      }
+
+      #search-icon,
+      #refresh-icon {
+        width: 18px;
+        height: 18px;
+        background-color: currentColor;
+        mask-position: center;
+        mask-repeat: no-repeat;
+        mask-size: contain;
+        pointer-events: none;
+      }
+
+      #search-icon {
+        mask-image: url("chrome://zotero/skin/20/universal/magnifier.svg");
+      }
+
+      #refresh-icon {
+        mask-image: url("chrome://zotero/skin/20/universal/sync.svg");
+      }
+
+      #search-button:active,
+      #refresh:active {
+        transform: scale(0.92);
+      }
+
+      #refresh:hover {
+        background-color: color-mix(
+          in srgb,
+          currentColor 8%,
+          transparent
+        ) !important;
+      }
+
+      #search-button:focus-visible,
+      #refresh:focus-visible {
+        outline: none;
+      }
+
+      #search-button:focus-visible {
+        box-shadow: inset 0 0 0 2px AccentColor !important;
+      }
+
+      #refresh:focus-visible {
+        outline: 2px solid AccentColor;
+        outline-offset: 1px;
       }
 
       #search-field {
-        max-width: 0;
-        transition: max-width 0.2s ease;
-        padding: 0;
-        padding-inline-end: 6px;
-        margin: 0;
-        appearance: none;
+        box-sizing: border-box;
+        flex: 1 1 auto;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
         height: 28px;
+        padding: 0 10px 0 0;
+        margin: 0;
+        border: 0 !important;
+        border-radius: 0;
+        outline: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: FieldText;
+        font: inherit;
+        font-size: 13px;
+        line-height: 28px;
+        appearance: none !important;
+        cursor: text !important;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 100ms ease;
       }
 
-      #search-field.visible {
-        max-width: 180px;
+      #search-shell.expanded #search-field {
+        opacity: 1;
+        pointer-events: auto;
       }
 
-      #search-field.expanding {
-        padding-inline-end: 35px;
+      #search-field::placeholder {
+        color: color-mix(in srgb, currentColor 55%, transparent);
+        opacity: 1;
       }
 
       #refresh {
-        list-style-image: url("chrome://zotero/skin/20/universal/sync.svg");
-        fill: currentColor;
+        flex: 0 0 28px;
+        list-style-image: none;
+        background-image: none;
+      }
+
+      #refresh[status="animate"] #refresh-icon {
+        animation: rotating 2s linear infinite;
+      }
+
+      #refresh:disabled {
+        cursor: default;
       }
 
       .footer-container {
@@ -166,35 +302,36 @@ type="text/css"?>
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
     >
       <!-- zotero original source: https://github.com/zotero/zotero/blob/3b7dd58c504884a55fab345efbc06de366983ab2/chrome/content/zotero/zoteroPane.xhtml#L1184 -->
-      <toolbar
-        id="search-container-toolbar"
-        tabindex="-1"
-        class="zotero-toolbar toolbar toolbar-primary"
-      >
-        <hbox id="search-container" style="align-items: center">
-          <html:div
-            style="
-              display: flex;
-              flex-direction: row;
-              flex-grow: 0;
-              flex-shrink: 1;
-              min-width: 0;
-            "
+      <html:div id="footer-search-group">
+        <html:div id="search-shell">
+          <html:button
+            id="search-button"
+            type="button"
+            data-l10n-id="search-field"
+            data-l10n-attrs="aria-label"
+            aria-controls="search-field"
+            aria-expanded="false"
           >
-            <toolbarbutton id="search-button" tabindex="-1" />
-            <search-textbox
-              id="search-field"
-              class="hidden"
-              disabled="true"
-              data-l10n-id="search-field"
-              data-l10n-attrs="placeholder"
-            />
-          </html:div>
-        </hbox>
-      </toolbar>
+            <html:span id="search-icon" aria-hidden="true"></html:span>
+          </html:button>
+          <html:input
+            id="search-field"
+            type="text"
+            disabled="true"
+            data-l10n-id="search-field"
+            data-l10n-attrs="placeholder"
+          ></html:input>
+        </html:div>
 
-      <toolbarbutton id="refresh" tabindex="-1" />
-      <div style="width: 8px"></div>
+        <html:button
+          id="refresh"
+          type="button"
+          data-l10n-id="refresh"
+          data-l10n-attrs="aria-label"
+        >
+          <html:span id="refresh-icon" aria-hidden="true"></html:span>
+        </html:button>
+      </html:div>
 
       <groupbox>
         <div class="footer-filter-group">

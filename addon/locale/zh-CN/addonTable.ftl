@@ -1,6 +1,7 @@
 title = 插件市场
 refresh = 
     .label = 刷新
+    .aria-label = 刷新
 selectSource = 选择源：
 customSource = 自定义源：
 filterByTag = 标签：
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = 隐藏工具栏入口
 search-field =
     .placeholder = 关键字搜索
+    .aria-label = 关键字搜索

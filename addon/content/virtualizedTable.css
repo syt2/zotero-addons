@@ -39,7 +39,44 @@
 .virtualized-table-body .row.is-recommended[selected],
 .virtualized-table-body .row.is-recommended[aria-selected="true"] {
   background-color: SelectedItem;
-  box-shadow: inset 3px 0 0 #f59e0b;
+  border: 0 !important;
+  border-left: 0 !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+.virtualized-table-body .row.is-recommended.selected > :first-child,
+.virtualized-table-body .row.is-recommended.selected > :last-child,
+.virtualized-table-body .row.is-recommended[selected] > :first-child,
+.virtualized-table-body .row.is-recommended[selected] > :last-child,
+.virtualized-table-body
+  .row.is-recommended[aria-selected="true"]
+  > :first-child,
+.virtualized-table-body
+  .row.is-recommended[aria-selected="true"]
+  > :last-child {
+  margin-inline: 0 !important;
+  border-inline: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Keep Zotero's focus ring from exposing the recommended-row accent. */
+.virtualized-table.multi-select:focus .row.is-recommended.focused {
+  border: 0 !important;
+  border-left: 0 !important;
+  outline: none;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+.virtualized-table.multi-select:focus
+  .row.is-recommended.focused
+  > :first-child,
+.virtualized-table.multi-select:focus
+  .row.is-recommended.focused
+  > :last-child {
+  margin-inline: 0;
 }
 
 .virtualized-table-body .row.is-recommended.selected:hover,
@@ -81,11 +118,7 @@
   flex: 0 0 auto;
   overflow: hidden;
   color: var(--tag-chip-color);
-  background-color: color-mix(
-    in srgb,
-    var(--tag-chip-color) 12%,
-    transparent
-  );
+  background-color: color-mix(in srgb, var(--tag-chip-color) 12%, transparent);
   cursor: pointer;
   transition:
     background-color 120ms ease,
@@ -96,11 +129,7 @@
 }
 
 .virtualized-table .cell.menu-tags .tag-chip:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--tag-chip-color) 18%,
-    transparent
-  );
+  background-color: color-mix(in srgb, var(--tag-chip-color) 18%, transparent);
 }
 
 .virtualized-table .cell.menu-tags .tag-chip:active {

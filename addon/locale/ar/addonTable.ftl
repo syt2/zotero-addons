@@ -1,6 +1,7 @@
 title = سوق الإضافات
 refresh =
     .label = تحديث
+    .aria-label = تحديث
 selectSource = اختر المصدر:
 customSource = مصدر مخصص:
 filterByTag = الوسوم:
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = إخفاء مدخل شريط الأدوات
 search-field =
     .placeholder = بحث...
+    .aria-label = بحث...

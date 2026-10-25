@@ -1,6 +1,7 @@
 title = Marché d'extensions
 refresh =
     .label = Actualiser
+    .aria-label = Actualiser
 selectSource = Sélectionner la source :
 customSource = Source personnalisée :
 filterByTag = Étiquettes :
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = Masquer l'entrée de la barre d'outils
 search-field =
     .placeholder = Rechercher...
+    .aria-label = Rechercher...

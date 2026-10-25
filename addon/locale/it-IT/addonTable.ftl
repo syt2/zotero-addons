@@ -1,6 +1,7 @@
 title = Mercato dei componenti aggiuntivi
 refresh =
     .label = Aggiorna
+    .aria-label = Aggiorna
 selectSource = Seleziona fonte:
 customSource = Fonte personalizzata:
 filterByTag = Tag:
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = Nascondi ingresso barra degli strumenti
 search-field =
     .placeholder = Cerca...
+    .aria-label = Cerca...

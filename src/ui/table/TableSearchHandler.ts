@@ -57,23 +57,38 @@ export class TableSearchHandler {
     const searchField = this.window.document.querySelector(
       "#search-field",
     ) as HTMLInputElement;
-
-    searchField.style.visibility = "hidden";
+    const searchShell = this.window.document.querySelector(
+      "#search-shell",
+    ) as HTMLElement;
     searchField.addEventListener("blur", () => this.hideSearch());
-    searchButton.addEventListener("click", () => {
-      if (!searchField.classList.contains("visible")) {
-        searchButton.style.display = "none";
-        const maxWidth = searchField.getAttribute("data-expanded-width");
-        if (maxWidth) {
-          searchField.style.maxWidth = `${maxWidth}px`;
-        }
-        searchField.style.visibility = "visible";
-        searchField.classList.add("visible", "expanding");
-        setTimeout(() => {
-          searchField.removeAttribute("disabled");
-          searchField.classList.remove("expanding");
-          searchField.focus();
-        }, 250);
+    const runSearch = () => {
+      try {
+        void Promise.resolve(onSearch()).catch((error: unknown) => {
+          ztoolkit.log(`failed to search add-ons: ${error}`);
+        });
+      } catch (error) {
+        ztoolkit.log(`failed to search add-ons: ${error}`);
+      }
+    };
+    searchButton.addEventListener("mousedown", (event) => {
+      if (searchShell.classList.contains("expanded")) {
+        event.preventDefault();
+        searchField.focus();
+      }
+    });
+    searchButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!searchShell.classList.contains("expanded")) {
+        searchShell.classList.add("expanded");
+        searchButton.setAttribute("aria-expanded", "true");
+        searchField.removeAttribute("disabled");
+        // Let the button finish its native focus handling before focusing input.
+        this.window.setTimeout(() => {
+          if (searchShell.classList.contains("expanded")) {
+            searchField.focus();
+          }
+        }, 0);
         return;
       }
       searchField.focus();
@@ -84,14 +99,26 @@ export class TableSearchHandler {
         this.window.clearTimeout(this.debounceTimer);
       }
       this.debounceTimer = this.window.setTimeout(() => {
-        void onSearch();
+        runSearch();
       }, delayMs);
     };
 
     // "command" usually fires on Enter/confirm in XUL inputs
-    searchField.addEventListener("command", () => void onSearch());
+    searchField.addEventListener("command", runSearch);
     // Real-time search while typing
     searchField.addEventListener("input", () => triggerSearchDebounced());
+    searchField.addEventListener("keydown", (event: KeyboardEvent) => {
+      if (event.isComposing || event.key !== "Escape") {
+        return;
+      }
+      event.preventDefault();
+      if (searchField.value) {
+        searchField.value = "";
+        runSearch();
+      }
+      searchField.blur();
+      searchButton.focus();
+    });
   }
 
   /**
@@ -104,21 +131,20 @@ export class TableSearchHandler {
     const searchButton = this.window.document.getElementById(
       "search-button",
     ) as HTMLElement;
+    const searchShell = this.window.document.getElementById(
+      "search-shell",
+    ) as HTMLElement;
     if (
       !searchField.value.length &&
-      searchField.classList.contains("visible")
+      searchShell.classList.contains("expanded")
     ) {
-      searchField.classList.remove("visible");
+      searchShell.classList.remove("expanded");
+      searchButton.setAttribute("aria-expanded", "false");
       searchField.setAttribute("disabled", "true");
       if (this.debounceTimer) {
         this.window.clearTimeout(this.debounceTimer);
         this.debounceTimer = undefined;
       }
-      this.window.setTimeout(() => {
-        searchButton.style.display = "";
-        searchField.style.visibility = "hidden";
-        searchField.style.removeProperty("max-width");
-      }, 50);
     }
   }
 

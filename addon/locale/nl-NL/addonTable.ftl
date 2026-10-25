@@ -1,6 +1,7 @@
 title = Add-on Markt
 refresh = 
     .label = Verversen
+    .aria-label = Verversen
 selectSource = Selecteer Bron:
 customSource = Aangepaste Bron:
 filterByTag = Tags:
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = Werkbalkingang verbergen
 search-field =
     .placeholder = Zoeken
+    .aria-label = Zoeken

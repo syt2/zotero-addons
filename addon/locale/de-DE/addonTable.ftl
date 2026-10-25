@@ -1,6 +1,7 @@
 title = Add-on-Markt
 refresh =
     .label = Neu laden
+    .aria-label = Neu laden
 selectSource = Quelle auswählen:
 customSource = Benutzerdefinierte Quelle:
 filterByTag = Tags:
@@ -10,3 +11,4 @@ hideToolbarEntrance =
     .label = Symbolleisten-Eintrag ausblenden
 search-field =
     .placeholder = Suchen...
+    .aria-label = Suchen...
