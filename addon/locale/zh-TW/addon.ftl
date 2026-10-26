@@ -82,6 +82,7 @@ source-kgithub = kGitHub
 source-others = 未知
 
 release-uncompatible-description = 此版本適用於 ({ $minVersion })-({ $maxVersion })，可能不適配您目前的Zotero版本 ({ $currentVersion })。
+release-previous-major-description = 此版本尚未宣告支援 Zotero { $currentVersion }，將沿用適用於 Zotero { $targetVersion } 的版本。請僅在確認相容後使用。
 
 guide-guide-done = 完成
 guide-open-addons-table-title = 開啟外掛市場

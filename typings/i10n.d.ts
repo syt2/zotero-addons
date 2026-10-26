@@ -69,6 +69,7 @@ export type FluentMessageId =
   | 'name'
   | 'refresh'
   | 'reinstall'
+  | 'release-previous-major-description'
   | 'release-uncompatible-description'
   | 'remove'
   | 'rollback-previous-button'

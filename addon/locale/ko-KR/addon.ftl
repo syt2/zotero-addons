@@ -82,6 +82,7 @@ source-kgithub = kGitHub
 source-others = 알 수 없음
 
 release-uncompatible-description = 이 버전은 ({ $minVersion })-({ $maxVersion })에 적합하며, 현재 Zotero 버전 ({ $currentVersion })과 호환되지 않을 수 있습니다.
+release-previous-major-description = This release has not declared support for Zotero { $currentVersion }; the version targeting Zotero { $targetVersion } will be used. Install it only after confirming compatibility.
 
 guide-guide-done = 완료
 guide-open-addons-table-title = 부가기능 마켓 열기

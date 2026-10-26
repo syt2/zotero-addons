@@ -82,6 +82,7 @@ source-kgithub = kGitHub
 source-others = 不明
 
 release-uncompatible-description = このバージョンは ({ $minVersion })-({ $maxVersion }) 向けです。現在のZoteroバージョン ({ $currentVersion }) と互換性がない可能性があります。
+release-previous-major-description = This release has not declared support for Zotero { $currentVersion }; the version targeting Zotero { $targetVersion } will be used. Install it only after confirming compatibility.
 
 guide-guide-done = 完了
 guide-open-addons-table-title = アドオンマーケットを開く

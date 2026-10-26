@@ -8,6 +8,7 @@ import {
   addonCanUpdate,
   addonReleaseInfo,
   displayAddonReleaseInfo,
+  explicitReleaseSelectionOptions,
   releaseMatchesInstalledAddon,
   relatedAddons,
 } from "./addonInfo";
@@ -20,6 +21,7 @@ import {
   setCustomSourceApi,
 } from "../utils/configuration";
 import { getPref, setPref } from "../utils/prefs";
+import { currentBuildCompatibilityPolicy } from "../utils/releaseChannel";
 import { AddonInfoDetail } from "./addonDetail";
 import { HistoricalVersions } from "./historicalVersions";
 import { Guide } from "./guide";
@@ -713,6 +715,14 @@ export class AddonTable {
     const menu = win.document.getElementById(
       "footer-settings-scope-menu",
     ) as HTMLElement | null;
+    const previewBuild = currentBuildCompatibilityPolicy().isPreviewBuild;
+    if (menu) {
+      menu.hidden = previewBuild;
+    }
+    if (previewBuild) {
+      win.document.getElementById("footer-settings-scope-popup")?.remove();
+      return;
+    }
     if (!menu) return;
     menu.dataset.settingsLabel ||= getString("addonScope");
     let popup = win.document.getElementById(
@@ -772,6 +782,10 @@ export class AddonTable {
     const menu = win.document.getElementById(
       "footer-settings-scope-menu",
     ) as HTMLElement | null;
+    if (currentBuildCompatibilityPolicy().isPreviewBuild) {
+      if (menu) menu.hidden = true;
+      return;
+    }
     const popup = win.document.getElementById("footer-settings-scope-popup");
     const compatibleItem = popup?.querySelector('menuitem[value="compatible"]');
     const allItem = popup?.querySelector('menuitem[value="all"]');
@@ -1244,16 +1258,20 @@ export class AddonTable {
     addonInfos = TableDataTransformer.sortAddonInfos(addonInfos, sortColumn);
     // Keep unsupported add-ons visible in "show all" mode without letting
     // them interrupt the normal list of installable add-ons.
-    addonInfos = [
-      ...addonInfos.filter(
-        ([addonInfo]) =>
-          displayAddonReleaseInfo(addonInfo)?.compatible !== false,
-      ),
-      ...addonInfos.filter(
-        ([addonInfo]) =>
-          displayAddonReleaseInfo(addonInfo)?.compatible === false,
-      ),
-    ];
+    const eligibilityOrder = {
+      native: 0,
+      "previous-major": 1,
+      unsupported: 2,
+    };
+    addonInfos = addonInfos.slice().sort((left, right) => {
+      const leftEligibility =
+        displayAddonReleaseInfo(left[0])?.eligibility ?? "unsupported";
+      const rightEligibility =
+        displayAddonReleaseInfo(right[0])?.eligibility ?? "unsupported";
+      return (
+        eligibilityOrder[leftEligibility] - eligibilityOrder[rightEligibility]
+      );
+    });
 
     this.addonInfos = addonInfos;
   }

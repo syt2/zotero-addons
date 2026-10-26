@@ -82,6 +82,7 @@ source-kgithub = kGitHub
 source-others = Bilinmiyor
 
 release-uncompatible-description = Bu sürüm ({ $minVersion })-({ $maxVersion }) için uygundur, mevcut Zotero sürümünüz ({ $currentVersion }) ile uyumlu olmayabilir.
+release-previous-major-description = This release has not declared support for Zotero { $currentVersion }; the version targeting Zotero { $targetVersion } will be used. Install it only after confirming compatibility.
 
 guide-guide-done = Tamam
 guide-open-addons-table-title = Eklenti marketini aç

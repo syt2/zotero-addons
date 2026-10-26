@@ -2,8 +2,10 @@ import {
   AddonInfo,
   AddonInfoManager,
   addonCanUpdateToDisplayedRelease,
+  addonReleaseCanBeInstalled,
   addonReleaseTime,
   displayAddonReleaseInfo,
+  explicitReleaseSelectionOptions,
   fetchHistoricalReleases,
   historicalReleaseDownloadUrls,
   HistoricalRelease,
@@ -169,6 +171,7 @@ export class AddonInfoDetail {
     const relatedAddonList = await relatedAddons(
       [addonInfo],
       this.relatedCatalog(addonInfo),
+      explicitReleaseSelectionOptions(),
     );
     const localAddon =
       relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;
@@ -269,6 +272,7 @@ export class AddonInfoDetail {
     const relateAddons = await relatedAddons(
       [this.addonInfo],
       this.relatedCatalog(this.addonInfo),
+      explicitReleaseSelectionOptions(),
     );
     let localAddon: any = undefined;
     if (relateAddons.length > 0 && relateAddons[0][1]) {
@@ -295,6 +299,7 @@ export class AddonInfoDetail {
     const relatedAddonList = await relatedAddons(
       [addonInfo],
       this.relatedCatalog(addonInfo),
+      explicitReleaseSelectionOptions(),
     );
     const localAddon =
       relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;
@@ -350,7 +355,18 @@ export class AddonInfoDetail {
       "";
 
     this.uncompatibleDescription.hidden = true;
-    if (releaseMatch && !releaseMatch.compatible) {
+    if (releaseMatch?.eligibility === "previous-major") {
+      this.uncompatibleDescription.hidden = false;
+      this.uncompatibleDescription.textContent = getString(
+        "release-previous-major-description",
+        {
+          args: {
+            targetVersion: releaseInfo?.targetZoteroVersion,
+            currentVersion: Zotero.version,
+          },
+        },
+      );
+    } else if (releaseMatch && !releaseMatch.compatible) {
       this.uncompatibleDescription.hidden = false;
       this.uncompatibleDescription.textContent =
         releaseInfo?.minZoteroVersion && releaseInfo.maxZoteroVersion
@@ -373,8 +389,12 @@ export class AddonInfoDetail {
     this.enableButton.hidden = true;
     this.disableButton.hidden = true;
 
+    const canInstall = addonReleaseCanBeInstalled(addonInfo);
     if (relatedAddonList.length > 0) {
-      if (relatedAddonList[0][1].appDisabled) {
+      if (!canInstall) {
+        // Keep uninstall/enable controls below, but do not offer install or
+        // update for a release this build cannot use.
+      } else if (relatedAddonList[0][1].appDisabled) {
         this.reinstallButton.hidden = false;
       } else if (
         addonCanUpdateToDisplayedRelease(
@@ -407,7 +427,7 @@ export class AddonInfoDetail {
           this.disableButton.hidden = false;
         }
       }
-    } else {
+    } else if (canInstall) {
       this.installButton.hidden = false;
     }
 

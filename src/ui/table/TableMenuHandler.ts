@@ -7,6 +7,8 @@ import { getString } from "../../utils/locale";
 import {
   AddonInfo,
   addonCanUpdateToDisplayedRelease,
+  addonReleaseCanBeInstalled,
+  explicitReleaseSelectionOptions,
   isScraperSource,
   relatedAddons,
 } from "../../modules/addonInfo";
@@ -96,7 +98,11 @@ export class TableMenuHandler {
       const catalog = addonInfos.map(([addonInfo]) => addonInfo);
       for (const idx of selects) {
         const addonInfo = addonInfos[idx];
-        const relatedAddon = await relatedAddons([addonInfo[0]], catalog);
+        const relatedAddon = await relatedAddons(
+          [addonInfo[0]],
+          catalog,
+          explicitReleaseSelectionOptions(),
+        );
         if (relatedAddon.length <= 0) {
           continue;
         }
@@ -132,9 +138,17 @@ export class TableMenuHandler {
     const allowBatchInstall = canShowBatchInstall(selects.size);
     for (const idx of selects) {
       const addonInfo = addonInfos[idx];
-      const relatedAddon = await relatedAddons([addonInfo[0]], catalog);
+      const relatedAddon = await relatedAddons(
+        [addonInfo[0]],
+        catalog,
+        explicitReleaseSelectionOptions(),
+      );
       if (relatedAddon.length > 0) {
-        if (relatedAddon[0][1].appDisabled) {
+        const canInstall = addonReleaseCanBeInstalled(addonInfo[0]);
+        if (!canInstall) {
+          // Keep management operations available, but never expose install or
+          // update for a release that this build cannot use.
+        } else if (relatedAddon[0][1].appDisabled) {
           append("menu-reinstall", addonInfo[0]);
         } else if (
           addonCanUpdateToDisplayedRelease(
@@ -175,7 +189,10 @@ export class TableMenuHandler {
         ) {
           append("menu-rollback-previous", addonInfo[0]);
         }
-      } else if (allowBatchInstall) {
+      } else if (
+        allowBatchInstall &&
+        addonReleaseCanBeInstalled(addonInfo[0])
+      ) {
         append("menu-install", addonInfo[0]);
       }
     }

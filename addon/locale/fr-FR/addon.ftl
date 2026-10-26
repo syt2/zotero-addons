@@ -82,6 +82,7 @@ source-kgithub = kGitHub
 source-others = Inconnu
 
 release-uncompatible-description = Cette version est conçue pour ({ $minVersion })-({ $maxVersion }), elle pourrait ne pas être compatible avec votre version actuelle de Zotero ({ $currentVersion }).
+release-previous-major-description = This release has not declared support for Zotero { $currentVersion }; the version targeting Zotero { $targetVersion } will be used. Install it only after confirming compatibility.
 
 guide-guide-done = Terminé
 guide-open-addons-table-title = Ouvrir le marché d'extensions

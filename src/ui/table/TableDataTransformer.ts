@@ -9,8 +9,10 @@ import {
   AddonInfoManager,
   InstallStatus,
   addonInstallStatus,
+  addonReleaseCanBeInstalled,
   addonReleaseTime,
   displayAddonReleaseInfo,
+  explicitReleaseSelectionOptions,
   relatedAddons,
 } from "../../modules/addonInfo";
 import type {
@@ -61,7 +63,11 @@ export class TableDataTransformer {
     let localMetadataAvailable = true;
     try {
       relateAddons = await withTimeout(
-        relatedAddons(addonInfos).catch((error: unknown) => {
+        relatedAddons(
+          addonInfos,
+          addonInfos,
+          explicitReleaseSelectionOptions(),
+        ).catch((error: unknown) => {
           ztoolkit.log(`failed to query local add-ons: ${error}`);
           localMetadataAvailable = false;
           return [];
@@ -90,11 +96,7 @@ export class TableDataTransformer {
               : "?";
         const rawRemoteVersion =
           releaseInfo?.xpiVersion?.toLowerCase().replace("v", "") ?? "";
-        const remoteVersion =
-          releaseMatch && !releaseMatch.compatible
-            ? `${rawRemoteVersion} (${getString("state-uncompatible")})`
-            : rawRemoteVersion;
-        result["menu-remote-version"] = remoteVersion;
+        result["menu-remote-version"] = rawRemoteVersion;
         result["menu-local-version"] = "";
         const releaseTime = addonReleaseTime(addonInfo, releaseInfo);
         if (releaseTime) {
@@ -118,8 +120,14 @@ export class TableDataTransformer {
           : InstallStatus.unknown;
         result["menu-install-state"] =
           TableDataTransformer.installStatusDescription(installState);
+        const canInstall = addonReleaseCanBeInstalled(addonInfo);
         result["menu-tags"] =
           TableDataTransformer.displayTags(addonInfo).join(", ");
+        if (!canInstall) {
+          result["menu-remote-version"] = `${rawRemoteVersion} (${getString(
+            "state-uncompatible",
+          )})`;
+        }
         return [addonInfo, result] as AssociatedAddonInfo;
       }),
     );
