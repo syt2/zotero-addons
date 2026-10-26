@@ -314,9 +314,9 @@ export class AddonTable {
         const newIdx = this.addonInfos.findIndex(
           (newAddon) =>
             oldAddon[0].repo === newAddon[0].repo ||
-            (addonReleaseInfo(newAddon[0])?.id &&
-              addonReleaseInfo(newAddon[0])?.id ===
-                addonReleaseInfo(oldAddon[0])?.id),
+            (displayAddonReleaseInfo(newAddon[0])?.release.id &&
+              displayAddonReleaseInfo(newAddon[0])?.release.id ===
+                displayAddonReleaseInfo(oldAddon[0])?.release.id),
         );
         if (newIdx >= 0) {
           this.tableHelper?.treeInstance.selection.rangedSelect(
@@ -1180,7 +1180,9 @@ export class AddonTable {
         {
           const addonInfo = selectAddons[0][0];
           const name =
-            addonReleaseInfo(addonInfo)?.name ?? addonInfo.name ?? "";
+            displayAddonReleaseInfo(addonInfo)?.release.name ??
+            addonInfo.name ??
+            "";
           if (addonInfo.repo) {
             HistoricalVersions.showWindow(name, addonInfo.repo);
           }
@@ -1195,7 +1197,9 @@ export class AddonTable {
       case "menu-open-xpi-location":
         selectAddons.forEach(async (selectedAddon) => {
           const dbAddon = await getXPIDatabase().getAddon(
-            (addon: any) => addon.id === addonReleaseInfo(selectedAddon[0])?.id,
+            (addon: any) =>
+              addon.id ===
+              displayAddonReleaseInfo(selectedAddon[0])?.release.id,
           );
           if (!dbAddon || !dbAddon.path) {
             return;

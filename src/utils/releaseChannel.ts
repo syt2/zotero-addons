@@ -21,7 +21,7 @@ export function buildCompatibilityPolicy(
   options: BuildCompatibilityOptions,
 ): BuildCompatibilityPolicy {
   const version = options.version.toLowerCase();
-  const updateChannel = options.updateChannel?.toLowerCase() ?? "release";
+  const updateChannel = options.updateChannel?.toLowerCase() || "release";
   const isPreviewBuild =
     updateChannel !== "release" || /-(beta|dev|source)/.test(version);
   const enforceMaxVersion = options.strictCompatibility !== false;

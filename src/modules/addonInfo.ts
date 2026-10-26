@@ -670,12 +670,25 @@ export class AddonInfoManager {
       sourcesWithApi.map((source) => async (registerCanceller) => {
         this.dependencies.log(`trying source: ${source.id}`);
         const apis = resolveSourceApis(source);
+        const cancellers: VoidFunction[] = [];
+        let cancelled = false;
+        registerCanceller(() => {
+          cancelled = true;
+          for (const cancel of cancellers) {
+            cancel();
+          }
+        });
         const infos = await fetchCatalogApis(
           apis,
           this.dependencies.fetchAddonInfos.bind(this.dependencies),
           {
             timeout: AUTO_SOURCE_FETCH_TIMEOUT_MS,
-            cancellerReceiver: registerCanceller,
+            cancellerReceiver: (cancel) => {
+              cancellers.push(cancel);
+              if (cancelled) {
+                cancel();
+              }
+            },
           },
         );
         return infos.length > 0
