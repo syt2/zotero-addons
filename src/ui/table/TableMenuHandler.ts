@@ -93,9 +93,10 @@ export class TableMenuHandler {
     append("menu-systemAddon");
     if (selects?.size === 1) {
       const addonInfos = this.deps.getAddonInfos();
+      const catalog = addonInfos.map(([addonInfo]) => addonInfo);
       for (const idx of selects) {
         const addonInfo = addonInfos[idx];
-        const relatedAddon = await relatedAddons([addonInfo[0]]);
+        const relatedAddon = await relatedAddons([addonInfo[0]], catalog);
         if (relatedAddon.length <= 0) {
           continue;
         }
@@ -127,10 +128,11 @@ export class TableMenuHandler {
       return selectedAddonOps;
     }
     const addonInfos = this.deps.getAddonInfos();
+    const catalog = addonInfos.map(([addonInfo]) => addonInfo);
     const allowBatchInstall = canShowBatchInstall(selects.size);
     for (const idx of selects) {
       const addonInfo = addonInfos[idx];
-      const relatedAddon = await relatedAddons([addonInfo[0]]);
+      const relatedAddon = await relatedAddons([addonInfo[0]], catalog);
       if (relatedAddon.length > 0) {
         if (relatedAddon[0][1].appDisabled) {
           append("menu-reinstall", addonInfo[0]);

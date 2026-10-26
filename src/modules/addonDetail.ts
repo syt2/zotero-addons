@@ -1,5 +1,6 @@
 import {
   AddonInfo,
+  AddonInfoManager,
   addonCanUpdateToDisplayedRelease,
   addonReleaseTime,
   displayAddonReleaseInfo,
@@ -165,7 +166,10 @@ export class AddonInfoDetail {
     if (!isScraperSource() || !addonInfo.repo) {
       return;
     }
-    const relatedAddonList = await relatedAddons([addonInfo]);
+    const relatedAddonList = await relatedAddons(
+      [addonInfo],
+      this.relatedCatalog(addonInfo),
+    );
     const localAddon =
       relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;
     const currentLocalVersion = localAddon?.version;
@@ -253,11 +257,19 @@ export class AddonInfoDetail {
       "#rollback-previous",
     ) as HTMLButtonElement;
   }
+  private static relatedCatalog(addonInfo: AddonInfo) {
+    const catalog = AddonInfoManager.shared.addonInfos;
+    return catalog.includes(addonInfo) ? catalog : [addonInfo];
+  }
+
   private static async localAddon(): Promise<any | undefined> {
     if (!this.addonInfo) {
       return undefined;
     }
-    const relateAddons = await relatedAddons([this.addonInfo]);
+    const relateAddons = await relatedAddons(
+      [this.addonInfo],
+      this.relatedCatalog(this.addonInfo),
+    );
     let localAddon: any = undefined;
     if (relateAddons.length > 0 && relateAddons[0][1]) {
       localAddon = relateAddons[0][1];
@@ -280,7 +292,10 @@ export class AddonInfoDetail {
     const version = releaseInfo?.xpiVersion;
     const releaseTime = addonReleaseTime(addonInfo, releaseInfo);
     // Get related addon info once (avoid duplicate relatedAddons calls)
-    const relatedAddonList = await relatedAddons([addonInfo]);
+    const relatedAddonList = await relatedAddons(
+      [addonInfo],
+      this.relatedCatalog(addonInfo),
+    );
     const localAddon =
       relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;
 

@@ -367,14 +367,21 @@ export class AddonTable {
       .show(-1);
     let num = 0;
     for (const addon of addons) {
-      if (!releaseMatchesInstalledAddon(addon[0], addon[1])) {
+      if (
+        !releaseMatchesInstalledAddon(
+          addon[0],
+          addon[1],
+          this.addonInfos.map(([addonInfo]) => addonInfo),
+        )
+      ) {
         ztoolkit.log(
           `skip updating ${addon[0].repo}: remote release ID does not match installed add-on ${addon[1].id}`,
         );
         continue;
       }
+      const releaseInfo = addonReleaseInfo(addon[0]);
       progressWin.changeLine({
-        text: `${addonReleaseInfo(addon[0])?.name ?? addon[0].name} ${addon[1].version} => ${addon[0].releases?.[0].xpiVersion}`,
+        text: `${releaseInfo?.name ?? addon[0].name} ${addon[1].version} => ${releaseInfo?.xpiVersion ?? "?"}`,
         progress: (num++ / addons.length) * 100,
       });
       await TableActions.installAddons([addon[0]]);
@@ -1298,13 +1305,12 @@ export class AddonTable {
   }
 
   private static async outdateAddons() {
-    const addons = await relatedAddons(
-      this.addonInfos.map((infos) => infos[0]),
-    );
+    const catalog = this.addonInfos.map(([addonInfo]) => addonInfo);
+    const addons = await relatedAddons(catalog, catalog);
     return addons.filter(
       ([addonInfo, addon]) =>
         addonCanUpdate(addonInfo, addon) &&
-        releaseMatchesInstalledAddon(addonInfo, addon),
+        releaseMatchesInstalledAddon(addonInfo, addon, catalog),
     );
   }
 }

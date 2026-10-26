@@ -85,6 +85,75 @@ describe("add-on identity matching", function () {
     assert.isTrue(releaseMatchesInstalledAddon(remote, local));
   });
 
+  it("disambiguates duplicate release IDs using the installed add-on name", function () {
+    const local = localAddon({
+      id: "shared@id",
+      name: "Fr AI",
+      homepageURL: "https://github.com/example/fr-ai",
+    });
+    const owner = remoteAddon({
+      id: "shared@id",
+      name: "Add-on Butler",
+      repo: "example/addon-butler",
+    });
+    const collision = remoteAddon({
+      id: "shared@id",
+      name: "Fr AI",
+      repo: "example/fr-ai",
+    });
+    const catalog = [owner, collision];
+
+    assert.isUndefined(findRelatedAddon(owner, [local], catalog));
+    assert.isFalse(releaseMatchesInstalledAddon(owner, local, catalog));
+    assert.strictEqual(findRelatedAddon(collision, [local], catalog), local);
+    assert.isTrue(releaseMatchesInstalledAddon(collision, local, catalog));
+  });
+
+  it("uses repository metadata to disambiguate renamed duplicate IDs", function () {
+    const local = localAddon({
+      id: "shared@id",
+      name: "Old Display Name",
+      homepageURL: "https://github.com/example/fr-ai",
+    });
+    const owner = remoteAddon({
+      id: "shared@id",
+      name: "Other Add-on",
+      repo: "example/other-addon",
+    });
+    const collision = remoteAddon({
+      id: "shared@id",
+      name: "New Display Name",
+      repo: "example/fr-ai",
+    });
+    const catalog = [owner, collision];
+
+    assert.isUndefined(findRelatedAddon(owner, [local], catalog));
+    assert.strictEqual(findRelatedAddon(collision, [local], catalog), local);
+  });
+
+  it("rejects duplicate IDs that cannot be disambiguated safely", function () {
+    const local = localAddon({
+      id: "shared@id",
+      name: "Shared Name",
+      homepageURL: "",
+      updateURL: "",
+    });
+    const first = remoteAddon({
+      id: "shared@id",
+      name: "Shared Name",
+      repo: "example/first",
+    });
+    const second = remoteAddon({
+      id: "shared@id",
+      name: "Shared Name",
+      repo: "example/second",
+    });
+    const catalog = [first, second];
+
+    assert.isUndefined(findRelatedAddon(first, [local], catalog));
+    assert.isUndefined(findRelatedAddon(second, [local], catalog));
+  });
+
   it("does not fall back to URL matching when the release ID is missing", function () {
     const local = localAddon({
       id: "installed@id",

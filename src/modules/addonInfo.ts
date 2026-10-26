@@ -144,19 +144,62 @@ export function addonReleaseTime(
 /**
  * Find the local add-on identified by the remote release ID.
  *
- * Display names and repository URLs are not stable identities: unrelated
- * add-ons can share a name, and one repository can publish multiple add-ons.
- * When a release has no ID, its installed status is therefore unknown.
+ * The ID is required. If the catalog contains the same ID in multiple
+ * repositories, names and repository URLs are used only to disambiguate those
+ * ID-matched candidates. When a release has no ID, its status stays unknown.
  */
 export function findRelatedAddon(
   addonInfo: AddonInfo,
   localAddons: readonly LocalAddon[],
+  catalog: readonly AddonInfo[] = [addonInfo],
 ): LocalAddon | undefined {
   const releaseId = displayAddonReleaseInfo(addonInfo)?.release.id;
   if (!releaseId) {
     return undefined;
   }
-  return localAddons.find((addon) => addon.id === releaseId);
+  const localAddon = localAddons.find((addon) => addon.id === releaseId);
+  if (!localAddon) {
+    return undefined;
+  }
+
+  // Some upstream indexes contain the same add-on ID in unrelated repositories.
+  // A unique ID is sufficient in that case, but collisions need one more stable
+  // signal before exposing install/update actions. URL matching is safe here
+  // because the ID must already match.
+  const candidates = catalog.filter(
+    (candidate) => displayAddonReleaseInfo(candidate)?.release.id === releaseId,
+  );
+  if (
+    new Set(candidates.map((candidate) => candidate.repo.toLowerCase())).size <=
+    1
+  ) {
+    return localAddon;
+  }
+
+  const localURLs = [localAddon.homepageURL, localAddon.updateURL].filter(
+    (url): url is string => Boolean(url),
+  );
+  const matchingRepos = new Set(
+    candidates
+      .filter((candidate) => {
+        const releaseName = displayAddonReleaseInfo(candidate)?.release.name;
+        if (
+          candidate.name === localAddon.name ||
+          releaseName === localAddon.name
+        ) {
+          return true;
+        }
+        const repo = candidate.repo.toLowerCase();
+        return localURLs.some((url) => url.toLowerCase().includes(repo));
+      })
+      .map((candidate) => candidate.repo.toLowerCase()),
+  );
+  if (matchingRepos.size !== 1) {
+    return undefined;
+  }
+  return matchingRepos.has(addonInfo.repo.toLowerCase())
+    ? localAddon
+    : undefined;
 }
 
 /**
@@ -164,14 +207,17 @@ export function findRelatedAddon(
  * @param addonInfos AddonInfo array
  * @returns [AddonInfo, addon][] pair which addon installed
  */
-export async function relatedAddons(addonInfos: AddonInfo[]) {
+export async function relatedAddons(
+  addonInfos: AddonInfo[],
+  catalog: readonly AddonInfo[] = addonInfos,
+) {
   const addons: [AddonInfo, LocalAddon][] = [];
   const localAddons = (await getAddonManager().getAllAddons()).filter(
     (e) => e.id,
   );
 
   for (const addonInfo of addonInfos) {
-    const relateAddon = findRelatedAddon(addonInfo, localAddons);
+    const relateAddon = findRelatedAddon(addonInfo, localAddons, catalog);
     if (relateAddon) {
       addons.push([addonInfo, relateAddon]);
     }
@@ -247,9 +293,9 @@ export function addonCanUpdate(addonInfo: AddonInfo, addon: LocalAddon) {
 export function releaseMatchesInstalledAddon(
   addonInfo: AddonInfo,
   addon: LocalAddon,
+  catalog: readonly AddonInfo[] = [addonInfo],
 ) {
-  const releaseId = addonReleaseInfo(addonInfo)?.id;
-  return Boolean(releaseId && releaseId === addon.id);
+  return findRelatedAddon(addonInfo, [addon], catalog) === addon;
 }
 
 /**
