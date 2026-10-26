@@ -141,9 +141,10 @@ export function addonReleaseCanBeInstalled(
  * back to the release targeting the closest Zotero major version.
  */
 export function displayAddonReleaseInfo(addonInfo: AddonInfo) {
+  const policy = previewCatalogDisplayPolicy();
   return resolveAddonReleaseSelection(addonInfo, {
-    allowPreviousMajor: previewCatalogDisplayPolicy().allowPreviousMajor,
-    allowUnsupported: previewCatalogDisplayPolicy().showUnsupported,
+    allowPreviousMajor: policy.allowPreviousMajor,
+    allowUnsupported: policy.showUnsupported,
   });
 }
 
