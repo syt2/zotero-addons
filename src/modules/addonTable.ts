@@ -8,6 +8,7 @@ import {
   addonCanUpdate,
   addonReleaseInfo,
   displayAddonReleaseInfo,
+  releaseMatchesInstalledAddon,
   relatedAddons,
 } from "./addonInfo";
 import { getActiveWindow, isWindowAlive } from "../utils/window";
@@ -366,6 +367,12 @@ export class AddonTable {
       .show(-1);
     let num = 0;
     for (const addon of addons) {
+      if (!releaseMatchesInstalledAddon(addon[0], addon[1])) {
+        ztoolkit.log(
+          `skip updating ${addon[0].repo}: remote release ID does not match installed add-on ${addon[1].id}`,
+        );
+        continue;
+      }
       progressWin.changeLine({
         text: `${addonReleaseInfo(addon[0])?.name ?? addon[0].name} ${addon[1].version} => ${addon[0].releases?.[0].xpiVersion}`,
         progress: (num++ / addons.length) * 100,
@@ -1294,8 +1301,10 @@ export class AddonTable {
     const addons = await relatedAddons(
       this.addonInfos.map((infos) => infos[0]),
     );
-    return addons.filter(([addonInfo, addon]) =>
-      addonCanUpdate(addonInfo, addon),
+    return addons.filter(
+      ([addonInfo, addon]) =>
+        addonCanUpdate(addonInfo, addon) &&
+        releaseMatchesInstalledAddon(addonInfo, addon),
     );
   }
 }
