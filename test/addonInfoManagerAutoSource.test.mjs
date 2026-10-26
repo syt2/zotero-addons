@@ -3,7 +3,10 @@ import { test } from "node:test";
 import { setImmediate } from "node:timers";
 import { createJiti } from "jiti";
 
-globalThis.Zotero = { version: "11.0-beta.1" };
+globalThis.Zotero = {
+  version: "11.0-beta.1",
+  Prefs: { get: () => false },
+};
 globalThis.Services = {
   prefs: {
     getStringPref: (key, fallback) =>

@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createJiti } from "jiti";
 
-globalThis.Zotero = { version: "11.0-beta.1" };
+globalThis.Zotero = {
+  version: "11.0-beta.1",
+  Prefs: {
+    get: (key) => key === "extensions.zotero.zoteroaddons.showAllAddons",
+  },
+};
 globalThis.Services = {
   prefs: {
     getStringPref: (key, fallback) =>
@@ -61,11 +66,21 @@ const futureOnly = {
   repo: "owner/future",
   releases: [release(12, "4.0.0")],
 };
+const legacyOnly = {
+  repo: "owner/legacy",
+  releases: [release(6, "1.0.0")],
+};
 
-test("preview display ignores the persisted show-all preference", () => {
+test("preview compatible display uses the previous-major fallback", () => {
   const selected = displayAddonReleaseInfo(previousOnly);
   assert.equal(selected?.release.xpiVersion, "2.0.0");
   assert.equal(selected?.eligibility, "previous-major");
+});
+
+test("preview all-addons display includes unsupported releases", () => {
+  const selected = displayAddonReleaseInfo(legacyOnly);
+  assert.equal(selected?.release.xpiVersion, "1.0.0");
+  assert.equal(selected?.eligibility, "unsupported");
 });
 
 test("preview explicit actions allow previous-major releases", () => {

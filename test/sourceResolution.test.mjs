@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createJiti } from "jiti";
 
-globalThis.Zotero = { version: "11.0.3" };
+globalThis.Zotero = {
+  version: "11.0.3",
+  Prefs: { get: () => false },
+};
 globalThis.Services = {
   prefs: {
     getStringPref: (_key, fallback) => fallback,
@@ -46,27 +49,40 @@ test("preview compatibility catalog resolves current then previous major", () =>
   );
 });
 
-test("preview builds ignore a persisted show-all preference", () => {
-  globalThis.Zotero = { version: "11.0-beta.1" };
+test("preview builds honor a persisted show-all preference", () => {
+  globalThis.Zotero = {
+    version: "11.0-beta.1",
+    Prefs: { get: () => true },
+  };
   globalThis.Services.prefs.getStringPref = () => "beta";
   globalThis.Services.prefs.getBoolPref = () => false;
-  globalThis.getPref = () => true;
   assert.deepEqual(
     resolveSourceApis(source, {
       zoteroVersion: "11.0-beta.1",
     }),
-    [
-      "https://example.test/addon_infos_11.json",
-      "https://example.test/addon_infos_10.json",
-    ],
+    [source.api],
   );
-  globalThis.Zotero = { version: "11.0.3" };
+  globalThis.Zotero = {
+    version: "11.0.3",
+    Prefs: { get: () => false },
+  };
   globalThis.Services.prefs.getStringPref = (_key, fallback) => fallback;
   globalThis.Services.prefs.getBoolPref = (_key, fallback) => fallback;
   globalThis.getPref = () => false;
 });
 
-test("all-addons mode remains a single full index", () => {
+test("preview all-addons mode remains a single full index", () => {
+  assert.deepEqual(
+    resolveSourceApis(source, {
+      showAllAddons: true,
+      zoteroVersion: "11.0-beta.1",
+      usePreviousMajorFallback: true,
+    }),
+    [source.api],
+  );
+});
+
+test("stable all-addons mode remains a single full index", () => {
   assert.deepEqual(
     resolveSourceApis(source, {
       showAllAddons: true,

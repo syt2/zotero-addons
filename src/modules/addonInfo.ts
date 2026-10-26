@@ -454,8 +454,7 @@ function previewCatalogDisplayPolicy() {
   const policy = currentBuildCompatibilityPolicy();
   return {
     allowPreviousMajor: policy.usePreviousMajorFallback,
-    showUnsupported:
-      !policy.isPreviewBuild && getPref("showAllAddons") === true,
+    showUnsupported: getPref("showAllAddons") === true,
   };
 }
 

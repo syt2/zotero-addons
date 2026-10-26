@@ -109,9 +109,9 @@ function resolveIndexApis(
 }
 
 /**
- * Resolve every index that represents the compatibility catalog for a source.
- * Preview builds return current-major followed by previous-major; stable
- * builds return only the current-major index.
+ * Resolve every index that represents the selected catalog for a source.
+ * Compatible mode returns current-major and, on preview builds, previous-major.
+ * All-addons mode always returns the unfiltered full index.
  */
 export function resolveSourceApis(
   source: Readonly<Source>,
@@ -119,8 +119,7 @@ export function resolveSourceApis(
 ) {
   const policy = currentBuildCompatibilityPolicy();
   const showAllAddons =
-    options?.showAllAddons ??
-    (!policy.isPreviewBuild && getPref("showAllAddons") === true);
+    options?.showAllAddons ?? getPref("showAllAddons") === true;
   if (showAllAddons || !source.versionedApi) {
     return source.api ? [source.api] : [];
   }
