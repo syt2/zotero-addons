@@ -1,4 +1,5 @@
 import { getPref, setPref } from "./prefs";
+import { currentBuildCompatibilityPolicy } from "./releaseChannel";
 
 /**
  * Add-on Source ID
@@ -76,31 +77,97 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
   },
 ];
 
-/**
- * Resolve the index URL for a source.
- * The versioned index is the default; the all-addons index is used only when
- * the user explicitly asks to see unsupported add-ons.
- */
-export function resolveSourceApi(
+interface IndexResolutionOptions {
+  showAllAddons?: boolean;
+  zoteroVersion?: string;
+  usePreviousMajorFallback?: boolean;
+}
+
+function currentMajorVersion(zoteroVersion?: string) {
+  return (zoteroVersion ?? Zotero.version).split(".")[0];
+}
+
+function resolveVersionedApi(source: Readonly<Source>, zoteroMajor: string) {
+  return source.versionedApi?.replace("{zoteroMajor}", zoteroMajor);
+}
+
+function resolveIndexApis(
   source: Readonly<Source>,
-  options?: { showAllAddons?: boolean; zoteroVersion?: string },
+  zoteroMajor: string,
+  usePreviousMajorFallback: boolean,
+) {
+  const currentMajor = Number.parseInt(zoteroMajor, 10);
+  if (!Number.isFinite(currentMajor)) {
+    return [];
+  }
+  const majors = usePreviousMajorFallback
+    ? [currentMajor, currentMajor - 1]
+    : [currentMajor];
+  return majors
+    .map((major) => resolveVersionedApi(source, String(major)))
+    .filter((api): api is string => Boolean(api));
+}
+
+/**
+ * Resolve every index that represents the compatibility catalog for a source.
+ * Preview builds return current-major followed by previous-major; stable
+ * builds return only the current-major index.
+ */
+export function resolveSourceApis(
+  source: Readonly<Source>,
+  options?: IndexResolutionOptions,
 ) {
   const showAllAddons =
     options?.showAllAddons ?? getPref("showAllAddons") === true;
-  if (!showAllAddons && source.versionedApi) {
-    const currentMajor = (options?.zoteroVersion ?? Zotero.version).split(
-      ".",
-    )[0];
-    return source.versionedApi.replace("{zoteroMajor}", currentMajor);
+  if (showAllAddons || !source.versionedApi) {
+    return source.api ? [source.api] : [];
   }
-  return source.api;
+  const usePreviousMajorFallback =
+    options?.usePreviousMajorFallback ??
+    currentBuildCompatibilityPolicy().usePreviousMajorFallback;
+  return resolveIndexApis(
+    source,
+    currentMajorVersion(options?.zoteroVersion),
+    usePreviousMajorFallback,
+  );
+}
+
+/**
+ * Resolve the primary index URL for a source. The all-addons index is used
+ * only when explicitly requested; callers that fetch the compatibility catalog
+ * should prefer resolveSourceApis().
+ */
+export function resolveSourceApi(
+  source: Readonly<Source>,
+  options?: IndexResolutionOptions,
+) {
+  return resolveSourceApis(source, options)[0];
+}
+
+/**
+ * A source with the complete endpoint set for one compatibility catalog.
+ */
+export type ResolvedSource = Readonly<Source & { apis?: readonly string[] }>;
+
+/**
+ * Attach the resolved compatibility indexes to a source without changing its
+ * identity. `api` remains the primary endpoint for backwards compatibility.
+ */
+export function withResolvedApis(
+  source: Readonly<Source>,
+  options?: IndexResolutionOptions,
+): ResolvedSource {
+  const apis = resolveSourceApis(source, options);
+  return { ...source, api: apis[0], apis };
 }
 
 /**
  * Get selected source
  * @returns selected source
  */
-export function currentSource(): Readonly<Source> {
+export function currentSource(): Readonly<
+  Source & { apis?: readonly string[] }
+> {
   const curSource = getPref("source");
   const match = Sources.find((source) => {
     return source.id === curSource;
@@ -108,10 +175,7 @@ export function currentSource(): Readonly<Source> {
   if (match) {
     if (match.id === "source-auto") {
       if (autoSource()) {
-        return {
-          id: "source-auto",
-          api: resolveSourceApi(autoSource()!),
-        };
+        return withResolvedApis(autoSource()!);
       }
       return match;
     }
@@ -124,10 +188,7 @@ export function currentSource(): Readonly<Source> {
       }
       return match;
     }
-    return {
-      ...match,
-      api: resolveSourceApi(match),
-    };
+    return withResolvedApis(match);
   }
   return Sources[0];
 }
