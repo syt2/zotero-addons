@@ -2,14 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createJiti } from "jiti";
 
-globalThis.Zotero = { version: "11.0-beta.1" };
 globalThis.Services = {
-  prefs: {
-    getStringPref: (key, fallback) =>
-      key === "app.update.channel" ? "beta" : fallback,
-    getBoolPref: (key, fallback) =>
-      key === "extensions.strictCompatibility" ? false : fallback,
-  },
   vc: {
     compare(left, right) {
       const parse = (value) =>
@@ -25,37 +18,51 @@ globalThis.Services = {
     },
   },
 };
-globalThis.getPref = () => false;
 const jiti = createJiti(import.meta.url, { interopDefault: true });
-const { displayAddonReleaseInfo } = await jiti.import(
-  "../src/modules/addonInfo.ts",
+const { selectAddonRelease } = await jiti.import(
+  "../src/utils/addonReleaseSelection.ts",
 );
 
-function release(target, version) {
+function release(target, version, releaseDate = "2026-01-01") {
   return {
     targetZoteroVersion: String(target),
     tagName: `v${version}`,
     xpiVersion: version,
     minZoteroVersion: `${target}.0`,
     maxZoteroVersion: `${target}.*`,
+    releaseDate,
     xpiDownloadUrl: { github: `https://example.test/${version}.xpi` },
   };
 }
 
-test("preview rows select native before previous-major", () => {
-  const addon = {
-    repo: "owner/addon",
-    releases: [release(10, "2.0.0"), release(11, "3.0.0")],
-  };
-  assert.equal(displayAddonReleaseInfo(addon)?.release.xpiVersion, "3.0.0");
-  assert.equal(displayAddonReleaseInfo(addon)?.eligibility, "native");
+test("selects native release before previous-major", () => {
+  const selected = selectAddonRelease(
+    {
+      repo: "owner/addon",
+      releases: [release(10, "2.0.0"), release(11, "3.0.0")],
+    },
+    {
+      currentVersion: "11.0-beta.1",
+      allowPreviousMajor: true,
+      allowUnsupported: false,
+    },
+  );
+  assert.equal(selected?.release.xpiVersion, "3.0.0");
+  assert.equal(selected?.eligibility, "native");
 });
 
-test("preview rows fall back to previous-major exactly once", () => {
-  const addon = {
-    repo: "owner/addon",
-    releases: [release(9, "1.0.0"), release(10, "2.0.0")],
-  };
-  assert.equal(displayAddonReleaseInfo(addon)?.release.xpiVersion, "2.0.0");
-  assert.equal(displayAddonReleaseInfo(addon)?.eligibility, "previous-major");
+test("selects previous-major when no native release exists", () => {
+  const selected = selectAddonRelease(
+    {
+      repo: "owner/addon",
+      releases: [release(9, "1.0.0"), release(10, "2.0.0")],
+    },
+    {
+      currentVersion: "11.0-beta.1",
+      allowPreviousMajor: true,
+      allowUnsupported: false,
+    },
+  );
+  assert.equal(selected?.release.xpiVersion, "2.0.0");
+  assert.equal(selected?.eligibility, "previous-major");
 });
