@@ -12,7 +12,6 @@ import {
   addonReleaseCanBeInstalled,
   addonReleaseTime,
   displayAddonReleaseInfo,
-  explicitReleaseSelectionOptions,
   relatedAddons,
 } from "../../modules/addonInfo";
 import type {
@@ -63,11 +62,7 @@ export class TableDataTransformer {
     let localMetadataAvailable = true;
     try {
       relateAddons = await withTimeout(
-        relatedAddons(
-          addonInfos,
-          addonInfos,
-          explicitReleaseSelectionOptions(),
-        ).catch((error: unknown) => {
+        relatedAddons(addonInfos, addonInfos).catch((error: unknown) => {
           ztoolkit.log(`failed to query local add-ons: ${error}`);
           localMetadataAvailable = false;
           return [];

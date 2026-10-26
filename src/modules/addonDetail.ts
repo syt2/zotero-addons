@@ -5,7 +5,6 @@ import {
   addonReleaseCanBeInstalled,
   addonReleaseTime,
   displayAddonReleaseInfo,
-  explicitReleaseSelectionOptions,
   fetchHistoricalReleases,
   historicalReleaseDownloadUrls,
   HistoricalRelease,
@@ -147,6 +146,9 @@ export class AddonInfoDetail {
   }
 
   private static async installAddon(addon: AddonInfo) {
+    if (!addonReleaseCanBeInstalled(addon)) {
+      return;
+    }
     const releaseInfo = displayAddonReleaseInfo(addon)?.release;
     const urls = xpiDownloadUrls(addon, releaseInfo).filter((x) => {
       return (x?.length ?? 0) > 0;
@@ -171,7 +173,6 @@ export class AddonInfoDetail {
     const relatedAddonList = await relatedAddons(
       [addonInfo],
       this.relatedCatalog(addonInfo),
-      explicitReleaseSelectionOptions(),
     );
     const localAddon =
       relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;
@@ -272,7 +273,6 @@ export class AddonInfoDetail {
     const relateAddons = await relatedAddons(
       [this.addonInfo],
       this.relatedCatalog(this.addonInfo),
-      explicitReleaseSelectionOptions(),
     );
     let localAddon: any = undefined;
     if (relateAddons.length > 0 && relateAddons[0][1]) {
@@ -299,7 +299,6 @@ export class AddonInfoDetail {
     const relatedAddonList = await relatedAddons(
       [addonInfo],
       this.relatedCatalog(addonInfo),
-      explicitReleaseSelectionOptions(),
     );
     const localAddon =
       relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;

@@ -116,7 +116,7 @@ export function xpiDownloadUrls(
  * @returns AddonInfo.releases (Adapted to current Zotero version)
  */
 export function addonReleaseInfo(addonInfo: AddonInfo) {
-  return resolveAddonRelease(addonInfo, false)?.release;
+  return resolveAddonReleaseSelection(addonInfo)?.release;
 }
 
 /**
@@ -141,10 +141,10 @@ export function addonReleaseCanBeInstalled(
  * back to the release targeting the closest Zotero major version.
  */
 export function displayAddonReleaseInfo(addonInfo: AddonInfo) {
-  return resolveAddonRelease(
-    addonInfo,
-    previewCatalogDisplayPolicy().showUnsupported,
-  );
+  return resolveAddonReleaseSelection(addonInfo, {
+    allowPreviousMajor: previewCatalogDisplayPolicy().allowPreviousMajor,
+    allowUnsupported: previewCatalogDisplayPolicy().showUnsupported,
+  });
 }
 
 /**
@@ -176,14 +176,13 @@ export function addonReleaseTime(
  * repositories, names and repository URLs are used only to disambiguate those
  * ID-matched candidates. When a release has no ID, its status stays unknown.
  */
-export function findRelatedAddon(
+function findRelatedAddonWithSelection(
   addonInfo: AddonInfo,
   localAddons: readonly LocalAddon[],
-  catalog: readonly AddonInfo[] = [addonInfo],
-  options?: { allowPreviousMajor?: boolean },
+  catalog: readonly AddonInfo[],
+  selectRelease: (candidate: AddonInfo) => ResolvedAddonRelease | undefined,
 ): LocalAddon | undefined {
-  const releaseId = resolveAddonReleaseSelection(addonInfo, options)?.release
-    .id;
+  const releaseId = selectRelease(addonInfo)?.release.id;
   if (!releaseId) {
     return undefined;
   }
@@ -197,9 +196,7 @@ export function findRelatedAddon(
   // signal before exposing install/update actions. URL matching is safe here
   // because the ID must already match.
   const candidates = catalog.filter(
-    (candidate) =>
-      resolveAddonReleaseSelection(candidate, options)?.release.id ===
-      releaseId,
+    (candidate) => selectRelease(candidate)?.release.id === releaseId,
   );
   if (
     new Set(candidates.map((candidate) => candidate.repo.toLowerCase())).size <=
@@ -214,8 +211,7 @@ export function findRelatedAddon(
   const matchingRepos = new Set(
     candidates
       .filter((candidate) => {
-        const releaseName = resolveAddonReleaseSelection(candidate, options)
-          ?.release.name;
+        const releaseName = selectRelease(candidate)?.release.name;
         if (
           candidate.name === localAddon.name ||
           releaseName === localAddon.name
@@ -236,6 +232,40 @@ export function findRelatedAddon(
 }
 
 /**
+ * Find an installed add-on using the release currently shown in the market.
+ * Preview fallback rows remain linkable for details and manual actions.
+ */
+export function findRelatedAddon(
+  addonInfo: AddonInfo,
+  localAddons: readonly LocalAddon[],
+  catalog: readonly AddonInfo[] = [addonInfo],
+): LocalAddon | undefined {
+  return findRelatedAddonWithSelection(
+    addonInfo,
+    localAddons,
+    catalog,
+    displayAddonReleaseInfo,
+  );
+}
+
+/**
+ * Match an installed add-on using a native release only. This is used by
+ * automatic updates, where a preview fallback must never be treated as target.
+ */
+export function findNativeRelatedAddon(
+  addonInfo: AddonInfo,
+  localAddons: readonly LocalAddon[],
+  catalog: readonly AddonInfo[] = [addonInfo],
+): LocalAddon | undefined {
+  return findRelatedAddonWithSelection(
+    addonInfo,
+    localAddons,
+    catalog,
+    resolveAddonReleaseSelection,
+  );
+}
+
+/**
  * Extract and filter local addon obj from AddonInfo
  * @param addonInfos AddonInfo array
  * @returns [AddonInfo, addon][] pair which addon installed
@@ -243,7 +273,6 @@ export function findRelatedAddon(
 export async function relatedAddons(
   addonInfos: AddonInfo[],
   catalog: readonly AddonInfo[] = addonInfos,
-  options?: { allowPreviousMajor?: boolean },
 ) {
   const addons: [AddonInfo, LocalAddon][] = [];
   const localAddons = (await getAddonManager().getAllAddons()).filter(
@@ -251,12 +280,7 @@ export async function relatedAddons(
   );
 
   for (const addonInfo of addonInfos) {
-    const relateAddon = findRelatedAddon(
-      addonInfo,
-      localAddons,
-      catalog,
-      options,
-    );
+    const relateAddon = findRelatedAddon(addonInfo, localAddons, catalog);
     if (relateAddon) {
       addons.push([addonInfo, relateAddon]);
     }
@@ -293,7 +317,9 @@ export async function addonInstallStatus(
           return InstallStatus.incompatible;
         } else if (relateAddon[1].userDisabled) {
           return InstallStatus.disabled;
-        } else if (addonCanUpdate(relateAddon[0], relateAddon[1])) {
+        } else if (
+          addonCanUpdateToDisplayedRelease(relateAddon[0], relateAddon[1])
+        ) {
           return InstallStatus.updatable;
         } else {
           return InstallStatus.normal;
@@ -318,9 +344,7 @@ export async function addonInstallStatus(
  * @returns bool
  */
 export function addonCanUpdate(addonInfo: AddonInfo, addon: LocalAddon) {
-  const version = resolveAddonReleaseSelection(addonInfo, {
-    forAutomaticUpdate: true,
-  })?.release.xpiVersion;
+  const version = resolveAddonReleaseSelection(addonInfo)?.release.xpiVersion;
   if (!version || !addon.version) {
     return false;
   }
@@ -328,27 +352,15 @@ export function addonCanUpdate(addonInfo: AddonInfo, addon: LocalAddon) {
 }
 
 /**
- * Verify that the compatible remote release belongs to the installed add-on.
+ * Verify that the native release belongs to the installed add-on.
  * This is a fail-closed guard for automatic update paths.
  */
-export const NATIVE_ONLY_RELEASE_SELECTION = {
-  allowPreviousMajor: false,
-} as const;
-
-export function explicitReleaseSelectionOptions() {
-  return {
-    allowPreviousMajor:
-      currentBuildCompatibilityPolicy().usePreviousMajorFallback,
-  };
-}
-
 export function releaseMatchesInstalledAddon(
   addonInfo: AddonInfo,
   addon: LocalAddon,
   catalog: readonly AddonInfo[] = [addonInfo],
-  options: { allowPreviousMajor?: boolean } = NATIVE_ONLY_RELEASE_SELECTION,
 ) {
-  return findRelatedAddon(addonInfo, [addon], catalog, options) === addon;
+  return findNativeRelatedAddon(addonInfo, [addon], catalog) === addon;
 }
 
 /**
@@ -419,23 +431,20 @@ export function resolveAddonRelease(
 }
 
 /**
- * Resolve the display release and its install eligibility under the current
- * build policy. This is shared by table, menu, detail, and auto-update paths.
+ * Resolve a release with an explicit policy. The default is deliberately
+ * native-only so automatic updates and internal identity checks cannot inherit
+ * the preview display fallback accidentally.
  */
 export function resolveAddonReleaseSelection(
   addonInfo: AddonInfo,
   options?: {
     allowPreviousMajor?: boolean;
     allowUnsupported?: boolean;
-    forAutomaticUpdate?: boolean;
   },
 ): ResolvedAddonRelease | undefined {
-  const policy = previewCatalogDisplayPolicy();
-  const automatic = options?.forAutomaticUpdate === true;
   return selectAddonRelease(addonInfo, {
     currentVersion: Zotero.version,
-    allowPreviousMajor:
-      !automatic && (options?.allowPreviousMajor ?? policy.allowPreviousMajor),
+    allowPreviousMajor: options?.allowPreviousMajor ?? false,
     allowUnsupported: options?.allowUnsupported ?? false,
   });
 }

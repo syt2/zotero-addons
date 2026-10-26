@@ -58,6 +58,13 @@ function releaseFitsTarget(
   );
 }
 
+function releaseAllowsCurrentMinimum(
+  release: AddonRelease,
+  currentVersion: string,
+) {
+  return versionFits(currentVersion, release.minZoteroVersion);
+}
+
 function latestRelease(releases: readonly AddonRelease[]) {
   return releases.reduce((latest, release) => {
     const latestTime = new Date(latest.releaseDate ?? "").getTime() || 0;
@@ -114,13 +121,14 @@ export function selectAddonRelease(
   }
 
   if (options.allowPreviousMajor) {
-    const previousReleases = releases.filter((release) =>
-      releaseFitsTarget(
-        release,
-        options.currentVersion,
-        currentMajor - 1,
-        true,
-      ),
+    const previousReleases = releases.filter(
+      (release) =>
+        releaseFitsTarget(
+          release,
+          options.currentVersion,
+          currentMajor - 1,
+          true,
+        ) && releaseAllowsCurrentMinimum(release, options.currentVersion),
     );
     if (previousReleases.length > 0) {
       return {

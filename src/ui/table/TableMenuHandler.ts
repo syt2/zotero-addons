@@ -8,7 +8,6 @@ import {
   AddonInfo,
   addonCanUpdateToDisplayedRelease,
   addonReleaseCanBeInstalled,
-  explicitReleaseSelectionOptions,
   isScraperSource,
   relatedAddons,
 } from "../../modules/addonInfo";
@@ -98,11 +97,7 @@ export class TableMenuHandler {
       const catalog = addonInfos.map(([addonInfo]) => addonInfo);
       for (const idx of selects) {
         const addonInfo = addonInfos[idx];
-        const relatedAddon = await relatedAddons(
-          [addonInfo[0]],
-          catalog,
-          explicitReleaseSelectionOptions(),
-        );
+        const relatedAddon = await relatedAddons([addonInfo[0]], catalog);
         if (relatedAddon.length <= 0) {
           continue;
         }
@@ -138,11 +133,7 @@ export class TableMenuHandler {
     const allowBatchInstall = canShowBatchInstall(selects.size);
     for (const idx of selects) {
       const addonInfo = addonInfos[idx];
-      const relatedAddon = await relatedAddons(
-        [addonInfo[0]],
-        catalog,
-        explicitReleaseSelectionOptions(),
-      );
+      const relatedAddon = await relatedAddons([addonInfo[0]], catalog);
       if (relatedAddon.length > 0) {
         const canInstall = addonReleaseCanBeInstalled(addonInfo[0]);
         if (!canInstall) {

@@ -7,7 +7,6 @@ import {
   AddonInfo,
   addonReleaseCanBeInstalled,
   displayAddonReleaseInfo,
-  explicitReleaseSelectionOptions,
   relatedAddons,
   xpiDownloadUrls,
 } from "../../modules/addonInfo";
@@ -47,11 +46,7 @@ export class TableActions {
     addons: AddonInfo[],
     popConfirmDialog: boolean,
   ): Promise<void> {
-    const relatedAddon = await relatedAddons(
-      addons,
-      addons,
-      explicitReleaseSelectionOptions(),
-    );
+    const relatedAddon = await relatedAddons(addons, addons);
     for (const [_addonInfo, addon] of relatedAddon) {
       await uninstall(addon, { popConfirmDialog: popConfirmDialog });
     }
@@ -61,11 +56,7 @@ export class TableActions {
    * Undo addon uninstallation
    */
   static async undoUninstallAddons(addons: AddonInfo[]): Promise<void> {
-    const relatedAddon = await relatedAddons(
-      addons,
-      addons,
-      explicitReleaseSelectionOptions(),
-    );
+    const relatedAddon = await relatedAddons(addons, addons);
     for (const [_addonInfo, addon] of relatedAddon) {
       await undoUninstall(addon);
     }
@@ -78,11 +69,7 @@ export class TableActions {
     addons: AddonInfo[],
     enable: boolean,
   ): Promise<void> {
-    const relatedAddon = await relatedAddons(
-      addons,
-      addons,
-      explicitReleaseSelectionOptions(),
-    );
+    const relatedAddon = await relatedAddons(addons, addons);
     for (const [_addonInfo, addon] of relatedAddon) {
       if (enable) {
         await addon.enable();

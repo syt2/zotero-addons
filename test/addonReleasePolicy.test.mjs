@@ -34,6 +34,8 @@ const {
   addonCanUpdateToDisplayedRelease,
   addonReleaseCanBeInstalled,
   displayAddonReleaseInfo,
+  findRelatedAddon,
+  releaseMatchesInstalledAddon,
 } = await jiti.import("../src/modules/addonInfo.ts");
 
 function release(target, version) {
@@ -82,6 +84,25 @@ test("unsupported future releases cannot be installed", () => {
     false,
     addonCanUpdateToDisplayedRelease(futureOnly, { version: "1.0.0" }),
   );
+});
+
+test("preview fallback can be matched for explicit UI actions only", () => {
+  const addon = {
+    repo: "owner/addon",
+    releases: [
+      {
+        ...release(10, "2.0.0"),
+        id: "fallback@example.com",
+      },
+    ],
+  };
+  const local = {
+    id: "fallback@example.com",
+    name: "Addon",
+    version: "1.0.0",
+  };
+  assert.strictEqual(findRelatedAddon(addon, [local]), local);
+  assert.equal(false, releaseMatchesInstalledAddon(addon, local));
 });
 
 test("automatic updates never use previous-major releases", () => {

@@ -8,7 +8,7 @@ import {
   addonCanUpdate,
   addonReleaseInfo,
   displayAddonReleaseInfo,
-  explicitReleaseSelectionOptions,
+  findNativeRelatedAddon,
   releaseMatchesInstalledAddon,
   relatedAddons,
 } from "./addonInfo";
@@ -34,7 +34,11 @@ import {
   getAddonManager,
   isZoteroVersionAtLeast,
 } from "../utils/compat";
-import type { TableMenuItemID, AssociatedAddonInfo } from "../types";
+import type {
+  TableMenuItemID,
+  AssociatedAddonInfo,
+  LocalAddon,
+} from "../types";
 import {
   TableSearchHandler,
   TableMenuHandler,
@@ -1324,7 +1328,16 @@ export class AddonTable {
 
   private static async outdateAddons() {
     const catalog = this.addonInfos.map(([addonInfo]) => addonInfo);
-    const addons = await relatedAddons(catalog, catalog);
+    const localAddons = (await getAddonManager().getAllAddons()).filter(
+      (addon) => addon.id,
+    );
+    const addons: [AddonInfo, LocalAddon][] = [];
+    for (const addonInfo of catalog) {
+      const addon = findNativeRelatedAddon(addonInfo, localAddons, catalog);
+      if (addon) {
+        addons.push([addonInfo, addon]);
+      }
+    }
     return addons.filter(
       ([addonInfo, addon]) =>
         addonCanUpdate(addonInfo, addon) &&

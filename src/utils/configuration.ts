@@ -117,14 +117,15 @@ export function resolveSourceApis(
   source: Readonly<Source>,
   options?: IndexResolutionOptions,
 ) {
+  const policy = currentBuildCompatibilityPolicy();
   const showAllAddons =
-    options?.showAllAddons ?? getPref("showAllAddons") === true;
+    options?.showAllAddons ??
+    (!policy.isPreviewBuild && getPref("showAllAddons") === true);
   if (showAllAddons || !source.versionedApi) {
     return source.api ? [source.api] : [];
   }
   const usePreviousMajorFallback =
-    options?.usePreviousMajorFallback ??
-    currentBuildCompatibilityPolicy().usePreviousMajorFallback;
+    options?.usePreviousMajorFallback ?? policy.usePreviousMajorFallback;
   return resolveIndexApis(
     source,
     currentMajorVersion(options?.zoteroVersion),
