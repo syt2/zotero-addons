@@ -58,8 +58,11 @@ export interface AddonInfoManagerDependencies {
  * @param addonInfo AddonInfo specified
  * @returns Download urls (Adapted to current Zotero version)
  */
-export function xpiDownloadUrls(addonInfo: AddonInfo) {
-  const suppliedDownloadURLs = addonReleaseInfo(addonInfo)?.xpiDownloadUrl;
+export function xpiDownloadUrls(
+  addonInfo: AddonInfo,
+  releaseInfo = addonReleaseInfo(addonInfo),
+) {
+  const suppliedDownloadURLs = releaseInfo?.xpiDownloadUrl;
   if (!suppliedDownloadURLs) {
     return [];
   }
@@ -230,6 +233,22 @@ export async function addonInstallStatus(
  */
 export function addonCanUpdate(addonInfo: AddonInfo, addon: LocalAddon) {
   const version = addonReleaseInfo(addonInfo)?.xpiVersion;
+  if (!version || !addon.version) {
+    return false;
+  }
+  return Services.vc.compare(addon.version, version) < 0;
+}
+
+/**
+ * Check whether the release currently shown in the table can update the local
+ * add-on. Explicit user actions use this so Zotero remains responsible for the
+ * final compatibility decision.
+ */
+export function addonCanUpdateToDisplayedRelease(
+  addonInfo: AddonInfo,
+  addon: LocalAddon,
+) {
+  const version = displayAddonReleaseInfo(addonInfo)?.release.xpiVersion;
   if (!version || !addon.version) {
     return false;
   }

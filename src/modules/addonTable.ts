@@ -7,6 +7,7 @@ import {
   AddonInfoManager,
   addonCanUpdate,
   addonReleaseInfo,
+  displayAddonReleaseInfo,
   relatedAddons,
 } from "./addonInfo";
 import { getActiveWindow, isWindowAlive } from "../utils/window";
@@ -1205,6 +1206,18 @@ export class AddonTable {
     // Sort
     const sortColumn = this.columnManager.getSortColumn();
     addonInfos = TableDataTransformer.sortAddonInfos(addonInfos, sortColumn);
+    // Keep unsupported add-ons visible in "show all" mode without letting
+    // them interrupt the normal list of installable add-ons.
+    addonInfos = [
+      ...addonInfos.filter(
+        ([addonInfo]) =>
+          displayAddonReleaseInfo(addonInfo)?.compatible !== false,
+      ),
+      ...addonInfos.filter(
+        ([addonInfo]) =>
+          displayAddonReleaseInfo(addonInfo)?.compatible === false,
+      ),
+    ];
 
     this.addonInfos = addonInfos;
   }

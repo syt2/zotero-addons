@@ -5,7 +5,7 @@
 
 import {
   AddonInfo,
-  addonReleaseInfo,
+  displayAddonReleaseInfo,
   relatedAddons,
   xpiDownloadUrls,
 } from "../../modules/addonInfo";
@@ -23,11 +23,12 @@ export class TableActions {
   ): Promise<void> {
     await Promise.all(
       addons.map(async (addon) => {
-        const urls = xpiDownloadUrls(addon).filter((x) => {
+        const releaseInfo = displayAddonReleaseInfo(addon)?.release;
+        const urls = xpiDownloadUrls(addon, releaseInfo).filter((x) => {
           return (x?.length ?? 0) > 0;
         }) as string[];
         await installAddonFrom(urls, {
-          name: addonReleaseInfo(addon)?.name ?? addon.name,
+          name: releaseInfo?.name ?? addon.name,
           popWin: options?.popWin,
         });
       }),

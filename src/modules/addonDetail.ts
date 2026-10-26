@@ -1,6 +1,6 @@
 import {
   AddonInfo,
-  addonReleaseInfo,
+  addonCanUpdateToDisplayedRelease,
   addonReleaseTime,
   displayAddonReleaseInfo,
   fetchHistoricalReleases,
@@ -144,14 +144,15 @@ export class AddonInfoDetail {
   }
 
   private static async installAddon(addon: AddonInfo) {
-    const urls = xpiDownloadUrls(addon).filter((x) => {
+    const releaseInfo = displayAddonReleaseInfo(addon)?.release;
+    const urls = xpiDownloadUrls(addon, releaseInfo).filter((x) => {
       return (x?.length ?? 0) > 0;
     }) as string[];
     if (urls.length === 0) {
       return;
     }
     await installAddonFrom(urls, {
-      name: addonReleaseInfo(addon)?.name ?? addon.name,
+      name: releaseInfo?.name ?? addon.name,
       popWin: true,
     });
   }
@@ -357,19 +358,14 @@ export class AddonInfoDetail {
     this.enableButton.hidden = true;
     this.disableButton.hidden = true;
 
-    // Use relatedAddonList from above (already fetched)
-    const addonCanUpdate = (addonInfo: AddonInfo, addon: any) => {
-      const version = addonReleaseInfo(addonInfo)?.xpiVersion;
-      if (!version || !addon.version) {
-        return false;
-      }
-      return Services.vc.compare(addon.version, version) < 0;
-    };
     if (relatedAddonList.length > 0) {
       if (relatedAddonList[0][1].appDisabled) {
         this.reinstallButton.hidden = false;
       } else if (
-        addonCanUpdate(relatedAddonList[0][0], relatedAddonList[0][1])
+        addonCanUpdateToDisplayedRelease(
+          relatedAddonList[0][0],
+          relatedAddonList[0][1],
+        )
       ) {
         this.updateButton.hidden = false;
       } else {
@@ -400,12 +396,6 @@ export class AddonInfoDetail {
       this.installButton.hidden = false;
     }
 
-    if (releaseMatch && !releaseMatch.compatible) {
-      this.installButton.hidden = true;
-      this.updateButton.hidden = true;
-      this.reinstallButton.hidden = true;
-    }
-
     // Historical versions button (only for scraper sources)
     this.setupHistoryVersionsButton(addonInfo);
     await this.setupRollbackPreviousButton(addonInfo, localAddon);
@@ -434,7 +424,10 @@ export class AddonInfoDetail {
 
     // Add click event listener
     newButton.addEventListener("click", () => {
-      const name = addonReleaseInfo(addonInfo)?.name ?? addonInfo.name ?? "";
+      const name =
+        displayAddonReleaseInfo(addonInfo)?.release.name ??
+        addonInfo.name ??
+        "";
       HistoricalVersions.showWindow(name, addonInfo.repo);
     });
   }
@@ -613,7 +606,9 @@ export class AddonInfoDetail {
       getString("rollback-previous-confirm-message", {
         args: {
           name:
-            addonReleaseInfo(addonInfo)?.name ?? addonInfo.name ?? "Unknown",
+            displayAddonReleaseInfo(addonInfo)?.release.name ??
+            addonInfo.name ??
+            "Unknown",
           currentVersion: currentLocalVersion,
           targetVersion,
         },
@@ -631,7 +626,7 @@ export class AddonInfoDetail {
     }
 
     await installAddonFrom(urls, {
-      name: addonReleaseInfo(addonInfo)?.name ?? addonInfo.name,
+      name: displayAddonReleaseInfo(addonInfo)?.release.name ?? addonInfo.name,
       popWin: true,
     });
   }
