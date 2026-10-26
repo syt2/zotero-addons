@@ -1249,26 +1249,9 @@ export class AddonTable {
       addonInfos = this.searchHandler.filterAddons(addonInfos);
     }
 
-    // Sort
+    // Sort by the selected column, using compatibility only as a tie-breaker.
     const sortColumn = this.columnManager.getSortColumn();
     addonInfos = TableDataTransformer.sortAddonInfos(addonInfos, sortColumn);
-    // Keep unsupported add-ons visible in "show all" mode without letting
-    // them interrupt the normal list of installable add-ons.
-    const eligibilityOrder = {
-      native: 0,
-      "previous-major": 1,
-      unsupported: 2,
-    };
-    addonInfos = addonInfos.slice().sort((left, right) => {
-      const leftEligibility =
-        displayAddonReleaseInfo(left[0])?.eligibility ?? "unsupported";
-      const rightEligibility =
-        displayAddonReleaseInfo(right[0])?.eligibility ?? "unsupported";
-      return (
-        eligibilityOrder[leftEligibility] - eligibilityOrder[rightEligibility]
-      );
-    });
-
     this.addonInfos = addonInfos;
   }
 
