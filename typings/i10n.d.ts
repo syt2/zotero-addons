@@ -83,6 +83,7 @@ export type FluentMessageId =
   | 'search-field'
   | 'selectSource'
   | 'send-button-status-login'
+  | 'settings'
   | 'source-auto'
   | 'source-custom'
   | 'source-ghfast'

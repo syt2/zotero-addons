@@ -1,10 +1,13 @@
 title = Add-on-Markt
+settings =
+    .aria-label = Einstellungen für den Add-on-Markt
 refresh =
     .label = Neu laden
     .aria-label = Neu laden
 selectSource = Quelle auswählen:
 customSource = Benutzerdefinierte Quelle:
 filterByTag = Tags:
+    .label = Tags:
 autoUpdate =
     .label = Add-ons automatisch aktualisieren
 hideToolbarEntrance =

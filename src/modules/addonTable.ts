@@ -66,7 +66,7 @@ export class AddonTable {
     );
     menuitem.setAttribute("class", "menuitem-iconic");
     menuitem.addEventListener("command", () => {
-      void this.showAddonsWindow({ from: "menu" });
+      void this.showAddonsWindow();
     });
 
     toolsPopup.append(separator, menuitem);
@@ -110,7 +110,7 @@ export class AddonTable {
               );
             },
             onCommand: () => {
-              void this.showAddonsWindow({ from: "menu" });
+              void this.showAddonsWindow();
             },
           },
         ],
@@ -124,18 +124,22 @@ export class AddonTable {
   /**
    * Register or unregister entrance in toolbar
    */
-  static registerInToolbar() {
-    const toolbar = Zotero.getMainWindow().document.querySelector(
+  static registerInToolbar(win: Window = Zotero.getMainWindow()) {
+    const toolbar = win.document.querySelector<XULElement>(
       "#zotero-items-toolbar",
-    )!;
+    );
+    if (!toolbar) return;
+    // Keep registration idempotent: toggling this setting must never stack
+    // multiple copies of the toolbar entrance.
+    toolbar
+      .querySelectorAll("#zotero-toolbaritem-addons")
+      .forEach((element: Element) => element.remove());
     if (getPref("hideToolbarEntrance")) {
-      toolbar
-        .querySelectorAll("#zotero-toolbaritem-addons")
-        .forEach((e: Element) => e.remove());
       return;
     }
-    const lookupNode = toolbar.querySelector("#zotero-tb-lookup")!;
-    const newNode = lookupNode?.cloneNode(true) as XULToolBarButtonElement;
+    const lookupNode = toolbar.querySelector("#zotero-tb-lookup");
+    if (!lookupNode) return;
+    const newNode = lookupNode.cloneNode(true) as XULToolBarButtonElement;
 
     newNode.setAttribute("id", "zotero-toolbaritem-addons");
     newNode.setAttribute("tooltiptext", getString("menuitem-addons"));
@@ -143,18 +147,24 @@ export class AddonTable {
     newNode.setAttribute("oncommand", "");
     newNode.setAttribute("mousedown", "");
     newNode.setAttribute("onmousedown", "");
-    newNode.addEventListener("click", async () => {
-      this.showAddonsWindow({ from: "toolbar" });
+    newNode.addEventListener("click", () => {
+      void this.showAddonsWindow();
     });
     const searchNode = toolbar.querySelector("#zotero-tb-search");
     newNode.style.listStyleImage = `url(chrome://${config.addonRef}/content/icons/favicon.svg)`;
     toolbar.insertBefore(newNode, searchNode);
   }
 
+  private static registerInAllToolbars() {
+    for (const win of Zotero.getMainWindows()) {
+      this.registerInToolbar(win);
+    }
+  }
+
   static unregisterAll() {
-    Zotero.getMainWindow()
-      .document.querySelector("#zotero-toolbaritem-addons")
-      ?.remove();
+    for (const win of Zotero.getMainWindows()) {
+      win.document.querySelector("#zotero-toolbaritem-addons")?.remove();
+    }
     const nativeMenuManager = this.getNativeMenuManager();
     if (nativeMenuManager?.unregisterMenu) {
       nativeMenuManager.unregisterMenu("addon-table-entrance");
@@ -178,13 +188,8 @@ export class AddonTable {
   /**
    * Display addon table window
    */
-  static async showAddonsWindow(options?: {
-    from?: "toolbar" | "menu";
-  }): Promise<Window | undefined> {
+  static async showAddonsWindow(): Promise<Window | undefined> {
     if (this.window && isWindowAlive(this.window)) {
-      if (options?.from) {
-        this.updateHideToolbarEntranceInWindow(options.from === "toolbar");
-      }
       this.window.focus();
       this.refresh();
       return this.window;
@@ -237,9 +242,6 @@ export class AddonTable {
     if (!isWindowAlive(win)) return;
     registerXPIDropInstaller(win);
     this.window = win;
-    if (options?.from) {
-      this.updateHideToolbarEntranceInWindow(options.from === "toolbar");
-    }
 
     // Initialize handlers
     this.searchHandler = new TableSearchHandler(win);
@@ -391,13 +393,6 @@ export class AddonTable {
     this.tableHelper = undefined;
     this.searchHandler = undefined;
     this.menuHandler = undefined;
-  }
-
-  private static updateHideToolbarEntranceInWindow(hide: boolean) {
-    const hideToolbarCheckbox = this.window?.document.querySelector(
-      "#hide-toolbar-entrance",
-    ) as HTMLElement;
-    hideToolbarCheckbox.hidden = hide;
   }
 
   private static async createTable() {
@@ -621,114 +616,166 @@ export class AddonTable {
     this.initAutoUpdate(win);
     this.initHideEntrance(win);
     this.initTagFilter(win);
+    this.initSettingsMenu(win);
+  }
+
+  private static initSettingsMenu(win: Window) {
+    const root = win.document.getElementById("footer-settings");
+    const button = win.document.getElementById(
+      "footer-settings-button",
+    ) as HTMLButtonElement | null;
+    const popup = win.document.getElementById(
+      "footer-settings-popup",
+    ) as XULPopupElement | null;
+    if (!root || !button || !popup) return;
+
+    const setOpenState = (open: boolean) => {
+      root.classList.toggle("is-open", open);
+      button.setAttribute("aria-expanded", String(open));
+    };
+    const closeMenu = () => {
+      if (popup.state !== "closed") {
+        popup.hidePopup();
+      }
+    };
+    const openMenu = () => {
+      if (popup.state === "open" || popup.state === "showing") return;
+      // Ask for the upper-left side; macOS may adjust the native menu to keep
+      // it inside the available screen area.
+      popup.openPopup(button, "before_start", 0, 0, false, false);
+    };
+
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (popup.state === "open" || popup.state === "showing") {
+        closeMenu();
+      } else if (popup.state === "closed") {
+        openMenu();
+      }
+    });
+    popup.addEventListener("popupshowing", () => setOpenState(true));
+    popup.addEventListener("popuphidden", () => setOpenState(false));
   }
 
   private static initTagFilter(win: Window) {
-    const placeholder = win.document.getElementById("tagFilterPlaceholder");
-    if (!placeholder) return;
-    this.replaceTagFilterList(placeholder);
+    const menu = win.document.getElementById(
+      "footer-settings-tag-menu",
+    ) as HTMLElement | null;
+    if (!menu) return;
+    menu.dataset.settingsLabel ||= menu.getAttribute("label") ?? "";
+    if (!win.document.getElementById("footer-settings-tag-popup")) {
+      const popup = win.document.createElementNS(
+        "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
+        "menupopup",
+      );
+      popup.id = "footer-settings-tag-popup";
+      menu.appendChild(popup);
+      popup.addEventListener("popupshowing", () => {
+        this.updateTagMenuChecks(this.currentTag ?? "all");
+      });
+    }
+    this.refreshTagFilter();
   }
 
-  private static replaceTagFilterList(node: Element) {
-    ztoolkit.UI.replaceElement(
-      {
-        tag: "menulist",
-        id: "tag-filter",
-        attributes: {
-          value: this.currentTag ?? "all",
-          native: "true",
-          sizetopopup: "none",
-        },
-        styles: {
-          cursor: "pointer",
-          width: "120px",
-          minWidth: "120px",
-          maxWidth: "120px",
-          height: "28px",
-          minHeight: "28px",
-        },
-        listeners: [
-          {
-            type: "command",
-            listener: () => {
-              const value = (
-                this.window?.document.getElementById(
-                  "tag-filter",
-                ) as XULMenuListElement
-              )?.getAttribute("value");
-              this.currentTag = value === "all" ? null : (value ?? null);
-              this.syncTagFilterControl();
-              this.applySearchAndSort();
-              void this.updateTable();
-            },
-          },
-        ],
-        children: [
-          {
-            tag: "menupopup",
-            id: "tag-filter-popup",
-            children: this.buildTagMenuItems(),
-          },
-        ],
-      },
-      node,
+  private static updateTagMenuChecks(value: string) {
+    const popup = this.window?.document.getElementById(
+      "footer-settings-tag-popup",
     );
+    for (const item of Array.from(popup?.children ?? [])) {
+      if (item.localName !== "menuitem") continue;
+      this.setMenuItemChecked(item, item.getAttribute("value") === value);
+    }
+  }
+
+  private static setMenuItemChecked(item: Element, checked: boolean) {
+    // Native menu rendering on macOS follows the attribute, not the XUL
+    // `checked` property, so keep the attribute as the source of truth.
+    if (checked) {
+      item.setAttribute("checked", "true");
+    } else {
+      item.removeAttribute("checked");
+    }
+  }
+
+  private static setTagFilter(value: string) {
+    this.currentTag = value === "all" ? null : value;
+    this.updateTagMenuChecks(value);
     this.syncTagFilterControl();
+    this.applySearchAndSort();
+    void this.updateTable();
   }
 
   private static buildTagMenuItems() {
     const counts = this.getTagCounts();
+    const buildItem = (value: string, label: string, style?: string) => {
+      const isSelected = (this.currentTag ?? "all") === value;
+      return {
+        tag: "menuitem" as const,
+        attributes: {
+          label,
+          value,
+          crop: "end",
+          type: "radio",
+          name: "footer-settings-tag-filter",
+          ...(isSelected ? { checked: "true" } : {}),
+          ...(style ? { style } : {}),
+        },
+        listeners: [
+          {
+            type: "command",
+            listener: () => this.setTagFilter(value),
+          },
+        ],
+      };
+    };
     return [
-      {
-        tag: "menuitem" as const,
-        attributes: {
-          label: `${getString("filter-all-tags")} (${this.baseAddonInfos.length})`,
-          value: "all",
-          crop: "end",
-        },
-      },
-      ...this.getAllTags().map((tag) => ({
-        tag: "menuitem" as const,
-        attributes: {
-          label: `${TableDataTransformer.displayTagLabel(tag)} (${counts.get(tag) ?? 0})`,
-          value: tag,
-          crop: "end",
-          style: `color: ${tagColor(tag)}; font-weight: 500`,
-        },
-      })),
+      buildItem(
+        "all",
+        `${getString("filter-all-tags")} (${this.baseAddonInfos.length})`,
+      ),
+      ...this.getAllTags().map((tag) =>
+        buildItem(
+          tag,
+          `${TableDataTransformer.displayTagLabel(tag)} (${counts.get(tag) ?? 0})`,
+          `color: ${tagColor(tag)}; font-weight: 500`,
+        ),
+      ),
     ];
   }
 
   private static refreshTagFilter() {
-    const popup = this.window?.document.getElementById("tag-filter-popup");
+    const popup = this.window?.document.getElementById(
+      "footer-settings-tag-popup",
+    );
     if (!popup) return;
 
     const allTags = this.getAllTags();
     // Reset currentTag if it no longer exists in the data
     if (this.currentTag && !allTags.includes(this.currentTag)) {
       this.currentTag = null;
-      (
-        this.window?.document.getElementById("tag-filter") as XULMenuListElement
-      )?.setAttribute("value", "all");
     }
 
     while (popup.firstChild) popup.removeChild(popup.firstChild);
     for (const item of this.buildTagMenuItems()) {
       ztoolkit.UI.appendElement(item, popup);
     }
+    this.updateTagMenuChecks(this.currentTag ?? "all");
     this.syncTagFilterControl();
   }
 
   private static syncTagFilterControl() {
     const control = this.window?.document.getElementById(
-      "tag-filter",
-    ) as XULMenuListElement | null;
+      "footer-settings-tag-menu",
+    ) as XULElement | null;
     if (!control) return;
     const label =
       this.currentTag === null
         ? getString("filter-all-tags")
         : TableDataTransformer.displayTagLabel(this.currentTag);
-    control.setAttribute("label", label);
+    const menuLabel = control.dataset.settingsLabel ?? "";
+    const currentValue = `${menuLabel} ${label}`.trim();
+    control.setAttribute("label", currentValue);
     control.setAttribute("tooltiptext", label);
   }
 
@@ -898,28 +945,38 @@ export class AddonTable {
   }
 
   private static initAutoUpdate(win: Window) {
-    const autoUpdateCheckbox = win.document.querySelector(
+    const autoUpdateItem = win.document.querySelector(
       "#auto-update",
-    )! as XULCheckboxElement;
-    autoUpdateCheckbox.checked = getPref("autoUpdate");
-    autoUpdateCheckbox?.addEventListener("command", (e: any) => {
-      const selected = (e.target as XULCheckboxElement).checked;
+    ) as XULMenuItemElement | null;
+    if (!autoUpdateItem) return;
+    const syncChecked = () => {
+      this.setMenuItemChecked(autoUpdateItem, getPref("autoUpdate"));
+    };
+    syncChecked();
+    autoUpdateItem.addEventListener("command", () => {
+      const selected = !getPref("autoUpdate");
       setPref("autoUpdate", selected);
+      syncChecked();
       if (selected) {
-        this.updateExistAddons();
+        void this.updateExistAddons();
       }
     });
   }
 
   private static initHideEntrance(win: Window) {
-    const hideToolbarCheckbox = win.document.querySelector(
+    const hideToolbarItem = win.document.querySelector(
       "#hide-toolbar-entrance",
-    ) as XULCheckboxElement;
-    hideToolbarCheckbox.checked = getPref("hideToolbarEntrance");
-    hideToolbarCheckbox?.addEventListener("command", (e: any) => {
-      const selected = (e.target as XULCheckboxElement).checked;
+    ) as XULMenuItemElement | null;
+    if (!hideToolbarItem) return;
+    const syncChecked = () => {
+      this.setMenuItemChecked(hideToolbarItem, getPref("hideToolbarEntrance"));
+    };
+    syncChecked();
+    hideToolbarItem.addEventListener("command", () => {
+      const selected = !getPref("hideToolbarEntrance");
       setPref("hideToolbarEntrance", selected);
-      this.registerInToolbar();
+      syncChecked();
+      this.registerInAllToolbars();
     });
   }
 

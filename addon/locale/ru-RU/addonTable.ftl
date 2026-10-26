@@ -1,10 +1,13 @@
 title = Магазин дополнений
+settings =
+    .aria-label = Настройки магазина дополнений
 refresh =
     .label = Обновить
     .aria-label = Обновить
 selectSource = Выбрать источник:
 customSource = Пользовательский источник:
 filterByTag = Теги:
+    .label = Теги:
 autoUpdate =
     .label = Автоматически обновлять дополнения
 hideToolbarEntrance =

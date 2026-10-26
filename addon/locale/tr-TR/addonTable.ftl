@@ -1,10 +1,13 @@
 title = Eklenti Marketi
+settings =
+    .aria-label = Eklenti Marketi ayarları
 refresh =
     .label = Yenile
     .aria-label = Yenile
 selectSource = Kaynak Seç:
 customSource = Özel Kaynak:
 filterByTag = Etiketler:
+    .label = Etiketler:
 autoUpdate =
     .label = Eklentileri otomatik güncelle
 hideToolbarEntrance =

@@ -1,10 +1,13 @@
 title = Mercado de extensões
+settings =
+    .aria-label = Configurações do mercado de extensões
 refresh =
     .label = Atualizar
     .aria-label = Atualizar
 selectSource = Selecionar fonte:
 customSource = Fonte personalizada:
 filterByTag = Tags:
+    .label = Tags:
 autoUpdate =
     .label = Atualizar extensões automaticamente
 hideToolbarEntrance =

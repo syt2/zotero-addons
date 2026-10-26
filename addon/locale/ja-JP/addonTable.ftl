@@ -1,10 +1,13 @@
 title = アドオンマーケット
+settings =
+    .aria-label = アドオンマーケットの設定
 refresh =
     .label = 再読み込み
     .aria-label = 再読み込み
 selectSource = ソースを選択：
 customSource = カスタムソース：
 filterByTag = タグ：
+    .label = タグ：
 autoUpdate =
     .label = アドオンを自動更新
 hideToolbarEntrance =

@@ -65,7 +65,7 @@ async function onStartup() {
 async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {
   // Create ztoolkit for every window
   addon.data.ztoolkit = createZToolkit();
-  AddonTable.registerInToolbar();
+  AddonTable.registerInToolbar(win);
   AddonTable.registerInMenuTool();
   registerXPIDropInstaller(win);
 

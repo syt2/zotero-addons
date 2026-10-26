@@ -1,10 +1,13 @@
 title = Marché d'extensions
+settings =
+    .aria-label = Paramètres du marché des extensions
 refresh =
     .label = Actualiser
     .aria-label = Actualiser
 selectSource = Sélectionner la source :
 customSource = Source personnalisée :
 filterByTag = Étiquettes :
+    .label = Étiquettes :
 autoUpdate =
     .label = Mettre à jour automatiquement les extensions
 hideToolbarEntrance =

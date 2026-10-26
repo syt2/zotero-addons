@@ -1,10 +1,13 @@
 title = Add-on Markt
+settings =
+    .aria-label = Instellingen voor de add-onmarkt
 refresh = 
     .label = Verversen
     .aria-label = Verversen
 selectSource = Selecteer Bron:
 customSource = Aangepaste Bron:
 filterByTag = Tags:
+    .label = Tags:
 autoUpdate =
     .label = Automatische add-ons bijwerken
 hideToolbarEntrance =

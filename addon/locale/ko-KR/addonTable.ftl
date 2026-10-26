@@ -1,10 +1,13 @@
 title = 부가기능 마켓
+settings =
+    .aria-label = 부가기능 마켓 설정
 refresh =
     .label = 새로고침
     .aria-label = 새로고침
 selectSource = 소스 선택:
 customSource = 사용자 정의 소스:
 filterByTag = 태그:
+    .label = 태그:
 autoUpdate =
     .label = 부가기능 자동 업데이트
 hideToolbarEntrance =

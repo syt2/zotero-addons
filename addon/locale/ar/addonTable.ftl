@@ -1,10 +1,13 @@
 title = سوق الإضافات
+settings =
+    .aria-label = إعدادات سوق الإضافات
 refresh =
     .label = تحديث
     .aria-label = تحديث
 selectSource = اختر المصدر:
 customSource = مصدر مخصص:
 filterByTag = الوسوم:
+    .label = الوسوم:
 autoUpdate =
     .label = تحديث الإضافات تلقائياً
 hideToolbarEntrance =

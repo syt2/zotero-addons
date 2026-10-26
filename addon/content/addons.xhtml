@@ -120,7 +120,8 @@ type="text/css"?>
       }
 
       #search-button,
-      #refresh {
+      #refresh,
+      #footer-settings-button {
         box-sizing: border-box;
         display: flex;
         align-items: center;
@@ -177,7 +178,8 @@ type="text/css"?>
       }
 
       #search-button:active,
-      #refresh:active {
+      #refresh:active,
+      #footer-settings-button:active {
         transform: scale(0.92);
       }
 
@@ -189,8 +191,18 @@ type="text/css"?>
         ) !important;
       }
 
+      #footer-settings-button:hover,
+      .footer-settings.is-open #footer-settings-button {
+        background-color: color-mix(
+          in srgb,
+          currentColor 8%,
+          transparent
+        ) !important;
+      }
+
       #search-button:focus-visible,
-      #refresh:focus-visible {
+      #refresh:focus-visible,
+      #footer-settings-button:focus-visible {
         outline: none;
       }
 
@@ -201,6 +213,10 @@ type="text/css"?>
       #refresh:focus-visible {
         outline: 2px solid AccentColor;
         outline-offset: 1px;
+      }
+
+      #footer-settings-button:focus-visible {
+        box-shadow: inset 0 0 0 2px AccentColor !important;
       }
 
       #search-field {
@@ -252,6 +268,23 @@ type="text/css"?>
         cursor: default;
       }
 
+      .footer-settings {
+        display: flex;
+        flex: 0 0 28px;
+      }
+
+      #footer-settings-icon {
+        width: 18px;
+        height: 18px;
+        background-image: url("chrome://zotero/skin/20/universal/cog.svg");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        -moz-context-properties: fill, fill-opacity;
+        fill: currentColor;
+        pointer-events: none;
+      }
+
       .footer-container {
         display: flex;
         flex-wrap: wrap;
@@ -270,24 +303,9 @@ type="text/css"?>
       .footer-right-group {
         display: flex;
         align-items: center;
-        gap: 8px;
         margin-left: auto;
         min-width: 0;
         flex-wrap: nowrap;
-      }
-
-      #tagFilterPlaceholder {
-        width: 120px;
-        min-width: 120px;
-        max-width: 120px;
-      }
-
-      #tag-filter {
-        width: 120px;
-        min-width: 120px;
-        max-width: 120px;
-        height: 28px;
-        min-height: 28px;
       }
 
       #sources {
@@ -356,21 +374,38 @@ type="text/css"?>
       </groupbox>
 
       <div class="footer-right-group">
-        <checkbox
-          id="hide-toolbar-entrance"
-          style="padding-left: 2px"
-          hidden="true"
-          data-l10n-id="hideToolbarEntrance"
-        >
-        </checkbox>
-        <checkbox
-          id="auto-update"
-          style="padding-left: 12px"
-          data-l10n-id="autoUpdate"
-        >
-        </checkbox>
-        <label data-l10n-id="filterByTag"></label>
-        <div id="tagFilterPlaceholder"></div>
+        <html:div id="footer-settings" class="footer-settings">
+          <html:button
+            id="footer-settings-button"
+            type="button"
+            data-l10n-id="settings"
+            data-l10n-attrs="aria-label"
+            aria-controls="footer-settings-popup"
+            aria-expanded="false"
+            aria-haspopup="menu"
+          >
+            <html:span id="footer-settings-icon" aria-hidden="true"></html:span>
+          </html:button>
+          <xul:menupopup id="footer-settings-popup" needsgutter="true">
+            <xul:menuitem
+              id="auto-update"
+              type="checkbox"
+              data-l10n-id="autoUpdate"
+            ></xul:menuitem>
+            <xul:menuseparator></xul:menuseparator>
+            <xul:menuitem
+              id="hide-toolbar-entrance"
+              type="checkbox"
+              data-l10n-id="hideToolbarEntrance"
+            ></xul:menuitem>
+            <xul:menuseparator></xul:menuseparator>
+            <xul:menu
+              id="footer-settings-tag-menu"
+              data-l10n-id="filterByTag"
+              data-l10n-attrs="label"
+            ></xul:menu>
+          </xul:menupopup>
+        </html:div>
       </div>
     </div>
   </body>

@@ -1,10 +1,13 @@
 title = Sklep z dodatkami
+settings =
+    .aria-label = Ustawienia sklepu z dodatkami
 refresh =
     .label = Odśwież
     .aria-label = Odśwież
 selectSource = Wybierz źródło:
 customSource = Niestandardowe źródło:
 filterByTag = Tagi:
+    .label = Tagi:
 autoUpdate =
     .label = Automatycznie aktualizuj dodatki
 hideToolbarEntrance =

@@ -1,10 +1,13 @@
 title = Mercado de complementos
+settings =
+    .aria-label = Configuración del mercado de complementos
 refresh =
     .label = Actualizar
     .aria-label = Actualizar
 selectSource = Seleccionar fuente:
 customSource = Fuente personalizada:
 filterByTag = Etiquetas:
+    .label = Etiquetas:
 autoUpdate =
     .label = Actualizar complementos automáticamente
 hideToolbarEntrance =

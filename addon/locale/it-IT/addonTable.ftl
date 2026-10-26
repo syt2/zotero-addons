@@ -1,10 +1,13 @@
 title = Mercato dei componenti aggiuntivi
+settings =
+    .aria-label = Impostazioni del mercato dei componenti aggiuntivi
 refresh =
     .label = Aggiorna
     .aria-label = Aggiorna
 selectSource = Seleziona fonte:
 customSource = Fonte personalizzata:
 filterByTag = Tag:
+    .label = Tag:
 autoUpdate =
     .label = Aggiorna automaticamente i componenti aggiuntivi
 hideToolbarEntrance =
