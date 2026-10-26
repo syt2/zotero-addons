@@ -142,6 +142,24 @@ export function addonReleaseTime(
 }
 
 /**
+ * Find the local add-on identified by the remote release ID.
+ *
+ * Display names and repository URLs are not stable identities: unrelated
+ * add-ons can share a name, and one repository can publish multiple add-ons.
+ * When a release has no ID, its installed status is therefore unknown.
+ */
+export function findRelatedAddon(
+  addonInfo: AddonInfo,
+  localAddons: readonly LocalAddon[],
+): LocalAddon | undefined {
+  const releaseId = displayAddonReleaseInfo(addonInfo)?.release.id;
+  if (!releaseId) {
+    return undefined;
+  }
+  return localAddons.find((addon) => addon.id === releaseId);
+}
+
+/**
  * Extract and filter local addon obj from AddonInfo
  * @param addonInfos AddonInfo array
  * @returns [AddonInfo, addon][] pair which addon installed
@@ -153,24 +171,7 @@ export async function relatedAddons(addonInfos: AddonInfo[]) {
   );
 
   for (const addonInfo of addonInfos) {
-    const releaseInfo = displayAddonReleaseInfo(addonInfo)?.release;
-    const relateAddon =
-      localAddons.find((addon) => releaseInfo?.id === addon.id) ??
-      localAddons.find((addon) => {
-        if (
-          addon.name &&
-          (releaseInfo?.name === addon.name || addonInfo.name === addon.name)
-        ) {
-          return true;
-        }
-        if (addon.homepageURL && addon.homepageURL.includes(addonInfo.repo)) {
-          return true;
-        }
-        if (addon.updateURL && addon.updateURL.includes(addonInfo.repo)) {
-          return true;
-        }
-        return false;
-      });
+    const relateAddon = findRelatedAddon(addonInfo, localAddons);
     if (relateAddon) {
       addons.push([addonInfo, relateAddon]);
     }
@@ -237,6 +238,18 @@ export function addonCanUpdate(addonInfo: AddonInfo, addon: LocalAddon) {
     return false;
   }
   return Services.vc.compare(addon.version, version) < 0;
+}
+
+/**
+ * Verify that the compatible remote release belongs to the installed add-on.
+ * This is a fail-closed guard for automatic update paths.
+ */
+export function releaseMatchesInstalledAddon(
+  addonInfo: AddonInfo,
+  addon: LocalAddon,
+) {
+  const releaseId = addonReleaseInfo(addonInfo)?.id;
+  return Boolean(releaseId && releaseId === addon.id);
 }
 
 /**
