@@ -629,6 +629,12 @@ export class AddonTable {
     ) as XULPopupElement | null;
     if (!root || !button || !popup) return;
 
+    // Zotero 11 can render anchored popups through the macOS native menu
+    // implementation. Native menus ignore per-item text colors used by the
+    // tag filter, so keep this settings menu on the XUL renderer used by
+    // Zotero 10 and older Zotero 11 versions.
+    popup.setAttribute("nonnative", "true");
+
     const setOpenState = (open: boolean) => {
       root.classList.toggle("is-open", open);
       button.setAttribute("aria-expanded", String(open));
@@ -673,7 +679,7 @@ export class AddonTable {
       "footer-settings-tag-menu",
     ) as HTMLElement | null;
     if (!menu) return;
-    menu.dataset.settingsLabel ||= menu.getAttribute("label") ?? "";
+    menu.dataset.settingsLabel ||= getString("filterByTag");
     let popup = win.document.getElementById(
       "footer-settings-tag-popup",
     ) as XULPopupElement | null;
@@ -685,6 +691,7 @@ export class AddonTable {
       });
       menu.append(popup);
     }
+    popup.setAttribute("nonnative", "true");
     this.refreshTagFilter();
   }
 
@@ -693,7 +700,7 @@ export class AddonTable {
       "footer-settings-scope-menu",
     ) as HTMLElement | null;
     if (!menu) return;
-    menu.dataset.settingsLabel ||= menu.getAttribute("label") ?? "";
+    menu.dataset.settingsLabel ||= getString("addonScope");
     let popup = win.document.getElementById(
       "footer-settings-scope-popup",
     ) as XULPopupElement | null;
@@ -730,6 +737,7 @@ export class AddonTable {
       popup.append(compatibleItem, allItem);
       menu.append(popup);
     }
+    popup.setAttribute("nonnative", "true");
     this.syncAddonScopeFilterControl();
   }
 
@@ -837,7 +845,7 @@ export class AddonTable {
       "footer-settings-tag-menu",
     ) as HTMLElement | null;
     if (menu) {
-      menu.dataset.settingsLabel ||= menu.getAttribute("label") ?? "";
+      menu.dataset.settingsLabel ||= getString("filterByTag");
     }
 
     const allTags = this.getAllTags();

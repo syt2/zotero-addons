@@ -119,3 +119,5 @@ xpi-drop-cancel = Annuleren
 
 showCompatibleAddons = Alleen compatibel
 showAllAddons = Alle add-ons tonen
+filterByTag = Tags:
+addonScope = Compatibiliteit:

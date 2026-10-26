@@ -119,3 +119,5 @@ xpi-drop-cancel = 取消
 
 showCompatibleAddons = 仅兼容版本
 showAllAddons = 显示所有插件
+filterByTag = 标签：
+addonScope = 兼容性：

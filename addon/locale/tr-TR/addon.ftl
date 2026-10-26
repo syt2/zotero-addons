@@ -119,3 +119,5 @@ xpi-drop-cancel = İptal
 
 showCompatibleAddons = Yalnızca uyumlu
 showAllAddons = Tüm eklentileri göster
+filterByTag = Etiketler:
+addonScope = Uyumluluk:

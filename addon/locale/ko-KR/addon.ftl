@@ -119,3 +119,5 @@ xpi-drop-cancel = 취소
 
 showCompatibleAddons = 호환 버전만
 showAllAddons = 모든 부가 기능 표시
+filterByTag = 태그:
+addonScope = 호환성:

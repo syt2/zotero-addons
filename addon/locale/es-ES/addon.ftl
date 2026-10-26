@@ -119,3 +119,5 @@ xpi-drop-cancel = Cancelar
 
 showCompatibleAddons = Solo compatibles
 showAllAddons = Mostrar todos los complementos
+filterByTag = Etiquetas:
+addonScope = Compatibilidad:

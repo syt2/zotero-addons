@@ -119,3 +119,5 @@ xpi-drop-cancel = キャンセル
 
 showCompatibleAddons = 互換バージョンのみ
 showAllAddons = すべてのアドオンを表示
+filterByTag = タグ：
+addonScope = 互換性：
