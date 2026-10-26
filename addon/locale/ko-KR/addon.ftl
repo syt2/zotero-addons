@@ -116,3 +116,6 @@ xpi-drop-invalid = 이 파일은 유효한 부가기능 패키지가 아닙니�
 
 xpi-drop-install = 설치
 xpi-drop-cancel = 취소
+
+showCompatibleAddons = 호환 버전만
+showAllAddons = 모든 부가 기능 표시

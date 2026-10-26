@@ -116,3 +116,6 @@ xpi-drop-invalid = Bu dosya geçerli bir eklenti paketi değil.
 
 xpi-drop-install = Kur
 xpi-drop-cancel = İptal
+
+showCompatibleAddons = Yalnızca uyumlu
+showAllAddons = Tüm eklentileri göster

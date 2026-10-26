@@ -3,9 +3,11 @@ import {
   Sources,
   autoSource,
   currentSource,
+  resolveSourceApi,
   setAutoSource,
 } from "../utils/configuration";
 import { getXPIDatabase, getAddonManager } from "../utils/compat";
+import { getPref } from "../utils/prefs";
 import {
   buildXpiDownloadUrlsFromGitHub,
   completeXpiDownloadUrls,
@@ -98,29 +100,20 @@ export function xpiDownloadUrls(addonInfo: AddonInfo) {
 }
 
 /**
- * Extract add-on release information from AddonInfo
+ * Extract a release that is compatible with the running Zotero version.
  * @param addonInfo AddonInfo
  * @returns AddonInfo.releases (Adapted to current Zotero version)
  */
 export function addonReleaseInfo(addonInfo: AddonInfo) {
-  const currentMajor = Zotero.version.split(".")[0];
-  const release =
-    addonInfo.releases?.find(
-      (release) => release.targetZoteroVersion === currentMajor,
-    ) ??
-    addonInfo.releases?.find((release) => {
-      const minVersion = release.minZoteroVersion?.replace(/\*/g, "999");
-      const maxVersion = release.maxZoteroVersion?.replace(/\*/g, "999");
-      const meetsMinimum =
-        !minVersion || Services.vc.compare(Zotero.version, minVersion) >= 0;
-      const meetsMaximum =
-        !maxVersion || Services.vc.compare(Zotero.version, maxVersion) <= 0;
-      return meetsMinimum && meetsMaximum;
-    });
-  if ((release?.xpiDownloadUrl?.github?.length ?? 0) === 0) {
-    return;
-  }
-  return release;
+  return resolveAddonRelease(addonInfo, false)?.release;
+}
+
+/**
+ * Resolve a release for display. In all-addons mode, unsupported add-ons fall
+ * back to the release targeting the closest Zotero major version.
+ */
+export function displayAddonReleaseInfo(addonInfo: AddonInfo) {
+  return resolveAddonRelease(addonInfo, getPref("showAllAddons") === true);
 }
 
 /**
@@ -128,8 +121,11 @@ export function addonReleaseInfo(addonInfo: AddonInfo) {
  * @param addonInfo AddonInfo
  * @returns AddonInfo.releases.releaseDate string with yyyy/MM/dd hh:mm:ss format (Adapted to current Zotero version)
  */
-export function addonReleaseTime(addonInfo: AddonInfo) {
-  const inputDate = new Date(addonReleaseInfo(addonInfo)?.releaseDate ?? "");
+export function addonReleaseTime(
+  addonInfo: AddonInfo,
+  releaseInfo = addonReleaseInfo(addonInfo),
+) {
+  const inputDate = new Date(releaseInfo?.releaseDate ?? "");
   if (inputDate) {
     const year = inputDate.getFullYear();
     const month = String(inputDate.getMonth() + 1).padStart(2, "0");
@@ -154,15 +150,13 @@ export async function relatedAddons(addonInfos: AddonInfo[]) {
   );
 
   for (const addonInfo of addonInfos) {
+    const releaseInfo = displayAddonReleaseInfo(addonInfo)?.release;
     const relateAddon =
-      localAddons.find(
-        (addon) => addonReleaseInfo(addonInfo)?.id === addon.id,
-      ) ??
+      localAddons.find((addon) => releaseInfo?.id === addon.id) ??
       localAddons.find((addon) => {
         if (
           addon.name &&
-          (addonReleaseInfo(addonInfo)?.name === addon.name ||
-            addonInfo.name === addon.name)
+          (releaseInfo?.name === addon.name || addonInfo.name === addon.name)
         ) {
           return true;
         }
@@ -222,7 +216,7 @@ export async function addonInstallStatus(
     }
   } else {
     // not found
-    return addonReleaseInfo(addonInfo)?.id
+    return displayAddonReleaseInfo(addonInfo)?.release.id
       ? InstallStatus.notInstalled
       : InstallStatus.unknown;
   }
@@ -252,19 +246,106 @@ export function isVersionCompatible(
   minVersion?: string,
   maxVersion?: string,
 ): boolean {
-  if (!minVersion || !maxVersion) {
-    return true; // If no version info, assume compatible
-  }
   const currentVersion = Zotero.version;
-  const minCompare = Services.vc.compare(
-    currentVersion,
-    minVersion.replace("*", "0"),
+  if (
+    minVersion &&
+    Services.vc.compare(currentVersion, minVersion.replace(/\*/g, "0")) < 0
+  ) {
+    return false;
+  }
+  if (
+    maxVersion &&
+    Services.vc.compare(currentVersion, maxVersion.replace(/\*/g, "999")) > 0
+  ) {
+    return false;
+  }
+  return true;
+}
+
+export interface ResolvedAddonRelease {
+  release: NonNullable<AddonInfo["releases"]>[number];
+  compatible: boolean;
+}
+
+function parseMajorVersion(version?: string) {
+  if (!version) return undefined;
+  const major = Number.parseInt(version, 10);
+  return Number.isFinite(major) ? major : undefined;
+}
+
+function releaseMatchesCurrentZotero(
+  release: NonNullable<AddonInfo["releases"]>[number],
+) {
+  const currentMajor = parseMajorVersion(Zotero.version);
+  const targetMajor = parseMajorVersion(release.targetZoteroVersion);
+  if (targetMajor !== undefined && targetMajor !== currentMajor) {
+    return false;
+  }
+  return isVersionCompatible(
+    release.minZoteroVersion,
+    release.maxZoteroVersion,
   );
-  const maxCompare = Services.vc.compare(
-    currentVersion,
-    maxVersion.replace("*", "999"),
+}
+
+function releaseDistanceFromCurrentZotero(
+  release: NonNullable<AddonInfo["releases"]>[number],
+) {
+  const currentMajor = parseMajorVersion(Zotero.version);
+  if (currentMajor === undefined) return Number.MAX_SAFE_INTEGER;
+
+  const targetMajor = parseMajorVersion(release.targetZoteroVersion);
+  if (targetMajor !== undefined) {
+    return Math.abs(targetMajor - currentMajor);
+  }
+
+  const minMajor = parseMajorVersion(
+    release.minZoteroVersion?.replace(/\*/g, "0"),
   );
-  return minCompare >= 0 && maxCompare <= 0;
+  const maxMajor = parseMajorVersion(
+    release.maxZoteroVersion?.replace(/\*/g, "999"),
+  );
+  if (minMajor !== undefined && currentMajor < minMajor) {
+    return minMajor - currentMajor;
+  }
+  if (maxMajor !== undefined && currentMajor > maxMajor) {
+    return currentMajor - maxMajor;
+  }
+  return 0;
+}
+
+/**
+ * Resolve the release for a row or detail page.
+ * `allowIncompatible` should only be used for display; install and update
+ * paths must continue to use `addonReleaseInfo`, which only returns compatible
+ * releases.
+ */
+export function resolveAddonRelease(
+  addonInfo: AddonInfo,
+  allowIncompatible: boolean,
+): ResolvedAddonRelease | undefined {
+  const releases = (addonInfo.releases ?? []).filter(
+    (release) => (release.xpiDownloadUrl?.github?.length ?? 0) > 0,
+  );
+  const compatibleRelease = releases.find(releaseMatchesCurrentZotero);
+  if (compatibleRelease) {
+    return { release: compatibleRelease, compatible: true };
+  }
+  if (!allowIncompatible || releases.length === 0) {
+    return undefined;
+  }
+
+  const closestRelease = releases.reduce((closest, release) => {
+    const distanceDelta =
+      releaseDistanceFromCurrentZotero(release) -
+      releaseDistanceFromCurrentZotero(closest);
+    if (distanceDelta !== 0) {
+      return distanceDelta < 0 ? release : closest;
+    }
+    const releaseTime = new Date(release.releaseDate ?? "").getTime() || 0;
+    const closestTime = new Date(closest.releaseDate ?? "").getTime() || 0;
+    return releaseTime > closestTime ? release : closest;
+  });
+  return { release: closestRelease, compatible: false };
 }
 
 class AddonInfoAPI {
@@ -302,7 +383,9 @@ class AddonInfoAPI {
         throw new Error(`HTTP ${response.status}`);
       }
       const addons = JSON.parse(response.response) as AddonInfo[];
-      const validAddons = addons.filter((addon) => addonReleaseInfo(addon));
+      const validAddons = addons.filter((addon) =>
+        displayAddonReleaseInfo(addon),
+      );
       // return validAddons.sort((a: AddonInfo, b: AddonInfo) => {
       //   return (b.stars ?? 0) - (a.stars ?? 0);
       // });
@@ -434,21 +517,19 @@ export class AddonInfoManager {
     const result = await firstSuccessfulStaggered(
       sourcesWithApi.map((source) => async (registerCanceller) => {
         this.dependencies.log(`trying source: ${source.id}`);
-        const infos = await this.dependencies.fetchAddonInfos(source.api, {
+        const api = resolveSourceApi(source) ?? source.api;
+        const infos = await this.dependencies.fetchAddonInfos(api, {
           timeout: AUTO_SOURCE_FETCH_TIMEOUT_MS,
           cancellerReceiver: registerCanceller,
         });
-        return infos.length > 0 ? { source, infos } : undefined;
+        return infos.length > 0 ? { source, api, infos } : undefined;
       }),
       AUTO_SOURCE_STAGGER_DELAY_MS,
       this.dependencies.staggerScheduler,
     );
 
     if (result) {
-      this.sourceInfos[result.source.api] = [
-        this.dependencies.now(),
-        result.infos,
-      ];
+      this.sourceInfos[result.api] = [this.dependencies.now(), result.infos];
       this.dependencies.setAutoSource(result.source);
       this.dependencies.log(`switched to ${result.source.id} automatically`);
       return result.infos;

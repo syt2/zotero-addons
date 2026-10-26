@@ -116,3 +116,6 @@ xpi-drop-invalid = Ce fichier n’est pas un paquet d’extension valide.
 
 xpi-drop-install = Installer
 xpi-drop-cancel = Annuler
+
+showCompatibleAddons = Compatibles uniquement
+showAllAddons = Afficher toutes les extensions

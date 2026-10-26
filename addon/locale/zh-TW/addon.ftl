@@ -116,3 +116,6 @@ xpi-drop-invalid = 此檔案不是有效的外掛安裝套件。
 
 xpi-drop-install = 安裝
 xpi-drop-cancel = 取消
+
+showCompatibleAddons = 僅相容版本
+showAllAddons = 顯示所有外掛

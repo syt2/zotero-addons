@@ -21,6 +21,11 @@ export type SourceID =
 export interface Source {
   id: SourceID;
   api?: string;
+  /**
+   * Version-filtered index. `{zoteroMajor}` is replaced with the current
+   * Zotero major version before requesting it.
+   */
+  versionedApi?: string;
 }
 
 /**
@@ -33,31 +38,63 @@ export const Sources: Readonly<Readonly<Source>[]> = <const>[
   {
     id: "source-zotero-scraper-github",
     api: "https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
+    versionedApi:
+      "https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos_{zoteroMajor}.json",
   },
   {
     id: "source-zotero-scraper-gitee",
     api: "https://gitee.com/ytshen/zotero-addon-scraper/raw/publish/addon_infos.json",
+    versionedApi:
+      "https://gitee.com/ytshen/zotero-addon-scraper/raw/publish/addon_infos_{zoteroMajor}.json",
   },
   {
     id: "source-zotero-scraper-jsdelivr",
     api: "https://cdn.jsdelivr.net/gh/syt2/zotero-addons-scraper@publish/addon_infos.json",
+    versionedApi:
+      "https://cdn.jsdelivr.net/gh/syt2/zotero-addons-scraper@publish/addon_infos_{zoteroMajor}.json",
   },
   {
     id: "source-zotero-scraper-ghproxy",
     api: "https://gh-proxy.org/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
+    versionedApi:
+      "https://gh-proxy.org/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos_{zoteroMajor}.json",
   },
   {
     id: "source-zotero-scraper-ghfast",
     api: "https://ghfast.top/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
+    versionedApi:
+      "https://ghfast.top/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos_{zoteroMajor}.json",
   },
   {
     id: "source-zotero-scraper-ghproxynet",
     api: "https://ghproxy.net/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos.json",
+    versionedApi:
+      "https://ghproxy.net/https://raw.githubusercontent.com/syt2/zotero-addons-scraper/publish/addon_infos_{zoteroMajor}.json",
   },
   {
     id: "source-custom",
   },
 ];
+
+/**
+ * Resolve the index URL for a source.
+ * The versioned index is the default; the all-addons index is used only when
+ * the user explicitly asks to see unsupported add-ons.
+ */
+export function resolveSourceApi(
+  source: Readonly<Source>,
+  options?: { showAllAddons?: boolean; zoteroVersion?: string },
+) {
+  const showAllAddons =
+    options?.showAllAddons ?? getPref("showAllAddons") === true;
+  if (!showAllAddons && source.versionedApi) {
+    const currentMajor = (options?.zoteroVersion ?? Zotero.version).split(
+      ".",
+    )[0];
+    return source.versionedApi.replace("{zoteroMajor}", currentMajor);
+  }
+  return source.api;
+}
 
 /**
  * Get selected source
@@ -73,7 +110,7 @@ export function currentSource(): Readonly<Source> {
       if (autoSource()) {
         return {
           id: "source-auto",
-          api: autoSource()?.api,
+          api: resolveSourceApi(autoSource()!),
         };
       }
       return match;
@@ -87,7 +124,10 @@ export function currentSource(): Readonly<Source> {
       }
       return match;
     }
-    return match;
+    return {
+      ...match,
+      api: resolveSourceApi(match),
+    };
   }
   return Sources[0];
 }

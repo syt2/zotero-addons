@@ -2,6 +2,7 @@ import {
   AddonInfo,
   addonReleaseInfo,
   addonReleaseTime,
+  displayAddonReleaseInfo,
   fetchHistoricalReleases,
   historicalReleaseDownloadUrls,
   HistoricalRelease,
@@ -146,6 +147,9 @@ export class AddonInfoDetail {
     const urls = xpiDownloadUrls(addon).filter((x) => {
       return (x?.length ?? 0) > 0;
     }) as string[];
+    if (urls.length === 0) {
+      return;
+    }
     await installAddonFrom(urls, {
       name: addonReleaseInfo(addon)?.name ?? addon.name,
       popWin: true,
@@ -161,21 +165,27 @@ export class AddonInfoDetail {
       return;
     }
     const relatedAddonList = await relatedAddons([addonInfo]);
-    const localAddon = relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;
+    const localAddon =
+      relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;
     const currentLocalVersion = localAddon?.version;
     if (!currentLocalVersion) {
       return;
     }
-    await this.rollbackToPreviousAvailableVersion(addonInfo, currentLocalVersion);
+    await this.rollbackToPreviousAvailableVersion(
+      addonInfo,
+      currentLocalVersion,
+    );
   }
 
   static async canRollbackToPreviousAvailable(
     addonInfo: AddonInfo,
     currentLocalVersion: string,
   ) {
-    return !!(await this.getPreviousAvailableRelease(addonInfo, currentLocalVersion));
+    return !!(await this.getPreviousAvailableRelease(
+      addonInfo,
+      currentLocalVersion,
+    ));
   }
-
 
   private static get installButton() {
     return this.window?.document.querySelector("#install") as HTMLButtonElement;
@@ -263,13 +273,15 @@ export class AddonInfoDetail {
     if (!win || !addonInfo || !isWindowAlive(win)) {
       return;
     }
-    const releaseInfo = addonReleaseInfo(addonInfo);
+    const releaseMatch = displayAddonReleaseInfo(addonInfo);
+    const releaseInfo = releaseMatch?.release;
     const tagName = releaseInfo?.tagName;
     const version = releaseInfo?.xpiVersion;
-    const releaseTime = addonReleaseTime(addonInfo);
+    const releaseTime = addonReleaseTime(addonInfo, releaseInfo);
     // Get related addon info once (avoid duplicate relatedAddons calls)
     const relatedAddonList = await relatedAddons([addonInfo]);
-    const localAddon = relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;
+    const localAddon =
+      relatedAddonList.length > 0 ? relatedAddonList[0][1] : undefined;
 
     const windowTitle = win.document.querySelector(
       "#win-title",
@@ -322,29 +334,18 @@ export class AddonInfoDetail {
       "";
 
     this.uncompatibleDescription.hidden = true;
-    if (releaseInfo?.minZoteroVersion && releaseInfo.maxZoteroVersion) {
-      if (
-        Services.vc.compare(
-          Zotero.version,
-          releaseInfo.minZoteroVersion.replace("*", "0"),
-        ) < 0 ||
-        Services.vc.compare(
-          Zotero.version,
-          releaseInfo.maxZoteroVersion.replace("*", "999"),
-        ) > 0
-      ) {
-        this.uncompatibleDescription.hidden = false;
-        this.uncompatibleDescription.textContent = getString(
-          "release-uncompatible-description",
-          {
-            args: {
-              minVersion: releaseInfo.minZoteroVersion,
-              maxVersion: releaseInfo.maxZoteroVersion,
-              currentVersion: Zotero.version,
-            },
-          },
-        );
-      }
+    if (releaseMatch && !releaseMatch.compatible) {
+      this.uncompatibleDescription.hidden = false;
+      this.uncompatibleDescription.textContent =
+        releaseInfo?.minZoteroVersion && releaseInfo.maxZoteroVersion
+          ? getString("release-uncompatible-description", {
+              args: {
+                minVersion: releaseInfo.minZoteroVersion,
+                maxVersion: releaseInfo.maxZoteroVersion,
+                currentVersion: Zotero.version,
+              },
+            })
+          : getString("state-uncompatible");
     }
 
     this.installButton.hidden = true;
@@ -367,7 +368,9 @@ export class AddonInfoDetail {
     if (relatedAddonList.length > 0) {
       if (relatedAddonList[0][1].appDisabled) {
         this.reinstallButton.hidden = false;
-      } else if (addonCanUpdate(relatedAddonList[0][0], relatedAddonList[0][1])) {
+      } else if (
+        addonCanUpdate(relatedAddonList[0][0], relatedAddonList[0][1])
+      ) {
         this.updateButton.hidden = false;
       } else {
         this.reinstallButton.hidden = false;
@@ -395,6 +398,12 @@ export class AddonInfoDetail {
       }
     } else {
       this.installButton.hidden = false;
+    }
+
+    if (releaseMatch && !releaseMatch.compatible) {
+      this.installButton.hidden = true;
+      this.updateButton.hidden = true;
+      this.reinstallButton.hidden = true;
     }
 
     // Historical versions button (only for scraper sources)
@@ -465,16 +474,15 @@ export class AddonInfoDetail {
     button.parentNode?.replaceChild(newButton, button);
 
     newButton.addEventListener("click", async () => {
-      await this.rollbackToPreviousAvailableVersion(addonInfo, localAddon.version);
+      await this.rollbackToPreviousAvailableVersion(
+        addonInfo,
+        localAddon.version,
+      );
     });
   }
 
   private static normalizeVersion(v: string) {
-    return (v ?? "")
-      .toLowerCase()
-      .trim()
-      .replace(/^v/, "")
-      .replace(/\s+/g, "");
+    return (v ?? "").toLowerCase().trim().replace(/^v/, "").replace(/\s+/g, "");
   }
 
   private static compareVersions(a: string, b: string) {
@@ -604,7 +612,8 @@ export class AddonInfoDetail {
       getString("rollback-previous-confirm-title"),
       getString("rollback-previous-confirm-message", {
         args: {
-          name: addonReleaseInfo(addonInfo)?.name ?? addonInfo.name ?? "Unknown",
+          name:
+            addonReleaseInfo(addonInfo)?.name ?? addonInfo.name ?? "Unknown",
           currentVersion: currentLocalVersion,
           targetVersion,
         },

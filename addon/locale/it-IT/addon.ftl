@@ -116,3 +116,6 @@ xpi-drop-invalid = Questo file non è un pacchetto valido di un componente aggiu
 
 xpi-drop-install = Installa
 xpi-drop-cancel = Annulla
+
+showCompatibleAddons = Solo compatibili
+showAllAddons = Mostra tutte le estensioni

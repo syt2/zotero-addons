@@ -1,10 +1,11 @@
 import { assert } from "chai";
 import {
   AddonInfoManager,
+  resolveAddonRelease,
   type AddonInfo,
   type AddonInfoManagerDependencies,
 } from "../src/modules/addonInfo";
-import type { Source } from "../src/utils/configuration";
+import { resolveSourceApi, type Source } from "../src/utils/configuration";
 import type { StaggerScheduler } from "../src/utils/staggeredRequests";
 
 const sourceA = {
@@ -249,5 +250,55 @@ describe("automatic add-on source manager", function () {
       cachedInfos,
       "an all-source failure must preserve the cache",
     );
+  });
+
+  describe("versioned add-on data", function () {
+    it("uses the versioned index by default and the full index on request", function () {
+      const source = {
+        id: "source-zotero-scraper-github",
+        api: "https://example.test/addon_infos.json",
+        versionedApi: "https://example.test/addon_infos_{zoteroMajor}.json",
+      } as const satisfies Source;
+
+      assert.equal(
+        resolveSourceApi(source, {
+          showAllAddons: false,
+          zoteroVersion: "11.0.3",
+        }),
+        "https://example.test/addon_infos_11.json",
+      );
+      assert.equal(
+        resolveSourceApi(source, {
+          showAllAddons: true,
+          zoteroVersion: "11.0.3",
+        }),
+        source.api,
+      );
+    });
+
+    it("marks an unsupported nearest-major release as incompatible", function () {
+      const currentMajor = Number.parseInt(Zotero.version, 10);
+      const addon = {
+        repo: "example/legacy-addon",
+        releases: [
+          {
+            targetZoteroVersion: String(currentMajor - 1),
+            tagName: "v1.0.0",
+            xpiVersion: "1.0.0",
+            minZoteroVersion: `${currentMajor - 2}.0`,
+            maxZoteroVersion: `${currentMajor - 1}.*`,
+            xpiDownloadUrl: {
+              github: "https://example.test/legacy.xpi",
+            },
+          },
+        ],
+      } satisfies AddonInfo;
+
+      assert.isUndefined(resolveAddonRelease(addon, false));
+      const displayRelease = resolveAddonRelease(addon, true);
+      assert.exists(displayRelease);
+      assert.isFalse(displayRelease!.compatible);
+      assert.equal(displayRelease!.release.xpiVersion, "1.0.0");
+    });
   });
 });

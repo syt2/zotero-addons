@@ -8,6 +8,7 @@ import {
   AddonInfo,
   addonCanUpdate,
   addonReleaseInfo,
+  displayAddonReleaseInfo,
   isScraperSource,
   relatedAddons,
 } from "../../modules/addonInfo";
@@ -124,14 +125,18 @@ export class TableMenuHandler {
     const addonInfos = this.deps.getAddonInfos();
     for (const idx of selects) {
       const addonInfo = addonInfos[idx];
+      const releaseCompatible =
+        displayAddonReleaseInfo(addonInfo[0])?.compatible === true;
       const relatedAddon = await relatedAddons([addonInfo[0]]);
       if (relatedAddon.length > 0) {
-        if (relatedAddon[0][1].appDisabled) {
-          append("menu-reinstall", addonInfo[0]);
-        } else if (addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
-          append("menu-update", addonInfo[0]);
-        } else {
-          append("menu-reinstall", addonInfo[0]);
+        if (releaseCompatible) {
+          if (relatedAddon[0][1].appDisabled) {
+            append("menu-reinstall", addonInfo[0]);
+          } else if (addonCanUpdate(relatedAddon[0][0], relatedAddon[0][1])) {
+            append("menu-update", addonInfo[0]);
+          } else {
+            append("menu-reinstall", addonInfo[0]);
+          }
         }
         const dbAddon = await getXPIDatabase().getAddon(
           (addon: any) => addon.id === relatedAddon[0][1].id,
@@ -155,10 +160,14 @@ export class TableMenuHandler {
           }
         }
 
-        if (isScraperSource() && addonInfo[0].repo && relatedAddon[0][1]?.version) {
+        if (
+          isScraperSource() &&
+          addonInfo[0].repo &&
+          relatedAddon[0][1]?.version
+        ) {
           append("menu-rollback-previous", addonInfo[0]);
         }
-      } else {
+      } else if (releaseCompatible) {
         append("menu-install", addonInfo[0]);
       }
     }

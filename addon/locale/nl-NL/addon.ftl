@@ -116,3 +116,6 @@ xpi-drop-invalid = Dit bestand is geen geldig add-onpakket.
 
 xpi-drop-install = Installeren
 xpi-drop-cancel = Annuleren
+
+showCompatibleAddons = Alleen compatibel
+showAllAddons = Alle add-ons tonen

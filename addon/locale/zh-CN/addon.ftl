@@ -116,3 +116,6 @@ xpi-drop-invalid = 此文件不是有效的插件安装包。
 
 xpi-drop-install = 安装
 xpi-drop-cancel = 取消
+
+showCompatibleAddons = 仅兼容版本
+showAllAddons = 显示所有插件

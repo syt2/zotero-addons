@@ -11,6 +11,7 @@ declare namespace _ZoteroTypes {
       'source': string;
       'customSource': string;
       'hideToolbarEntrance': boolean;
+      'showAllAddons': boolean;
       'guideStatus': number;
       'firstInstalledVersion': string;
       'tagColumnLayoutMigrated': boolean;

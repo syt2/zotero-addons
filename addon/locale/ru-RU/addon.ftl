@@ -116,3 +116,6 @@ xpi-drop-invalid = Этот файл не является допустимым 
 
 xpi-drop-install = Установить
 xpi-drop-cancel = Отмена
+
+showCompatibleAddons = Только совместимые
+showAllAddons = Показать все дополнения

@@ -616,6 +616,7 @@ export class AddonTable {
     this.initAutoUpdate(win);
     this.initHideEntrance(win);
     this.initTagFilter(win);
+    this.initAddonScopeFilter(win);
     this.initSettingsMenu(win);
   }
 
@@ -654,7 +655,12 @@ export class AddonTable {
         openMenu();
       }
     });
-    popup.addEventListener("popupshowing", () => setOpenState(true));
+    popup.addEventListener("popupshowing", () => {
+      setOpenState(true);
+      // Fluent localization may run after footer initialization, so refresh
+      // the dynamic current value each time the native menu opens.
+      this.syncAddonScopeFilterControl();
+    });
     popup.addEventListener("popuphidden", () => setOpenState(false));
   }
 
@@ -676,6 +682,80 @@ export class AddonTable {
       });
     }
     this.refreshTagFilter();
+  }
+
+  private static initAddonScopeFilter(win: Window) {
+    const menu = win.document.getElementById(
+      "footer-settings-scope-menu",
+    ) as HTMLElement | null;
+    if (!menu) return;
+    menu.dataset.settingsLabel ||= menu.getAttribute("label") ?? "";
+    const popup = win.document.createElementNS(
+      "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
+      "menupopup",
+    );
+    popup.id = "footer-settings-scope-popup";
+    const createItem = (id: string, value: string, label: string) => {
+      const item = win.document.createElementNS(
+        "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
+        "menuitem",
+      ) as XULMenuItemElement;
+      item.id = id;
+      item.setAttribute("type", "radio");
+      item.setAttribute("name", "footer-settings-addon-scope");
+      item.setAttribute("value", value);
+      item.setAttribute("label", label);
+      return item;
+    };
+    const compatibleItem = createItem(
+      "footer-settings-compatible-addons",
+      "compatible",
+      getString("showCompatibleAddons"),
+    );
+    const allItem = createItem(
+      "footer-settings-all-addons",
+      "all",
+      getString("showAllAddons"),
+    );
+    compatibleItem.addEventListener("command", () => {
+      this.setShowAllAddons(false);
+    });
+    allItem.addEventListener("command", () => {
+      this.setShowAllAddons(true);
+    });
+    popup.append(compatibleItem, allItem);
+    menu.append(popup);
+    this.syncAddonScopeFilterControl();
+  }
+
+  private static setShowAllAddons(showAllAddons: boolean) {
+    if ((getPref("showAllAddons") === true) === showAllAddons) {
+      this.syncAddonScopeFilterControl();
+      return;
+    }
+    setPref("showAllAddons", showAllAddons);
+    this.syncAddonScopeFilterControl();
+    void this.refresh(true);
+  }
+
+  private static syncAddonScopeFilterControl() {
+    const win = this.window;
+    if (!win) return;
+    const showAllAddons = getPref("showAllAddons") === true;
+    const menu = win.document.getElementById(
+      "footer-settings-scope-menu",
+    ) as HTMLElement | null;
+    const popup = win.document.getElementById("footer-settings-scope-popup");
+    const compatibleItem = popup?.querySelector('menuitem[value="compatible"]');
+    const allItem = popup?.querySelector('menuitem[value="all"]');
+    if (!menu || !compatibleItem || !allItem) return;
+    this.setMenuItemChecked(compatibleItem, !showAllAddons);
+    this.setMenuItemChecked(allItem, showAllAddons);
+    const menuLabel = menu.dataset.settingsLabel ?? "";
+    const currentValue = showAllAddons
+      ? getString("showAllAddons")
+      : getString("showCompatibleAddons");
+    menu.setAttribute("label", `${menuLabel} ${currentValue}`.trim());
   }
 
   private static updateTagMenuChecks(value: string) {

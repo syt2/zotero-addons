@@ -4,6 +4,7 @@
 // @ts-nocheck
 export type FluentMessageId =
   | 'addon-name'
+  | 'addonScope'
   | 'autoUpdate'
   | 'close-button'
   | 'column-compatibility'
@@ -84,6 +85,8 @@ export type FluentMessageId =
   | 'selectSource'
   | 'send-button-status-login'
   | 'settings'
+  | 'showAllAddons'
+  | 'showCompatibleAddons'
   | 'source-auto'
   | 'source-custom'
   | 'source-ghfast'

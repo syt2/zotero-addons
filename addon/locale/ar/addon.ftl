@@ -116,3 +116,6 @@ xpi-drop-invalid = هذا الملف ليس حزمة إضافة صالحة.
 
 xpi-drop-install = تثبيت
 xpi-drop-cancel = إلغاء
+
+showCompatibleAddons = المتوافق فقط
+showAllAddons = إظهار كل الإضافات

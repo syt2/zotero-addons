@@ -9,8 +9,8 @@ import {
   AddonInfoManager,
   InstallStatus,
   addonInstallStatus,
-  addonReleaseInfo,
   addonReleaseTime,
+  displayAddonReleaseInfo,
   relatedAddons,
 } from "../../modules/addonInfo";
 import type {
@@ -77,7 +77,8 @@ export class TableDataTransformer {
     return Promise.all(
       addonInfos.map(async (addonInfo) => {
         const result: Partial<Record<TableColumnID, string>> = {};
-        const releaseInfo = addonReleaseInfo(addonInfo);
+        const releaseMatch = displayAddonReleaseInfo(addonInfo);
+        const releaseInfo = releaseMatch?.release;
         result["menu-name"] = releaseInfo?.name ?? addonInfo.name;
         result["menu-desc"] =
           releaseInfo?.description ?? addonInfo.description ?? "";
@@ -87,17 +88,21 @@ export class TableDataTransformer {
             : addonInfo.stars
               ? String(addonInfo.stars)
               : "?";
-        const remoteVersion =
+        const rawRemoteVersion =
           releaseInfo?.xpiVersion?.toLowerCase().replace("v", "") ?? "";
+        const remoteVersion =
+          releaseMatch && !releaseMatch.compatible
+            ? `${rawRemoteVersion} (${getString("state-uncompatible")})`
+            : rawRemoteVersion;
         result["menu-remote-version"] = remoteVersion;
         result["menu-local-version"] = "";
-        const releaseTime = addonReleaseTime(addonInfo);
+        const releaseTime = addonReleaseTime(addonInfo, releaseInfo);
         if (releaseTime) {
           result["menu-remote-update-time"] = releaseTime;
         }
         const relateAddon = localMetadataAvailable
           ? relateAddons.find((addonPair) => {
-              const addonID = addonReleaseInfo(addonInfo)?.id;
+              const addonID = releaseInfo?.id;
               if (addonID) {
                 return addonID == addonPair[1].id;
               } else {
@@ -140,8 +145,16 @@ export class TableDataTransformer {
       switch (sortColumn.dataKey) {
         case "menu-name":
           [l, r] = [
-            (addonReleaseInfo(a)?.name ?? a.name ?? "").toLowerCase(),
-            (addonReleaseInfo(b)?.name ?? b.name ?? "").toLowerCase(),
+            (
+              displayAddonReleaseInfo(a)?.release.name ??
+              a.name ??
+              ""
+            ).toLowerCase(),
+            (
+              displayAddonReleaseInfo(b)?.release.name ??
+              b.name ??
+              ""
+            ).toLowerCase(),
           ];
           if (l == r) {
             break;
@@ -180,8 +193,8 @@ export class TableDataTransformer {
           return l > r ? sortOrder : -sortOrder;
         case "menu-remote-update-time":
           [l, r] = [
-            addonReleaseInfo(a)?.releaseDate ?? "",
-            addonReleaseInfo(b)?.releaseDate ?? "",
+            displayAddonReleaseInfo(a)?.release.releaseDate ?? "",
+            displayAddonReleaseInfo(b)?.release.releaseDate ?? "",
           ];
           if (l == r) {
             break;

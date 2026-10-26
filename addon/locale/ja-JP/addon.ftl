@@ -116,3 +116,6 @@ xpi-drop-invalid = このファイルは有効なアドオンパッケージで�
 
 xpi-drop-install = インストール
 xpi-drop-cancel = キャンセル
+
+showCompatibleAddons = 互換バージョンのみ
+showAllAddons = すべてのアドオンを表示
