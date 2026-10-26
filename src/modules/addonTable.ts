@@ -616,8 +616,6 @@ export class AddonTable {
     this.initRefreshButton(win);
     this.initAutoUpdate(win);
     this.initHideEntrance(win);
-    this.initTagFilter(win);
-    this.initAddonScopeFilter(win);
     this.initSettingsMenu(win);
   }
 
@@ -658,6 +656,11 @@ export class AddonTable {
     });
     popup.addEventListener("popupshowing", () => {
       setOpenState(true);
+      // `xul:menu` elements with a Fluent id are localized after insertion,
+      // which removes any popup declared as a static child. Build the nested
+      // popups only after the native menu has been rendered and opened.
+      this.initTagFilter(win);
+      this.initAddonScopeFilter(win);
       // Fluent localization may run after footer initialization, so refresh
       // the dynamic current value each time the native menu opens.
       this.syncAddonScopeFilterControl();
@@ -671,16 +674,16 @@ export class AddonTable {
     ) as HTMLElement | null;
     if (!menu) return;
     menu.dataset.settingsLabel ||= menu.getAttribute("label") ?? "";
-    if (!win.document.getElementById("footer-settings-tag-popup")) {
-      const popup = win.document.createElementNS(
-        "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
-        "menupopup",
-      );
+    let popup = win.document.getElementById(
+      "footer-settings-tag-popup",
+    ) as XULPopupElement | null;
+    if (!popup) {
+      popup = win.document.createXULElement("menupopup") as XULPopupElement;
       popup.id = "footer-settings-tag-popup";
-      menu.appendChild(popup);
       popup.addEventListener("popupshowing", () => {
         this.updateTagMenuChecks(this.currentTag ?? "all");
       });
+      menu.append(popup);
     }
     this.refreshTagFilter();
   }
@@ -691,41 +694,42 @@ export class AddonTable {
     ) as HTMLElement | null;
     if (!menu) return;
     menu.dataset.settingsLabel ||= menu.getAttribute("label") ?? "";
-    const popup = win.document.createElementNS(
-      "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
-      "menupopup",
-    );
-    popup.id = "footer-settings-scope-popup";
-    const createItem = (id: string, value: string, label: string) => {
-      const item = win.document.createElementNS(
-        "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
-        "menuitem",
-      ) as XULMenuItemElement;
-      item.id = id;
-      item.setAttribute("type", "radio");
-      item.setAttribute("name", "footer-settings-addon-scope");
-      item.setAttribute("value", value);
-      item.setAttribute("label", label);
-      return item;
-    };
-    const compatibleItem = createItem(
-      "footer-settings-compatible-addons",
-      "compatible",
-      getString("showCompatibleAddons"),
-    );
-    const allItem = createItem(
-      "footer-settings-all-addons",
-      "all",
-      getString("showAllAddons"),
-    );
-    compatibleItem.addEventListener("command", () => {
-      this.setShowAllAddons(false);
-    });
-    allItem.addEventListener("command", () => {
-      this.setShowAllAddons(true);
-    });
-    popup.append(compatibleItem, allItem);
-    menu.append(popup);
+    let popup = win.document.getElementById(
+      "footer-settings-scope-popup",
+    ) as XULPopupElement | null;
+    if (!popup) {
+      popup = win.document.createXULElement("menupopup") as XULPopupElement;
+      popup.id = "footer-settings-scope-popup";
+      const createItem = (id: string, value: string, label: string) => {
+        const item = win.document.createXULElement(
+          "menuitem",
+        ) as XULMenuItemElement;
+        item.id = id;
+        item.setAttribute("type", "radio");
+        item.setAttribute("name", "footer-settings-addon-scope");
+        item.setAttribute("value", value);
+        item.setAttribute("label", label);
+        return item;
+      };
+      const compatibleItem = createItem(
+        "footer-settings-compatible-addons",
+        "compatible",
+        getString("showCompatibleAddons"),
+      );
+      const allItem = createItem(
+        "footer-settings-all-addons",
+        "all",
+        getString("showAllAddons"),
+      );
+      compatibleItem.addEventListener("command", () => {
+        this.setShowAllAddons(false);
+      });
+      allItem.addEventListener("command", () => {
+        this.setShowAllAddons(true);
+      });
+      popup.append(compatibleItem, allItem);
+      menu.append(popup);
+    }
     this.syncAddonScopeFilterControl();
   }
 
@@ -829,12 +833,22 @@ export class AddonTable {
     const popup = this.window?.document.getElementById(
       "footer-settings-tag-popup",
     );
-    if (!popup) return;
+    const menu = this.window?.document.getElementById(
+      "footer-settings-tag-menu",
+    ) as HTMLElement | null;
+    if (menu) {
+      menu.dataset.settingsLabel ||= menu.getAttribute("label") ?? "";
+    }
 
     const allTags = this.getAllTags();
     // Reset currentTag if it no longer exists in the data
     if (this.currentTag && !allTags.includes(this.currentTag)) {
       this.currentTag = null;
+    }
+
+    if (!popup) {
+      this.syncTagFilterControl();
+      return;
     }
 
     while (popup.firstChild) popup.removeChild(popup.firstChild);
