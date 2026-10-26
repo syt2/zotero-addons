@@ -3,9 +3,11 @@ import {
   Sources,
   autoSource,
   currentSource,
-  resolveSourceApi,
+  resolveSourceApis,
   setAutoSource,
+  withResolvedApis,
 } from "../utils/configuration";
+import { mergeAddonCatalogs } from "../utils/addonCatalog";
 import { getXPIDatabase, getAddonManager } from "../utils/compat";
 import { getPref } from "../utils/prefs";
 import {
@@ -41,7 +43,7 @@ export interface AddonInfoFetchOptions {
 }
 
 export interface AddonInfoManagerDependencies {
-  currentSource: () => Readonly<Source>;
+  currentSource: () => Readonly<Source & { apis?: readonly string[] }>;
   sources: readonly Readonly<Source>[];
   setAutoSource: (source: Readonly<Source>) => void;
   fetchAddonInfos: (
@@ -426,6 +428,29 @@ export function resolveAddonRelease(
   return { release: closestRelease, compatible: false };
 }
 
+async function fetchCatalogApis(
+  urls: readonly string[],
+  fetchOne: AddonInfoManagerDependencies["fetchAddonInfos"],
+  options: AddonInfoFetchOptions,
+) {
+  const [currentUrl, previousUrl] = urls;
+  if (!currentUrl) {
+    return [];
+  }
+  const currentRequest = fetchOne(currentUrl, options);
+  const previousRequest = previousUrl
+    ? fetchOne(previousUrl, options).catch(() => [])
+    : Promise.resolve([]);
+  const [current, previous] = await Promise.all([
+    currentRequest,
+    previousRequest,
+  ]);
+  if (current.length === 0) {
+    return [];
+  }
+  return previous.length > 0 ? mergeAddonCatalogs(current, previous) : current;
+}
+
 class AddonInfoAPI {
   /**
    * Fetch AddonInfo from url
@@ -495,24 +520,34 @@ export class AddonInfoManager {
    * Get AddonInfos from memory
    */
   get addonInfos() {
-    const url = this.dependencies.currentSource().api;
-    if (!url) {
+    const urls = this.currentSourceApis();
+    if (urls.length === 0) {
       return [];
     }
-    if (url in this.sourceInfos) {
+    const cacheKey = this.cacheKey(urls);
+    if (cacheKey in this.sourceInfos) {
       if (
         this.dependencies.now().getTime() -
-          this.sourceInfos[url][0].getTime() >=
+          this.sourceInfos[cacheKey][0].getTime() >=
         12 * 60 * 60 * 1000
       ) {
         this.fetchAddonInfos(true);
       }
-      return this.sourceInfos[url][1];
+      return this.sourceInfos[cacheKey][1];
     }
     return [];
   }
 
   private sourceInfos: { [key: string]: [Date, AddonInfo[]] } = {};
+
+  private currentSourceApis() {
+    const source = this.dependencies.currentSource();
+    return source.apis?.length ? [...source.apis] : resolveSourceApis(source);
+  }
+
+  private cacheKey(urls: readonly string[]) {
+    return urls.join("\n");
+  }
 
   private autoSourceOperationPromise: Promise<AddonInfo[]> | undefined;
   /**
@@ -525,7 +560,10 @@ export class AddonInfoManager {
     if (source.id === "source-auto" && !source.api) {
       return await this.runAutoSourceOperation(() => this.findAvailableApi());
     }
-    const url = source.api;
+    const urls = source.apis?.length
+      ? [...source.apis]
+      : resolveSourceApis(source);
+    const url = urls[0];
     if (!url) {
       return [];
     }
@@ -536,14 +574,17 @@ export class AddonInfoManager {
         return cachedInfos;
       }
     }
-    const cachedInfos = this.sourceInfos[url]?.[1] ?? [];
+    const cacheKey = this.cacheKey(urls);
+    const cachedInfos = this.sourceInfos[cacheKey]?.[1] ?? [];
     if (forceRefresh && source.id === "source-auto") {
       return await this.runAutoSourceOperation(async () => {
-        const infos = await this.dependencies.fetchAddonInfos(url, {
-          timeout: CURRENT_SOURCE_FETCH_TIMEOUT_MS,
-        });
+        const infos = await fetchCatalogApis(
+          urls,
+          this.dependencies.fetchAddonInfos.bind(this.dependencies),
+          { timeout: CURRENT_SOURCE_FETCH_TIMEOUT_MS },
+        );
         if (infos.length > 0) {
-          this.sourceInfos[url] = [this.dependencies.now(), infos];
+          this.sourceInfos[cacheKey] = [this.dependencies.now(), infos];
           return infos;
         }
 
@@ -552,11 +593,13 @@ export class AddonInfoManager {
       });
     }
 
-    const infos = await this.dependencies.fetchAddonInfos(url, {
-      timeout: CURRENT_SOURCE_FETCH_TIMEOUT_MS,
-    });
+    const infos = await fetchCatalogApis(
+      urls,
+      this.dependencies.fetchAddonInfos.bind(this.dependencies),
+      { timeout: CURRENT_SOURCE_FETCH_TIMEOUT_MS },
+    );
     if (infos.length > 0) {
-      this.sourceInfos[url] = [this.dependencies.now(), infos];
+      this.sourceInfos[cacheKey] = [this.dependencies.now(), infos];
       return infos;
     }
     return cachedInfos;
@@ -595,19 +638,26 @@ export class AddonInfoManager {
     const result = await firstSuccessfulStaggered(
       sourcesWithApi.map((source) => async (registerCanceller) => {
         this.dependencies.log(`trying source: ${source.id}`);
-        const api = resolveSourceApi(source) ?? source.api;
-        const infos = await this.dependencies.fetchAddonInfos(api, {
-          timeout: AUTO_SOURCE_FETCH_TIMEOUT_MS,
-          cancellerReceiver: registerCanceller,
-        });
-        return infos.length > 0 ? { source, api, infos } : undefined;
+        const apis = resolveSourceApis(source);
+        const infos = await fetchCatalogApis(
+          apis,
+          this.dependencies.fetchAddonInfos.bind(this.dependencies),
+          {
+            timeout: AUTO_SOURCE_FETCH_TIMEOUT_MS,
+            cancellerReceiver: registerCanceller,
+          },
+        );
+        return infos.length > 0
+          ? { source: withResolvedApis(source), infos }
+          : undefined;
       }),
       AUTO_SOURCE_STAGGER_DELAY_MS,
       this.dependencies.staggerScheduler,
     );
 
     if (result) {
-      this.sourceInfos[result.api] = [this.dependencies.now(), result.infos];
+      const cacheKey = this.cacheKey(result.source.apis ?? []);
+      this.sourceInfos[cacheKey] = [this.dependencies.now(), result.infos];
       this.dependencies.setAutoSource(result.source);
       this.dependencies.log(`switched to ${result.source.id} automatically`);
       return result.infos;
