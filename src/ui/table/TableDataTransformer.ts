@@ -204,8 +204,23 @@ export class TableDataTransformer {
           }
           return l > r ? sortOrder : -sortOrder;
       }
-      return 0;
+      return (
+        TableDataTransformer.eligibilityRank(infoA) -
+        TableDataTransformer.eligibilityRank(infoB)
+      );
     });
+  }
+
+  private static eligibilityRank(info: AssociatedAddonInfo) {
+    switch (displayAddonReleaseInfo(info[0])?.eligibility) {
+      case "native":
+        return 0;
+      case "previous-major":
+        return 1;
+      case "unsupported":
+      default:
+        return 2;
+    }
   }
 
   /**
